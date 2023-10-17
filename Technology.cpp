@@ -1586,6 +1586,18 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
 				current_gmPmos= gm[0];	
 				gm_oncurrent = gm[0];  // gm at on current
 
+				// REF CACTI PARAMS
+				//vdd = 1;									V
+				//vth = 581.81e-3;							V
+				//phyGateLength = 0.022e-6;					V
+				//capIdealGate = 5.02e-10;					V
+				//capFringe = 1.9e-10;						V
+				//capJunction = 1.00e-3;					X - New Methods Introduced
+				//capOx = 2.19e-2;							X - New Methods Introduced
+				//effectiveElectronMobility = 395.20e-4;	X - New Methods Introduced
+				//effectiveHoleMobility = 88.67e-4;			X - New Methods Introduced
+				//pnSizeRatio = 2.23;						V
+				//effectiveResistanceMultiplier = 1.99;		V
 
 				currentOnNmos[0]  = currentlist[0];
 				currentOnNmos[10] = 853;
@@ -1597,7 +1609,7 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
 				currentOnNmos[70] = 646;
 				currentOnNmos[80] = 618;
 				currentOnNmos[90] = 591;
-				currentOnNmos[100] =565;
+				currentOnNmos[100] = 565;
 				currentOnPmos[0]  = currentOnNmos[0];
 				currentOnPmos[10] = 767;
 				currentOnPmos[20] = 718;

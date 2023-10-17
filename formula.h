@@ -33,6 +33,13 @@ void CalculateGateCapacitance(
 		double heightTransistorRegion, Technology tech,
 		double *capInput, double *capOutput);
 
+// GAA special layout 
+void CalculateGateCapacitance_GAA(
+		int gateType, int numInput,
+		double widthNMOS, double widthPMOS,
+		double heightTransistorRegion, Technology tech,
+		double *capInput, double *capOutput, double Gatefactor, double Ntuningfactor, double Ptuningfactor);
+
 double CalculateDrainCap(
 		double width, int type,
 		double heightTransistorRegion, Technology tech);
@@ -62,5 +69,6 @@ double CalculateWireCapacitance(
 		double ildThickness, double millarValue, double horizontalDielectric,
 		double verticalDielectic, double fringeCap);
 
+double CalculateOnResistance_normal(double width, int type, double temperature, Technology tech);
 
 #endif /* FORMULA_H_ */

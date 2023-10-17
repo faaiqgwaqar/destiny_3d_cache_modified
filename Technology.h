@@ -55,6 +55,22 @@ public:
 	double currentOffNmos[101];	/* NMOS off current (from 300K to 400K), Unit: A/m */
 	double currentOffPmos[101]; /* PMOS off current (from 300K to 400K), Unit: A/m */
 
+	// 1.4 update : additional parameters related to added nodes
+
+	double max_sheet_num=0;
+	double thickness_sheet=0;
+	double width_sheet=0;
+	double effective_width=0;
+	double max_fin_num=0;
+	double max_fin_per_GAA=0;
+	double gm_oncurrent = 0;  // gm at on current
+	double cap_draintotal = 0;
+	double current_gmNmos;		/* NMOS current at 0.7*vdd for gm calculation, Unit: A/m/V*/ 
+    double current_gmPmos;		/* PMOS current at 0.7*vdd for gm calculation, Unit: A/m/V*/
+	double heightFin;	/* Fin height, Unit: m */
+	double widthFin;	/* Fin width, Unit: m */
+	double PitchFin;	/* Fin pitch, Unit: m */
+
 	double capPolywire;	/* Poly wire capacitance, Unit: F/m */
 
     double capTSV[NUM_TSV_TYPES];
