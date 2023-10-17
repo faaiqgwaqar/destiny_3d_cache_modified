@@ -25,6 +25,14 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
 	if (initialized)
 		cout << "Warning: Already initialized!" << endl;
 
+	double caplist [7] = {103.816,97.549,100.497,81.859,72.572, 79.74, 66.94}; // 69.369
+	double currentlist [7] = {595.045, 599.237, 562.048, 578.494, 641.463, 526.868, 460.979}; //  556.448
+	double currentlist_off [7] = {0.0001,0.000127, 0.000147, 0.000138, 0.000158, 0.0000733, 0.000169}; //0.000569
+	double eff_res_mul [7] = {2.09, 2.09, 2.05, 2.10, 2.14, 1.98, 2.05};
+	double gm [7] = {1415.34, 1803.50, 1785.37, 1820.90, 2018.04, 1968.85, 2401.75};
+	double vth_list [7] = {0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1}; // dummy values, since we don't need them
+	double cap_draintotallist [7] = {2.499e-17, 2.668e-17, 2.224e-17, 2.076e-17, 1.791e-17, 1.543e-17, 1.409e-17};
+
 	featureSizeInNano = _featureSizeInNano;
 	featureSize = _featureSizeInNano * 1e-9;
 	deviceRoadmap = _deviceRoadmap;
@@ -1550,7 +1558,555 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
             cout << "Unknown device roadmap!" << endl;
             exit(1);
         }
-	}
+	} else if (featureSizeInNano >= 14) {
+			if (deviceRoadmap == HP) {
+				
+				// 1.4 update
+				cout<<"HP for 14 nm and beyond is not supported"<<endl;
+				exit(-1);
+
+			} else {
+				// 1.4 update : device specifications follow IRDS 2016
+				vdd = 0.8;
+				vth = vth_list[0];
+				heightFin = 4.2e-8;
+				widthFin = 8.0e-9;
+				PitchFin = 4.8e-8;
+
+				// 1.4 update
+				max_fin_num =4;
+				effective_width=widthFin+heightFin*2;
+
+				phyGateLength = 2.6e-8; // 1.4 update : changed to 2.6e-8 following IRDS 2016
+				capIdealGate = caplist[0] * 1E-18 / (effective_width);
+				cap_draintotal = cap_draintotallist[0] / (effective_width);
+				capFringe = 0;
+				effectiveResistanceMultiplier = eff_res_mul[0];	/* from CACTI */
+				current_gmNmos= gm[0];
+				current_gmPmos= gm[0];	
+				gm_oncurrent = gm[0];  // gm at on current
+
+
+				currentOnNmos[0]  = currentlist[0];
+				currentOnNmos[10] = 853;
+				currentOnNmos[20] = 814;
+				currentOnNmos[30] = 777;
+				currentOnNmos[40] = 742;
+				currentOnNmos[50] = 708;
+				currentOnNmos[60] = 677;
+				currentOnNmos[70] = 646;
+				currentOnNmos[80] = 618;
+				currentOnNmos[90] = 591;
+				currentOnNmos[100] =565;
+				currentOnPmos[0]  = currentOnNmos[0];
+				currentOnPmos[10] = 767;
+				currentOnPmos[20] = 718;
+				currentOnPmos[30] = 672;
+				currentOnPmos[40] = 631;
+				currentOnPmos[50] = 593;
+				currentOnPmos[60] = 558;
+				currentOnPmos[70] = 526;
+				currentOnPmos[80] = 496;
+				currentOnPmos[90] = 469;
+				currentOnPmos[100] =443;
+				currentOffNmos[0]  = currentlist_off[0];
+				currentOffNmos[10] = 184.4553e-6;
+				currentOffNmos[20] = 328.7707e-6;
+				currentOffNmos[30] = 566.8658e-6;
+				currentOffNmos[40] = 948.1816e-6;
+				currentOffNmos[50] = 1.5425e-3;
+				currentOffNmos[60] = 2.4460e-3;
+				currentOffNmos[70] = 3.7885e-3;
+				currentOffNmos[80] = 5.7416e-3;
+				currentOffNmos[90] = 8.5281e-3;
+				currentOffNmos[100] =1.24327e-2;;
+				currentOffPmos[0]  = 102.3333e-6;
+				currentOffPmos[10] = 203.4774e-6;
+				currentOffPmos[20] = 389.0187e-6;
+				currentOffPmos[30] = 717.5912e-6;
+				currentOffPmos[40] = 1.2810e-3;
+				currentOffPmos[50] = 2.2192e-3;
+				currentOffPmos[60] = 3.7395e-3;
+				currentOffPmos[70] = 6.1428e-3;
+				currentOffPmos[80] = 9.8554e-3;
+				currentOffPmos[90] = 1.54702e-2;
+				currentOffPmos[100] =2.37959e-2;
+				pnSizeRatio = (int)(currentOnNmos[0]/currentOnPmos[0]);
+			}
+		} else if (featureSizeInNano >= 10) {
+			if (deviceRoadmap == HP) {
+
+				// 1.4 update
+				cout<<"HP for 14 nm and beyond is not supported"<<endl;
+				exit(-1);
+
+	  		} else {
+
+				// 1.4 update : device specifications follow IRDS 2017
+				vdd = 0.75;
+				vth = vth_list[1];
+				heightFin = 4.5e-8;	
+				widthFin = 8.0e-9;	
+				PitchFin = 3.6e-8;			
+
+				// 1.4 update 
+				max_fin_num =3;
+				effective_width=widthFin+heightFin*2;
+
+				phyGateLength = 2.2e-8;	
+				capIdealGate = caplist[1] * 1E-18 / (effective_width);
+				cap_draintotal = cap_draintotallist[1]/ (effective_width);
+				capFringe = 0;
+				effectiveResistanceMultiplier = eff_res_mul[1];	/* from CACTI */
+				current_gmNmos= gm[1];
+				current_gmPmos= gm[1];			
+				gm_oncurrent = gm[1];  // gm at on current
+
+
+				currentOnNmos[0]  = currentlist[1];
+				currentOnNmos[10] = 824;
+				currentOnNmos[20] = 787;
+				currentOnNmos[30] = 751;
+				currentOnNmos[40] = 717;
+				currentOnNmos[50] = 684;
+				currentOnNmos[60] = 654;
+				currentOnNmos[70] = 624;
+				currentOnNmos[80] = 597;
+				currentOnNmos[90] = 571;
+				currentOnNmos[100] =546;
+				currentOnPmos[0]  = currentOnNmos[0];  
+				currentOnPmos[10] = 725;
+				currentOnPmos[20] = 678;
+				currentOnPmos[30] = 636;
+				currentOnPmos[40] = 597;
+				currentOnPmos[50] = 561;
+				currentOnPmos[60] = 527;
+				currentOnPmos[70] = 497;
+				currentOnPmos[80] = 469;
+				currentOnPmos[90] = 443;
+				currentOnPmos[100] =419;
+				currentOffNmos[0]  = currentlist_off[1];
+				currentOffNmos[10] = 184.4892e-6;
+				currentOffNmos[20] = 329.1615e-6;
+				currentOffNmos[30] = 568.0731e-6;
+				currentOffNmos[40] = 951.0401e-6;
+				currentOffNmos[50] = 1.5484e-3;
+				currentOffNmos[60] = 2.4574e-3;
+				currentOffNmos[70] = 3.8090e-3;
+				currentOffNmos[80] = 5.7767e-3;
+				currentOffNmos[90] = 8.5862e-3;
+				currentOffNmos[100] =1.2525e-2;
+				currentOffPmos[0]  = 100.5839e-6;
+				currentOffPmos[10] = 200.2609e-6;
+				currentOffPmos[20] = 383.3239e-6;
+				currentOffPmos[30] = 707.8499e-6;
+				currentOffPmos[40] = 1.2649e-3;
+				currentOffPmos[50] = 2.1932e-3;
+				currentOffPmos[60] = 3.6987e-3;
+				currentOffPmos[70] = 6.0804e-3;
+				currentOffPmos[80] = 9.7622e-3;
+				currentOffPmos[90] = 1.53340e-2;
+				currentOffPmos[100] =2.36007e-2;
+				pnSizeRatio = (int)(currentOnNmos[0]/currentOnPmos[0]);
+			}
+		} else if (featureSizeInNano >= 7) {
+			if (deviceRoadmap == HP) {
+
+				// 1.4 update
+				cout<<"HP for 14 nm and beyond is not supported"<<endl;
+				exit(-1);
+
+			} else {
+
+				// 1.4 update: based on IRDS 2017
+				vdd = 0.7;
+				vth = vth_list[2];
+				heightFin = 5.0e-8;
+				widthFin = 7e-9;
+				PitchFin = 3.0e-8;			
+
+				// 1.4 update
+				max_fin_num = 2;
+				effective_width=107e-9;	
+
+				phyGateLength = 2.2e-8;
+				capIdealGate = caplist[2] * 1E-18 / (effective_width);//8.49489e-10;
+				cap_draintotal = cap_draintotallist[2]/ (effective_width);
+				capFringe = 0;
+				effectiveResistanceMultiplier = eff_res_mul[2];	/* from CACTI */
+				current_gmNmos= gm[2];
+				current_gmPmos= gm[2];
+				gm_oncurrent = gm[2];  // gm at on current
+
+
+				currentOnNmos[0]  = currentlist[2];
+				currentOnNmos[10] = 786; 
+				currentOnNmos[20] = 750; 
+				currentOnNmos[30] = 716; 
+				currentOnNmos[40] = 684; 
+				currentOnNmos[50] = 653; 
+				currentOnNmos[60] = 624; 
+				currentOnNmos[70] = 595; 
+				currentOnNmos[80] = 569; 
+				currentOnNmos[90] = 545;
+				currentOnNmos[100]= 521; 
+				currentOnPmos[0]  = currentOnNmos[0];  
+				currentOnPmos[10] = 689;
+				currentOnPmos[20] = 645;
+				currentOnPmos[30] = 605;
+				currentOnPmos[40] = 567;
+				currentOnPmos[50] = 533;
+				currentOnPmos[60] = 501;
+				currentOnPmos[70] = 473;
+				currentOnPmos[80] = 446;
+				currentOnPmos[90] = 421;
+				currentOnPmos[100] =398;
+				currentOffNmos[0]  = currentlist_off[2];
+				currentOffNmos[10] = 1.85E-04;
+				currentOffNmos[20] = 3.32E-04;
+				currentOffNmos[30] = 5.74E-04;
+				currentOffNmos[40] = 9.62E-04;
+				currentOffNmos[50] = 1.5695e-3;
+				currentOffNmos[60] = 2.4953e-3;
+				currentOffNmos[70] = 3.8744e-3 ;
+				currentOffNmos[80] = 5.8858e-3 ;
+				currentOffNmos[90] = 8.7624e-3;
+				currentOffNmos[100] =1.28025e-2;
+				currentOffPmos[0]  = 100.9536e-6;
+				currentOffPmos[10] = 201.3937e-6;
+				currentOffPmos[20] = 386.2086e-6;
+				currentOffPmos[30] = 714.4288e-6;
+				currentOffPmos[40] = 1.2788e-3;
+				currentOffPmos[50] = 2.2207e-3;
+				currentOffPmos[60] = 3.7509e-3;
+				currentOffPmos[70] = 6.1750e-3;
+				currentOffPmos[80] = 9.9278e-3;
+				currentOffPmos[90] = 1.56146e-2;
+				currentOffPmos[100] =2.40633e-2;
+				pnSizeRatio = (int)(currentOnNmos[0]/currentOnPmos[0]);
+			}
+		} 
+
+		// 1.4 update: technology extension beyond 7 nm 
+
+		/* Technology update beyond 7 nm */ 
+		else if (featureSizeInNano >= 5) {
+			if (deviceRoadmap == HP) {
+
+				// 1.4 update
+				cout<<"HP for 14 nm and beyond is not supported"<<endl;
+				exit(-1);
+
+			} else {
+
+				// 1.4 update: IRDS 2021
+				vdd = 0.7;
+				vth = vth_list[3];
+
+				widthFin=6.0e-9; 
+				PitchFin=28.0e-9;	
+				phyGateLength = 2.0e-8;
+
+				// 1.4 update: height is not needed as long as effective width is specified
+				effective_width = 106.0*1e-9;	
+				max_fin_num =2;		
+
+				capIdealGate = caplist[3] * 1E-18 / (effective_width );
+				cap_draintotal = cap_draintotallist[3]/ (effective_width);
+				capFringe = 0;
+
+				effectiveResistanceMultiplier = eff_res_mul[3];	/* from CACTI */
+				current_gmNmos= gm[3];
+				current_gmPmos= gm[3];
+				gm_oncurrent = gm[3];  // gm at on current
+
+
+				currentOnNmos[0]  = currentlist[3];
+				currentOnNmos[10] = 786; 
+				currentOnNmos[20] = 750; 
+				currentOnNmos[30] = 716; 
+				currentOnNmos[40] = 684; 
+				currentOnNmos[50] = 653; 
+				currentOnNmos[60] = 624; 
+				currentOnNmos[70] = 595; 
+				currentOnNmos[80] = 569; 
+				currentOnNmos[90] = 545;
+				currentOnNmos[100]= 521; 
+				currentOnPmos[0]  = currentOnNmos[0]; 
+				currentOnPmos[10] = 689;
+				currentOnPmos[20] = 645;
+				currentOnPmos[30] = 605;
+				currentOnPmos[40] = 567;
+				currentOnPmos[50] = 533;
+				currentOnPmos[60] = 501;
+				currentOnPmos[70] = 473;
+				currentOnPmos[80] = 446;
+				currentOnPmos[90] = 421;
+				currentOnPmos[100] =398;
+				currentOffNmos[0]  = currentlist_off[3];
+				currentOffNmos[10] = 1.85E-04;
+				currentOffNmos[20] = 3.32E-04;
+				currentOffNmos[30] = 5.74E-04;
+				currentOffNmos[40] = 9.62E-04;
+				currentOffNmos[50] = 1.5695e-3;
+				currentOffNmos[60] = 2.4953e-3;
+				currentOffNmos[70] = 3.8744e-3 ;
+				currentOffNmos[80] = 5.8858e-3 ;
+				currentOffNmos[90] = 8.7624e-3;
+				currentOffNmos[100] =1.28025e-2;
+				currentOffPmos[0]  = 100.9536e-6;
+				currentOffPmos[10] = 201.3937e-6;
+				currentOffPmos[20] = 386.2086e-6;
+				currentOffPmos[30] = 714.4288e-6;
+				currentOffPmos[40] = 1.2788e-3;
+				currentOffPmos[50] = 2.2207e-3;
+				currentOffPmos[60] = 3.7509e-3;
+				currentOffPmos[70] = 6.1750e-3;
+				currentOffPmos[80] = 9.9278e-3;
+				currentOffPmos[90] = 1.56146e-2;
+				currentOffPmos[100] =2.40633e-2;
+				pnSizeRatio = (int)(currentOnNmos[0]/currentOnPmos[0]);
+			}
+		} else if (featureSizeInNano >= 3) {
+			if (deviceRoadmap == HP) {
+
+				// 1.4 update
+				cout<<"HP for 14 nm and beyond is not supported"<<endl;
+				exit(-1);
+
+			} else {
+
+				// 1.4 update: IRDS 2022
+				vdd = 0.7;
+				vth = vth_list[4];
+				widthFin=5.0e-9;  	
+				PitchFin=24.0e-9;	
+				phyGateLength = 1.8e-8;
+
+				// 1.4 update: height is not needed as long as effective width is specified
+				effective_width = 101.0*1e-9;
+				max_fin_num =2;	
+				
+				capIdealGate = caplist[4] * 1E-18 / (effective_width);   //6.44E-10; //8.91E-10;
+				cap_draintotal = cap_draintotallist[4]/ (effective_width);
+				capFringe = 0;
+
+				effectiveResistanceMultiplier = eff_res_mul[4];	/* from CACTI */
+				current_gmNmos= gm[4];
+				current_gmPmos= gm[4];	
+				gm_oncurrent = gm[4];  // gm at on current
+
+				currentOnNmos[0]  = currentlist[4];
+				currentOnNmos[10] = 786; 
+				currentOnNmos[20] = 750; 
+				currentOnNmos[30] = 716; 
+				currentOnNmos[40] = 684; 
+				currentOnNmos[50] = 653; 
+				currentOnNmos[60] = 624; 
+				currentOnNmos[70] = 595; 
+				currentOnNmos[80] = 569; 
+				currentOnNmos[90] = 545;
+				currentOnNmos[100]= 521; 
+				currentOnPmos[0]  = currentOnNmos[0]; 
+				currentOnPmos[10] = 689;
+				currentOnPmos[20] = 645;
+				currentOnPmos[30] = 605;
+				currentOnPmos[40] = 567;
+				currentOnPmos[50] = 533;
+				currentOnPmos[60] = 501;
+				currentOnPmos[70] = 473;
+				currentOnPmos[80] = 446;
+				currentOnPmos[90] = 421;
+				currentOnPmos[100] =398;
+				currentOffNmos[0]  = currentlist_off[4];
+				currentOffNmos[10] = 1.85E-04;
+				currentOffNmos[20] = 3.32E-04;
+				currentOffNmos[30] = 5.74E-04;
+				currentOffNmos[40] = 9.62E-04;
+				currentOffNmos[50] = 1.5695e-3;
+				currentOffNmos[60] = 2.4953e-3;
+				currentOffNmos[70] = 3.8744e-3 ;
+				currentOffNmos[80] = 5.8858e-3 ;
+				currentOffNmos[90] = 8.7624e-3;
+				currentOffNmos[100] =1.28025e-2;
+				currentOffPmos[0]  = 100.9536e-6;
+				currentOffPmos[10] = 201.3937e-6;
+				currentOffPmos[20] = 386.2086e-6;
+				currentOffPmos[30] = 714.4288e-6;
+				currentOffPmos[40] = 1.2788e-3;
+				currentOffPmos[50] = 2.2207e-3;
+				currentOffPmos[60] = 3.7509e-3;
+				currentOffPmos[70] = 6.1750e-3;
+				currentOffPmos[80] = 9.9278e-3;
+				currentOffPmos[90] = 1.56146e-2;
+				currentOffPmos[100] =2.40633e-2;
+				pnSizeRatio = (int)(currentOnNmos[0]/currentOnPmos[0]);
+			}
+		} 
+		else if (featureSizeInNano >= 2) {
+			if (deviceRoadmap == HP) {
+
+				// 1.4 update
+				cout<<"HP for 14 nm and beyond is not supported"<<endl;
+				exit(-1);
+
+			} else { // 2 nm
+
+				// 1.4 update: IRDS 2022
+				vdd = 0.65;
+				vth = vth_list[5];
+				PitchFin= 26e-9;
+				phyGateLength = 1.4e-8;
+
+				// 1.4 update: GAA-specific parameters
+				max_fin_per_GAA=1;
+				max_sheet_num=3;
+				thickness_sheet=6*1e-9;
+				width_sheet=15*1e-9;	
+
+				widthFin=width_sheet; // for drain height calculation 	
+				effective_width=(thickness_sheet+width_sheet)*2;
+
+				capIdealGate = caplist[5] * 1E-18 /  (effective_width*max_sheet_num) ; 
+				cap_draintotal = cap_draintotallist[5]/ (effective_width);
+				capFringe = 0;
+
+				effectiveResistanceMultiplier = eff_res_mul[5];	/* from CACTI */
+				current_gmNmos= gm[5];
+				current_gmPmos= gm[5];	
+				gm_oncurrent = gm[5];  // gm at on current
+
+
+				currentOnNmos[0]  = currentlist[5];
+				currentOnNmos[10] = 786; 
+				currentOnNmos[20] = 750; 
+				currentOnNmos[30] = 716; 
+				currentOnNmos[40] = 684; 
+				currentOnNmos[50] = 653; 
+				currentOnNmos[60] = 624; 
+				currentOnNmos[70] = 595; 
+				currentOnNmos[80] = 569; 
+				currentOnNmos[90] = 545;
+				currentOnNmos[100]= 521; 
+				currentOnPmos[0]  = currentOnNmos[0]; 
+				currentOnPmos[10] = 689;
+				currentOnPmos[20] = 645;
+				currentOnPmos[30] = 605;
+				currentOnPmos[40] = 567;
+				currentOnPmos[50] = 533;
+				currentOnPmos[60] = 501;
+				currentOnPmos[70] = 473;
+				currentOnPmos[80] = 446;
+				currentOnPmos[90] = 421;
+				currentOnPmos[100] =398;
+				currentOffNmos[0]  = currentlist_off[5];
+				currentOffNmos[10] = 1.85E-04;
+				currentOffNmos[20] = 3.32E-04;
+				currentOffNmos[30] = 5.74E-04;
+				currentOffNmos[40] = 9.62E-04;
+				currentOffNmos[50] = 1.5695e-3;
+				currentOffNmos[60] = 2.4953e-3;
+				currentOffNmos[70] = 3.8744e-3 ;
+				currentOffNmos[80] = 5.8858e-3 ;
+				currentOffNmos[90] = 8.7624e-3;
+				currentOffNmos[100] =1.28025e-2;
+				currentOffPmos[0]  = 100.9536e-6;
+				currentOffPmos[10] = 201.3937e-6;
+				currentOffPmos[20] = 386.2086e-6;
+				currentOffPmos[30] = 714.4288e-6;
+				currentOffPmos[40] = 1.2788e-3;
+				currentOffPmos[50] = 2.2207e-3;
+				currentOffPmos[60] = 3.7509e-3;
+				currentOffPmos[70] = 6.1750e-3;
+				currentOffPmos[80] = 9.9278e-3;
+				currentOffPmos[90] = 1.56146e-2;
+				currentOffPmos[100] =2.40633e-2;
+				pnSizeRatio = (int)(currentOnNmos[0]/currentOnPmos[0]);
+			}
+		} 		
+		else if (featureSizeInNano >= 1) {
+			if (deviceRoadmap == HP) {
+
+				// 1.4 update
+				cout<<"HP for 14 nm and beyond is not supported"<<endl;
+				exit(-1);
+
+			} else {
+
+				// 1.4 update: IRDS 2022
+				vdd = 0.6;
+				vth = vth_list[6];
+				PitchFin= 24e-9;
+				phyGateLength = 1.2e-8;
+
+				// 1.4 update: IRDS 2022 - GAA specfic parameters
+				max_fin_per_GAA=1;
+				max_sheet_num=4;
+				thickness_sheet=6*1e-9;
+				width_sheet=10*1e-9;	
+					
+				widthFin= width_sheet; // for drain height calculation 
+				effective_width=(thickness_sheet+width_sheet)*2;
+				
+				capIdealGate = caplist[6] * 1E-18 /  (effective_width*max_sheet_num) ;
+				cap_draintotal = cap_draintotallist[6]/ (effective_width);
+				capFringe = 0;
+
+				effectiveResistanceMultiplier = eff_res_mul[6];	/* from CACTI */
+				current_gmNmos= gm[6];
+				current_gmPmos= gm[6];	
+				gm_oncurrent = gm[6];  // gm at on current	
+
+				currentOnNmos[0]  = currentlist[6];
+				currentOnNmos[10] = 786; 
+				currentOnNmos[20] = 750; 
+				currentOnNmos[30] = 716; 
+				currentOnNmos[40] = 684; 
+				currentOnNmos[50] = 653; 
+				currentOnNmos[60] = 624; 
+				currentOnNmos[70] = 595; 
+				currentOnNmos[80] = 569; 
+				currentOnNmos[90] = 545;
+				currentOnNmos[100]= 521; 
+				currentOnPmos[0]  = currentOnNmos[0]; 
+				currentOnPmos[10] = 689;
+				currentOnPmos[20] = 645;
+				currentOnPmos[30] = 605;
+				currentOnPmos[40] = 567;
+				currentOnPmos[50] = 533;
+				currentOnPmos[60] = 501;
+				currentOnPmos[70] = 473;
+				currentOnPmos[80] = 446;
+				currentOnPmos[90] = 421;
+				currentOnPmos[100] =398;
+				currentOffNmos[0]  = currentlist_off[6];
+				currentOffNmos[10] = 1.85E-04;
+				currentOffNmos[20] = 3.32E-04;
+				currentOffNmos[30] = 5.74E-04;
+				currentOffNmos[40] = 9.62E-04;
+				currentOffNmos[50] = 1.5695e-3;
+				currentOffNmos[60] = 2.4953e-3;
+				currentOffNmos[70] = 3.8744e-3 ;
+				currentOffNmos[80] = 5.8858e-3 ;
+				currentOffNmos[90] = 8.7624e-3;
+				currentOffNmos[100] =1.28025e-2;
+				currentOffPmos[0]  = 100.9536e-6;
+				currentOffPmos[10] = 201.3937e-6;
+				currentOffPmos[20] = 386.2086e-6;
+				currentOffPmos[30] = 714.4288e-6;
+				currentOffPmos[40] = 1.2788e-3;
+				currentOffPmos[50] = 2.2207e-3;
+				currentOffPmos[60] = 3.7509e-3;
+				currentOffPmos[70] = 6.1750e-3;
+				currentOffPmos[80] = 9.9278e-3;
+				currentOffPmos[90] = 1.56146e-2;
+				currentOffPmos[100] =2.40633e-2;
+				pnSizeRatio = (int)(currentOnNmos[0]/currentOnPmos[0]);
+			}
+		} else {
+			cout<<"Error: CMOS Technology node "<< featureSizeInNano <<"nm is not supported"<<endl;
+	        exit(-1);
+		}
 
     // Setup TSV params 
     if (_featureSizeInNano >= 180) {

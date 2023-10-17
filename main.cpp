@@ -45,8 +45,8 @@ int nvsim(ofstream& outputFile, string inputFileName, long long& numSolution, Re
 
 void tsvVerif(InputParameter *inputParameter)
 {
-    int techNodes[] = {90,65,45,32,22};
-    int nodeCount = 5;
+    int techNodes[] = {90,65,45,32,22,14,10,7,5,3,2,1};
+    int nodeCount = 12;
     bool interpolate = true;
     bool buffered = false;
 
@@ -86,7 +86,28 @@ void tsvVerif(InputParameter *inputParameter)
                     } else if (techNodes[node] >= 22) { // 22 nm < technology node <= 32 nm
                         techHigh.Initialize(32, inputParameter->deviceRoadmap, inputParameter);
                         alpha = (techNodes[node] - 22.0) / 10;
-                    }
+                    } else if (techNodes[node] >= 14) { // 14 nm < technology node <= 22 nm
+                        techHigh.Initialize(22, inputParameter->deviceRoadmap, inputParameter);
+                        alpha = (techNodes[node] - 14.0) / 8;
+					} else if (techNodes[node] >= 10) { // 10 nm < technology node <= 14 nm
+                        techHigh.Initialize(14, inputParameter->deviceRoadmap, inputParameter);
+                        alpha = (techNodes[node] - 14.0) / 4;
+					} else if (techNodes[node] >= 7) { // 7 nm < technology node <= 10 nm
+                        techHigh.Initialize(10, inputParameter->deviceRoadmap, inputParameter);
+                        alpha = (techNodes[node] - 7.0) / 3;
+					} else if (techNodes[node] >= 5) { // 5 nm < technology node <= 7 nm
+                        techHigh.Initialize(7, inputParameter->deviceRoadmap, inputParameter);
+                        alpha = (techNodes[node] - 5.0) / 2;
+					} else if (techNodes[node] >= 3) { // 3 nm < technology node <= 5 nm
+                        techHigh.Initialize(5, inputParameter->deviceRoadmap, inputParameter);
+                        alpha = (techNodes[node] - 3.0) / 2;
+					} else if (techNodes[node] >= 2) { // 2 nm < technology node <= 3 nm
+                        techHigh.Initialize(3, inputParameter->deviceRoadmap, inputParameter);
+                        alpha = (techNodes[node] - 2.0) / 1;
+					} else if (techNodes[node] >= 1) { // 1 nm < technology node <= 2 nm
+                        techHigh.Initialize(2, inputParameter->deviceRoadmap, inputParameter);
+                        alpha = (techNodes[node] - 1.0) / 1;
+					}
 
                     tech->InterpolateWith(techHigh, alpha);
                 }
@@ -163,6 +184,27 @@ int main(int argc, char *argv[])
 	} else if (inputParameter->processNode >= 22) { // 22 nm < technology node <= 32 nm
 		techHigh.Initialize(32, inputParameter->deviceRoadmap, inputParameter);
 		alpha = (inputParameter->processNode - 22.0) / 10;
+	} else if (inputParameter->processNode >= 14) { // 14 nm < technology node <= 22 nm
+		techHigh.Initialize(22, inputParameter->deviceRoadmap, inputParameter);
+		alpha = (inputParameter->processNode - 14.0) / 8;
+	} else if (inputParameter->processNode >= 10) { // 10 nm < technology node <= 14 nm
+		techHigh.Initialize(14, inputParameter->deviceRoadmap, inputParameter);
+		alpha = (inputParameter->processNode - 14.0) / 4;
+	} else if (inputParameter->processNode >= 7) { // 7 nm < technology node <= 10 nm
+		techHigh.Initialize(10, inputParameter->deviceRoadmap, inputParameter);
+		alpha = (inputParameter->processNode - 7.0) / 3;
+	} else if (inputParameter->processNode >= 5) { // 5 nm < technology node <= 7 nm
+		techHigh.Initialize(7, inputParameter->deviceRoadmap, inputParameter);
+		alpha = (inputParameter->processNode - 5.0) / 2;
+	} else if (inputParameter->processNode >= 3) { // 3 nm < technology node <= 5 nm
+		techHigh.Initialize(5, inputParameter->deviceRoadmap, inputParameter);
+		alpha = (inputParameter->processNode - 3.0) / 2;
+	} else if (inputParameter->processNode >= 2) { // 2 nm < technology node <= 3 nm
+		techHigh.Initialize(3, inputParameter->deviceRoadmap, inputParameter);
+		alpha = (inputParameter->processNode - 2.0) / 1;
+	} else if (inputParameter->processNode >= 1) { // 1 nm < technology node <= 2 nm
+		techHigh.Initialize(2, inputParameter->deviceRoadmap, inputParameter);
+		alpha = (inputParameter->processNode - 1.0) / 1;
 	} else {
 		//TO-DO: technology node < 22 nm
 	}
