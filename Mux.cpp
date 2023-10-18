@@ -26,6 +26,8 @@ void Mux::Initialize(int _numInput, long long _numMux, double _capLoad, double _
 	if (initialized)
 		cout << "[Mux] Warning: Already initialized!" << endl;
 
+	double resCellAccess = CalculateOnResistance(cell->widthAccessCMOS * ((tech->featureSize <= 14)? 2:1) * tech->featureSize, NMOS, inputParameter->temperature, *tech);
+
 	numInput = _numInput;
 	numMux = _numMux;
 	capLoad = _capLoad;
@@ -37,9 +39,13 @@ void Mux::Initialize(int _numInput, long long _numMux, double _capLoad, double _
 		if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor) {
 			/* Mux resistance should be small enough for voltage dividing */
 			double maxResNMOSPassTransistor = cell->resistanceOn * IR_DROP_TOLERANCE;
-	    	widthNMOSPassTransistor = CalculateOnResistance(tech->featureSize, NMOS, inputParameter->temperature, *tech)
+	    	if(tech->featureSize >= 22* 1e-9) widthNMOSPassTransistor = CalculateOnResistance(tech->featureSize, NMOS, inputParameter->temperature, *tech)
 					* tech->featureSize / maxResNMOSPassTransistor;
-	    	if (widthNMOSPassTransistor > inputParameter->maxNmosSize * tech->featureSize) {	// Change the transistor size to avoid severe IR drop
+			else{ widthNMOSPassTransistor = CalculateOnResistance_normal(((tech->featureSize <= 14* 1e-9)? 2:1)*tech->featureSize, NMOS, inputParameter->temperature, *tech)
+								* tech->featureSize / (resCellAccess*2);
+				widthNMOSPassTransistor = 2* ceil(widthNMOSPassTransistor/tech->featureSize) * tech->featureSize;
+			}
+			if (widthNMOSPassTransistor > inputParameter->maxNmosSize * tech->featureSize) {	// Change the transistor size to avoid severe IR drop
 	    		widthNMOSPassTransistor = inputParameter->maxNmosSize * tech->featureSize;
 	    	}
 			widthNMOSPassTransistor = MAX(MAX(widthNMOSPassTransistor,minNMOSWidth), 6 * MIN_NMOS_SIZE * tech->featureSize);
