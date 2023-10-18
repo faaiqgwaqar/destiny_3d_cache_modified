@@ -680,51 +680,82 @@ double CalculateGateLeakage(
 		double widthNMOS, double widthPMOS,
 		double temperature, Technology tech) {
 	int tempIndex = (int)temperature - 300;
-	if ((tempIndex > 100) || (tempIndex < 0)) {
-		cout<<"Error: Temperature is out of range"<<endl;
-		exit(-1);
-	}
-	double *leakN = tech.currentOffNmos;
-	double *leakP = tech.currentOffPmos;
-	double leakageN, leakageP;
-	switch (gateType) {
-	case INV:
-		leakageN = widthNMOS * leakN[tempIndex];
-		leakageP = widthPMOS * leakP[tempIndex];
-		return MAX(leakageN, leakageP);
-	case NOR:
-		leakageN = widthNMOS * leakN[tempIndex] * numInput;
-		if (numInput == 2) {
-			return AVG_RATIO_LEAK_2INPUT_NOR * leakageN;
-		}
-		else {
-			return AVG_RATIO_LEAK_3INPUT_NOR * leakageN;
-		}
-	case NAND:
-		leakageP = widthPMOS * leakP[tempIndex] * numInput;
-		if (numInput == 2) {
-			return AVG_RATIO_LEAK_2INPUT_NAND * leakageP;
-		}
-		else {
-			return AVG_RATIO_LEAK_3INPUT_NAND * leakageP;
-		}
-	default:
-		return 0.0;
-	}
+    if ((tempIndex > 100) || (tempIndex < 0)) {
+        cout<<"Error: Temperature is out of range"<<endl;
+        exit(-1);
+    }
+    double *leakN = tech.currentOffNmos;
+    double *leakP = tech.currentOffPmos;
+    double leakageN, leakageP;
+	
+	double widthNMOSEff, widthPMOSEff;
+	if (tech.featureSize >= 22 * 1e-9) {
+		widthNMOSEff = widthNMOS;
+		widthPMOSEff = widthPMOS;
+	} else if (tech.featureSize < 22 * 1e-9  && tech.featureSize >= 3 * 1e-9 ) { // 1.4 update : up to FinFET 7 nm
+        widthNMOS *= 1/(2 * tech.featureSize);
+        widthPMOS *= 1/(2 * tech.featureSize);
+        widthNMOSEff = int(ceil(widthNMOS))*(tech.effective_width);
+        widthPMOSEff = int(ceil(widthPMOS))*(tech.effective_width);
+    }
+    else { // 1.4 update : GAA case
+        widthNMOS*=1/(2 * tech.featureSize);
+        widthPMOS*=1/(2 * tech.featureSize);
+        widthNMOSEff = int(ceil(widthNMOS))*tech.effective_width*tech.max_sheet_num/tech.max_fin_per_GAA;
+        widthPMOSEff = int(ceil(widthPMOS))*tech.effective_width*tech.max_sheet_num/tech.max_fin_per_GAA;
+    }
+    
+	
+    switch (gateType) {
+    case INV:
+        leakageN = widthNMOSEff * leakN[tempIndex];
+        leakageP = widthPMOSEff * leakP[tempIndex];
+        return (leakageN + leakageP)/2;
+    case NOR:
+        leakageN = widthNMOSEff * leakN[tempIndex] * numInput;
+        if (numInput == 2) {
+            return AVG_RATIO_LEAK_2INPUT_NOR * leakageN;
+        }
+        else {
+            return AVG_RATIO_LEAK_3INPUT_NOR * leakageN;
+        }
+    case NAND:
+        leakageP = widthPMOSEff * leakP[tempIndex] * numInput;
+        if (numInput == 2) {
+            return AVG_RATIO_LEAK_2INPUT_NAND * leakageP;
+        }
+        else {
+            return AVG_RATIO_LEAK_3INPUT_NAND * leakageP;
+        }
+    default:
+        return 0.0;
+    }
 }
 
 double CalculateOnResistance(double width, int type, double temperature, Technology tech) {
 	double r;
-	int tempIndex = (int)temperature - 300;
-	if ((tempIndex > 100) || (tempIndex < 0)) {
-		cout<<"Error: Temperature is out of range"<<endl;
-		exit(-1);
-	}
-	if (type == NMOS)
-		r = tech.effectiveResistanceMultiplier * tech.vdd / (tech.currentOnNmos[tempIndex] * width);
-	else
-		r = tech.effectiveResistanceMultiplier * tech.vdd / (tech.currentOnPmos[tempIndex] * width);
-	return r;
+    int tempIndex = (int)temperature - 300;
+    if ((tempIndex > 100) || (tempIndex < 0)) {
+        cout<<"Error: Temperature is out of range"<<endl;
+        exit(-1);
+    }
+	double widthEff = 0;
+	if (tech.featureSize >= 22 * 1e-9) {
+		widthEff = width;
+	} else if (tech.featureSize < 22 * 1e-9  && tech.featureSize >=  3 * 1e-9 ) { // 1.4 update : up to FinFET 7 nm
+        width = width/(2 * tech.featureSize);
+        widthEff = (ceil(width))*(tech.effective_width);
+    } else { // 1.4 update : GAA case
+        width = width/(2 * tech.featureSize);
+        widthEff = (ceil(width))*tech.effective_width*tech.max_sheet_num/tech.max_fin_per_GAA;
+    }
+
+    if (type == NMOS)
+        r = tech.effectiveResistanceMultiplier * tech.vdd / (tech.currentOnNmos[tempIndex] * widthEff);
+    else
+        r = tech.effectiveResistanceMultiplier * tech.vdd / (tech.currentOnPmos[tempIndex] * widthEff);
+	
+    return r;
 }
 
 double CalculateTransconductance(double width, int type, Technology tech) {
