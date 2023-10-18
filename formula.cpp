@@ -119,10 +119,14 @@ void CalculateGateCapacitance(
 		double heightTransistorRegion, Technology tech,
 		double *capInput, double *capOutput) {
 
+	//cout << "in calculategatecapacitance" << endl;
+
 	if(tech.featureSize >= 22 * 1e-9){
 	/* TO-DO: most parts of this function is the same of CalculateGateArea,
 	 * perhaps they will be combined in future
 	 */
+		//cout << "widthNMOS: " << widthNMOS << endl;
+		//cout << "widthPMOS: " << widthPMOS << endl;
 		double	ratio = widthPMOS / (widthPMOS + widthNMOS);
 
 		double maxWidthPMOS = 0, maxWidthNMOS = 0;
@@ -243,6 +247,8 @@ void CalculateGateCapacitance(
 	if (capOutput){
 		if (tech.featureSize <= 14 * 1e-9) {  // 1.4 update: finfet or GAA
 
+			//cout << "tech.featuresize: " << tech.featureSize * 1e9 << endl;
+
 			if (tech.featureSize > 2 * 1e-9) { // 1.4 update: finfet
 				widthNMOS *= 1/(2 * tech.featureSize); 
 				widthPMOS *= 1/(2 * tech.featureSize); 
@@ -253,7 +259,13 @@ void CalculateGateCapacitance(
 				widthPMOS *= 1/(2 * tech.featureSize);
 			}
 
+			//cout << "widthNMOS: " << widthNMOS * 1e9 << endl;
+			//cout << "widthPMOS: " << widthPMOS * 1e9 << endl;
+
 			// 1.4 update: handle updated standard cell trend below 14 nm node
+
+			//cout << "MAX_TRANSISTOR_HEIGHT: " << MAX_TRANSISTOR_HEIGHT << endl;
+			//cout << "MAX_TRANSISTOR_HEIGHT_FINFET: " << MAX_TRANSISTOR_HEIGHT_FINFET << endl;
 
         	heightTransistorRegion *= ((double) MAX_TRANSISTOR_HEIGHT_FINFET/MAX_TRANSISTOR_HEIGHT);
 
@@ -346,6 +358,7 @@ void CalculateGateCapacitance(
 			double modified_MIN_GAP_BET_GATE_POLY_FINFET;
 
 			// 1.4 update: handle different fin number/CPP/Cell width trend for 14 nm and below
+			//cout << "tech.max_fin_num: " << tech.max_fin_num << endl;
 			if (tech.featureSize == 14 * 1e-9) { // adding more cases 
 				maxNumPFin = maxNumNFin = tech.max_fin_num; // changed from 3 to 4
 				modified_POLY_WIDTH_FINFET= POLY_WIDTH_14nm;
@@ -376,10 +389,7 @@ void CalculateGateCapacitance(
 				CPP_advanced = CPP_1nm;
 			} 
 
-
 		// 1.4 update: setting the maximum number of fins
-        if (!speciallayout) {
-
  			if (tech.featureSize == 14 * 1e-9) { // adding more cases 
 				maxNumPFin = maxNumNFin = tech.max_fin_num; // changed from 3 to 4
 				modified_POLY_WIDTH_FINFET= POLY_WIDTH_14nm;
@@ -409,52 +419,11 @@ void CalculateGateCapacitance(
 				modified_POLY_WIDTH_FINFET= POLY_WIDTH_1nm;
 				CPP_advanced = CPP_1nm;
 			} 
-        }
-
-        else {
-
-        if (tech.featureSize == 14 * 1e-9) { 
-            maxNumPFin = maxNumNFin =  (floor)( ( (heightTransistorRegion - (double) MIN_GAP_BET_P_AND_N_DIFFS_14nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_14nm * tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
-            modified_POLY_WIDTH_FINFET= POLY_WIDTH_14nm;
-			CPP_advanced = CPP_14nm;
-       
-        } else if (tech.featureSize == 10 * 1e-9) {
-            maxNumPFin = maxNumNFin =  (floor)( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_10nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_10nm * tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
-            modified_POLY_WIDTH_FINFET= POLY_WIDTH_10nm;
-            CPP_advanced = CPP_10nm;        
-        
-        } else if (tech.featureSize == 7 * 1e-9) {
-            maxNumPFin = maxNumNFin = (floor)( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_7nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_7nm * tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
-            modified_POLY_WIDTH_FINFET= POLY_WIDTH_7nm;
-            CPP_advanced = CPP_7nm;         
-        
-        } else if (tech.featureSize == 5 * 1e-9) {
-            maxNumPFin = maxNumNFin = (floor)( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_5nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_5nm * tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
-            modified_POLY_WIDTH_FINFET= POLY_WIDTH_5nm;
-            CPP_advanced = CPP_5nm;         
-        
-        } else if (tech.featureSize == 3 * 1e-9) {
-            maxNumPFin = maxNumNFin = (floor)( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_3nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_3nm * tech.featureSize) + tech.PitchFin ) / 2 / (tech.widthFin + tech.PitchFin) );
-            modified_POLY_WIDTH_FINFET= POLY_WIDTH_3nm;
-            CPP_advanced = CPP_3nm;           
-        
-        } else if (tech.featureSize == 2 * 1e-9) {
-            maxNumPSheet= maxNumNSheet = (floor)( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_2nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_2nm* tech.featureSize) + tech.PitchFin ) / 2 / (tech.widthFin + tech.PitchFin) );
-            modified_POLY_WIDTH_FINFET= POLY_WIDTH_2nm;
-            CPP_advanced = CPP_2nm;           
-        
-        } else if (tech.featureSize == 1 * 1e-9) {
-            maxNumPSheet= maxNumNSheet = (floor)( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_1nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_1nm * tech.featureSize) + tech.PitchFin ) / 2 / (tech.widthFin + tech.PitchFin) );
-            modified_POLY_WIDTH_FINFET= POLY_WIDTH_1nm;
-            CPP_advanced = CPP_1nm;           
-        
-        } 
-            
-
-        }
 
 		// 1.4 update: temp_P, temp_N, temp_P_NS, temp_N_NS
 		// 1.4 update: temp_N_ratio, temp_P_ratio, temp_N_NS_ratio, temp_P_NS_ratio
+		//cout << "maxNumPFin:  " << maxNumPFin << endl;
+		//cout << "maxNumNFin:  " << maxNumNFin << endl;
 
         double temp_P=2*maxNumPFin;
         double temp_N=2*maxNumNFin;
@@ -468,8 +437,9 @@ void CalculateGateCapacitance(
 
 		// 1.4 update: setting the maximum number of fin for folding
 
+		//cout << "ratio:  " << (ratio == 0) << endl;
         if (ratio == 0) {   /* no PFinFET */
-
+			//cout << "temp_N: " << temp_N << endl;
             maxNumPFin = 0;
             maxNumNFin = temp_N;
             maxNumPSheet = 0;
@@ -483,7 +453,6 @@ void CalculateGateCapacitance(
             maxNumNSheet= 0;
 
         } else {
-
             if (ratio>0.5) {
             temp_N_ratio=int (temp_N*(1-ratio));
             temp_P_ratio= temp_N-temp_N_ratio;
@@ -509,6 +478,8 @@ void CalculateGateCapacitance(
             maxNumNSheet = temp_N_NS_ratio; 
         }
 
+		//cout << "huh? "<< endl;
+
 			// 1.4 update: updated the gap distance between finfets
 			modified_MIN_GAP_BET_GATE_POLY_FINFET= CPP_advanced-modified_POLY_WIDTH_FINFET; 
 
@@ -516,6 +487,8 @@ void CalculateGateCapacitance(
 			if (tech.featureSize < 22 * 1e-9  && tech.featureSize >= 3 * 1e-9) { // 1.4 update: FinFET case
 
 				int NumPFin = (int)(ceil(widthPMOS));
+				//cout << "NumPFin: " << NumPFin << endl;
+				//cout << "maxNumNFin:  " << maxNumNFin << endl;
 				if (NumPFin > 0) {
 					if (NumPFin <= maxNumPFin) { /* No folding */
 						unitWidthDrainP = tech.featureSize * modified_MIN_GAP_BET_GATE_POLY_FINFET;
@@ -532,6 +505,8 @@ void CalculateGateCapacitance(
 					unitWidthSourceP = 0;
 					heightDrainP = 0;
 				}
+
+				//cout << "is this...:  " << endl;
 
 				int NumNFin = (int)(ceil(widthNMOS));
 
@@ -551,6 +526,8 @@ void CalculateGateCapacitance(
 					unitWidthSourceN = 0;
 					heightDrainN = 0;
 				}
+
+				//cout << "is this:  " << endl;
 			}
 
 			else {
@@ -594,6 +571,8 @@ void CalculateGateCapacitance(
 
 			}
 		}
+
+		//cout << "what about here? "<< endl;
 
 		switch (gateType) {
 		case INV:
@@ -681,8 +660,7 @@ void CalculateGateCapacitance(
         *(capOutput) = capDrainBottomN + capDrainBottomP + capDrainSidewallN + capDrainSidewallP + capDrainToChannelN + capDrainToChannelP; 
         }
         
-	}	
-	
+	}
 	}
 }
 
