@@ -2737,19 +2737,19 @@ void Technology::InterpolateWith(Technology rhs, double _alpha) {
 		vdsatPmos = phyGateLength * 1e5 /* Silicon saturatio velocity, Unit: m/s */ / effectiveHoleMobility;
 
 		// new technology parameters
-		max_sheet_num = rhs.max_sheet_num;
-		thickness_sheet = rhs.thickness_sheet;
-		width_sheet = rhs.width_sheet;
-		effective_width = rhs.effective_width;
-		max_fin_num = rhs.max_fin_num;
+		max_sheet_num = max_sheet_num;
+		thickness_sheet = thickness_sheet;
+		width_sheet = width_sheet;
+		effective_width = effective_width;
+		max_fin_num = max_fin_num;
 		max_fin_per_GAA = rhs.max_fin_per_GAA;
 		gm_oncurrent = (1 - _alpha) * gm_oncurrent + _alpha * rhs.gm_oncurrent;  // gm at on current
 		cap_draintotal = (1 - _alpha) * cap_draintotal + _alpha * rhs.cap_draintotal;
 		current_gmNmos = (1 - _alpha) * current_gmNmos + _alpha * rhs.current_gmNmos;		/* NMOS current at 0.7*vdd for gm calculation, Unit: A/m/V*/ 
     	current_gmPmos = (1 - _alpha) * current_gmPmos + _alpha * rhs.current_gmPmos;		/* PMOS current at 0.7*vdd for gm calculation, Unit: A/m/V*/
-		heightFin = rhs.heightFin;	/* Fin height, Unit: m */
-		widthFin = rhs.widthFin;	/* Fin width, Unit: m */
-		PitchFin = rhs.PitchFin;	/* Fin pitch, Unit: m */
+		heightFin = heightFin;	/* Fin height, Unit: m */
+		widthFin = widthFin;	/* Fin width, Unit: m */
+		PitchFin = PitchFin;	/* Fin pitch, Unit: m */
 	}
 }
 

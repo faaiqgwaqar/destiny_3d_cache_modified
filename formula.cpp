@@ -487,8 +487,8 @@ void CalculateGateCapacitance(
 			if (tech.featureSize < 22 * 1e-9  && tech.featureSize >= 3 * 1e-9) { // 1.4 update: FinFET case
 
 				int NumPFin = (int)(ceil(widthPMOS));
-				//cout << "NumPFin: " << NumPFin << endl;
-				//cout << "maxNumNFin:  " << maxNumNFin << endl;
+				// cout << "NumPFin: " << NumPFin << endl;
+				// cout << "maxNumPFin:  " << maxNumPFin << endl;
 				if (NumPFin > 0) {
 					if (NumPFin <= maxNumPFin) { /* No folding */
 						unitWidthDrainP = tech.featureSize * modified_MIN_GAP_BET_GATE_POLY_FINFET;
@@ -509,7 +509,8 @@ void CalculateGateCapacitance(
 				//cout << "is this...:  " << endl;
 
 				int NumNFin = (int)(ceil(widthNMOS));
-
+				//cout << "NumNFin: " << NumNFin << endl;
+				//cout << "maxNumNFin:  " << maxNumNFin << endl;
 				if (NumNFin > 0) {
 					if (NumNFin <= maxNumNFin) { /* No folding */
 						unitWidthDrainN = tech.featureSize * modified_MIN_GAP_BET_GATE_POLY_FINFET;
@@ -662,6 +663,7 @@ void CalculateGateCapacitance(
         
 	}
 	}
+	//cout << "end calculategatecap "<< endl;
 }
 
 double CalculateDrainCap(
