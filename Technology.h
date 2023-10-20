@@ -31,6 +31,8 @@ public:
 	bool initialized;	/* Initialization flag */
 	int featureSizeInNano; /*Process feature size, Unit: nm */
 	double featureSize;	/* Process feature size, Unit: m */
+	double cellFeatureSize;	/* Process feature size, Unit: m */
+	double wireWidth;	/* Process feature size, Unit: m */
 	DeviceRoadmap deviceRoadmap;	/* HP, LSTP, or LOP */
 	double vdd;			/* Supply voltage, Unit: V */
     double vpp;             /* Wordline overdrive voltage. */
@@ -70,6 +72,7 @@ public:
 	double heightFin;	/* Fin height, Unit: m */
 	double widthFin;	/* Fin width, Unit: m */
 	double PitchFin;	/* Fin pitch, Unit: m */
+	bool neurosim_wiring;
 
 	double capPolywire;	/* Poly wire capacitance, Unit: F/m */
 

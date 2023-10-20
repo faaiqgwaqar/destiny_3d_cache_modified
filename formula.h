@@ -62,12 +62,12 @@ double horowitz(double tr, double beta, double rampInput, double *rampOutput);
 
 double CalculateWireResistance(
 		double resistivity, double wireWidth, double wireThickness,
-		double barrierThickness, double dishingThickness, double alphaScatter);
+		double barrierThickness, double dishingThickness, double alphaScatter, bool neurosim_wiring, Technology tech);
 
 double CalculateWireCapacitance(
 		double permittivity, double wireWidth, double wireThickness, double wireSpacing,
 		double ildThickness, double millarValue, double horizontalDielectric,
-		double verticalDielectic, double fringeCap);
+		double verticalDielectic, double fringeCap, bool neurosim_wiring);
 
 double CalculateOnResistance_normal(double width, int type, double temperature, Technology tech);
 

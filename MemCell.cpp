@@ -191,6 +191,7 @@ void MemCell::ReadCellFromFile(const string & inputFile)
 				readMode = false;
 			continue;
 		}
+
 		if (!strncmp("-ReadVoltage", line, strlen("-ReadVoltage"))) {
 			sscanf(line, "-ReadVoltage (V): %lf", &readVoltage);
 			continue;
@@ -214,7 +215,6 @@ void MemCell::ReadCellFromFile(const string & inputFile)
 			minSenseVoltage /= 1e3;
 			continue;
 		}
-
 
 		if (!strncmp("-ResetMode", line, strlen("-ResetMode"))) {
 			sscanf(line, "-ResetMode: %s", tmp);

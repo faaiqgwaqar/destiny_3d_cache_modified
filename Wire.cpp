@@ -447,11 +447,10 @@ void Wire::Initialize(int _featureSizeInNano, WireType _wireType, WireRepeaterTy
 	copper_resistivity = copper_resistivity
 			* (1 + COPPER_RESISTIVITY_TEMPERATURE_COEFFICIENT * (temperature - 293));
 	resWirePerUnit = CalculateWireResistance(copper_resistivity, wireWidth, wireThickness, barrierThickness,
-			0 /* Dishing Thickness */, 1 /* Alpha Scatter */);
+			0 /* Dishing Thickness */, 1 /* Alpha Scatter */, tech->neurosim_wiring, *tech);
 	capWirePerUnit = CalculateWireCapacitance(PERMITTIVITY, wireWidth, wireThickness, wireSpacing,
 		ildThickness, 1.5 /* miller value */, horizontalDielectric, 3.9 /* Vertical Dielectric */,
-		1.15e-10 /* Fringe Capacitance (Unit: F/m), TO-DO: CACTI assumes a fixed number here */);
-
+		1.15e-10 /* Fringe Capacitance (Unit: F/m), TO-DO: CACTI assumes a fixed number here */, tech->neurosim_wiring);
 	if (wireRepeaterType != repeated_none) {
 		/* If the repeaters are inserted in the wire */
 		findOptimalRepeater();

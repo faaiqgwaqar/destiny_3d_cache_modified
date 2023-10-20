@@ -804,19 +804,178 @@ double horowitz(double tr, double beta, double rampInput, double *rampOutput) {
 
 double CalculateWireResistance(
 		double resistivity, double wireWidth, double wireThickness,
-		double barrierThickness, double dishingThickness, double alphaScatter) {
-	return(alphaScatter * resistivity / (wireThickness - barrierThickness - dishingThickness)
+		double barrierThickness, double dishingThickness, double alphaScatter, bool neurosim_wiring, Technology tech) {
+	if(!neurosim_wiring){
+		return(alphaScatter * resistivity / (wireThickness - barrierThickness - dishingThickness)
 			/ (wireWidth - 2 * barrierThickness));
+	} else {
+		double Metal0, Metal1, wirewidth, barrierthickness, featuresize;
+		switch (tech.featureSizeInNano){
+			case 130: 	Metal0=175; Metal1=175; wirewidth=175; barrierthickness=10.0e-9; featuresize = wirewidth*1e-9; break;  
+			case 90: 	Metal0=110; Metal1=110; wirewidth=110; barrierthickness=10.0e-9; featuresize = wirewidth*1e-9; break;  
+			case 65:	Metal0=105; Metal1=105; wirewidth=105; barrierthickness=7.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 45:	Metal0=80; Metal1=80;   wirewidth=80;  barrierthickness=5.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 32:	Metal0=56; Metal1=56;   wirewidth=56;  barrierthickness=4.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 22:	Metal0=40; Metal1=40;   wirewidth=40;  barrierthickness=2.5e-9;  featuresize = wirewidth*1e-9; break; 
+			case 14:	Metal0=32; Metal1=39;   wirewidth=32;  barrierthickness=2.5e-9;  featuresize = wirewidth*1e-9; break;  
+			case 10:	Metal0=22; Metal1=32;   wirewidth=22;  barrierthickness=2.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 7:		Metal0=20; Metal1=28.5; wirewidth=20;  barrierthickness=2.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 5:		Metal0=15; Metal1=17;   wirewidth=15;  barrierthickness=2.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 3:		Metal0=12; Metal1=16;   wirewidth=12;  barrierthickness=1.5e-9;  featuresize = wirewidth*1e-9; break; 
+			case 2:		Metal0=10; Metal1=11.5; wirewidth=10;  barrierthickness=0.5e-9;  featuresize = wirewidth*1e-9; break;  
+			case 1:		Metal0=8;  Metal1=10;   wirewidth=8;   barrierthickness=0.2e-9;  featuresize = wirewidth*1e-9; break;    
+			case -1:	break;	
+			default:	exit(-1); puts("Wire width out of range"); 
+		}
+
+		double AR, Rho;
+		// 1.4 update: wirewidth
+		if (wirewidth >= 175) {
+			AR = 1.6; 
+			Rho = 2.01*1e-8;
+		} else if ((110 <= wirewidth) &&  (wirewidth < 175)) {
+			AR = 1.6; 
+			Rho = 2.20*1e-8;
+		} else if ((105 <= wirewidth) &&  (wirewidth < 110)) {
+			AR = 1.7; 
+			Rho = 2.21*1e-8;
+		} else if ((80 <= wirewidth) &&  (wirewidth < 105)){
+			AR = 1.7; 
+			Rho = 2.37*1e-8;
+		} else if ((56 <= wirewidth) &&  (wirewidth < 80)){
+			AR = 1.8; 
+			Rho = 2.63*1e-8;
+		} else if ((40 <= wirewidth) &&  (wirewidth < 56)) {
+			AR = 1.9; 
+			Rho = 2.97*1e-8;
+		} else if ((32 <= wirewidth) &&  (wirewidth < 40)) {
+			AR = 2.0; 
+			Rho = 3.25*1e-8;
+		} else if ((22 <= wirewidth) &&  (wirewidth < 32)){
+			AR = 2.00; Rho = 3.95*1e-8;
+		} else if ((20 <= wirewidth) &&  (wirewidth < 22)){
+			AR = 2.00; Rho = 4.17*1e-8; 
+		} else if ((15 <= wirewidth) &&  (wirewidth < 20)){
+			AR = 2.00; Rho = 4.98*1e-8; 
+		} else if ((12 <= wirewidth) &&  (wirewidth < 15)){
+			AR = 2.00; Rho = 5.8*1e-8; 
+		} else if ((10 <= wirewidth) &&  (wirewidth < 12)){
+			// AR = 3.00; Rho = 6.65*1e-8; 
+			AR = 2.00; Rho = 6.61*1e-8; 
+		} else if ((8 <= wirewidth) &&  (wirewidth < 10)){
+			AR = 3.00; Rho = 7.87*1e-8; 
+		} else {
+			exit(-1); puts("Wire width out of range"); 
+		}
+
+		Rho = Rho * 1 / (1- ( (2*AR*wirewidth + wirewidth)*barrierthickness / (AR*pow(wirewidth,2) ) ));
+
+		double AR_Metal0, Rho_Metal0;
+		// 1.4 update: Metal0
+		if (Metal0 >= 175) {
+			AR_Metal0 = 1.6; 
+			Rho_Metal0 = 2.01*1e-8;
+		} else if ((110 <= Metal0) &&  (Metal0< 175)) {
+			AR_Metal0 = 1.6; 
+			Rho_Metal0 = 2.20*1e-8;
+		} else if ((105 <= Metal0) &&  (Metal0< 110)){
+			AR_Metal0 = 1.7; 
+			Rho_Metal0 = 2.21*1e-8;
+		} else if ((80 <= Metal0) &&  (Metal0< 105)) {
+			AR_Metal0 = 1.7; 
+			Rho_Metal0 = 2.37*1e-8;
+		} else if ((56 <= Metal0) &&  (Metal0< 80)){
+			AR_Metal0 = 1.8; 
+			Rho_Metal0 = 2.63*1e-8;
+		} else if ((40 <= Metal0) &&  (Metal0< 56)) {
+			AR_Metal0 = 1.9; 
+			Rho_Metal0 = 2.97*1e-8;
+		} else if ((32 <= Metal0) &&  (Metal0< 40)) {
+			AR_Metal0 = 2.0; 
+			Rho_Metal0 = 3.25*1e-8;
+		} else if ((22 <= Metal0) &&  (Metal0< 32)){
+			AR_Metal0 = 2.00; Rho_Metal0 = 3.95*1e-8;
+		} else if ((20 <= Metal0) &&  (Metal0< 22)){
+			AR_Metal0 = 2.00; Rho_Metal0 = 4.17*1e-8; 
+		} else if ((15 <= Metal0) &&  (Metal0< 20)){
+			AR_Metal0 = 2.00; Rho_Metal0 = 4.98*1e-8; 
+		} else if ((12 <= Metal0) &&  (Metal0< 15)){
+			AR_Metal0 = 2.00; Rho_Metal0 = 5.8*1e-8; 
+		} else if ((10 <= Metal0) &&  (Metal0< 12)){
+			// AR_Metal0 = 3.00; Rho_Metal0 = 6.65*1e-8; 
+			AR_Metal0 = 2.00; Rho_Metal0 = 6.61*1e-8; 
+		} else if ((8 <= Metal0) &&  (Metal0< 10)){
+			AR_Metal0 = 3.00; Rho_Metal0 = 7.87*1e-8; 
+		} else {
+			exit(-1); puts("Wire width out of range"); 
+		}
+
+		Rho_Metal0 = Rho_Metal0 * 1 / (1- ( (2*AR_Metal0*Metal0 + Metal0)*barrierthickness / (AR_Metal0*pow(Metal0,2) ) ));
+
+		double AR_Metal1, Rho_Metal1;
+		// 1.4 update: Metal1
+		if (Metal1 >= 175) {
+			AR_Metal1 = 1.6; 
+			Rho_Metal1 = 2.01*1e-8;
+		} else if ((110 <= Metal1) &&  (Metal1 < 175)) {
+			AR_Metal1 = 1.6; 
+			Rho_Metal1 = 2.20*1e-8;
+		} else if ((105 <= Metal1) &&  (Metal1 < 110)) {
+			AR_Metal1 = 1.7; 
+			Rho_Metal1 = 2.21*1e-8;
+		} else if ((80 <= Metal1) &&  (Metal1 <105)) {
+			AR_Metal1 = 1.7; 
+			Rho_Metal1 = 2.37*1e-8;
+		} else if ((56 <= Metal1) &&  (Metal1 < 80)) {
+			AR_Metal1 = 1.8; 
+			Rho_Metal1 = 2.63*1e-8;
+		} else if ((40 <= Metal1) &&  (Metal1 < 56)){
+			AR_Metal1 = 1.9; 
+			Rho_Metal1 = 2.97*1e-8;
+		} else if ((32 <= Metal1) &&  (Metal1 < 40)) {
+			AR_Metal1 = 2.0; 
+			Rho_Metal1 = 3.25*1e-8;
+		} else if ((22 <= Metal1) &&  (Metal1 < 32)){
+			AR_Metal1 = 2.00; Rho_Metal1 = 3.95*1e-8;
+		} else if ((20 <= Metal1) &&  (Metal1 < 22)){
+			AR_Metal1 = 2.00; Rho_Metal1 = 4.17*1e-8; 
+		} else if ((15 <= Metal1) &&  (Metal1 < 20)){
+			AR_Metal1 = 2.00; Rho_Metal1 = 4.98*1e-8; 
+		} else if ((12 <= Metal1) &&  (Metal1 < 15)){
+			AR_Metal1 = 2.00; Rho_Metal1 = 5.8*1e-8; 
+		} else if ((10 <= Metal1) &&  (Metal1 < 12)){
+			// AR_Metal1 = 3.00; Rho_Metal1 = 6.65*1e-8; 
+			AR_Metal1 = 2.00; Rho_Metal1 = 6.61*1e-8;
+		} else if ((8 <= Metal1) &&  (Metal1 < 10)){
+			AR_Metal1 = 3.00; Rho_Metal1 = 7.87*1e-8; 
+		} else {
+			exit(-1); puts("Wire width out of range"); 
+		}
+
+		Rho_Metal1 = Rho_Metal1 * 1 / (1- ( (2*AR_Metal1*Metal1 + Metal1)*barrierthickness / (AR_Metal1*pow(Metal1,2) ) ));
+
+		double Metal0_unitwireresis, Metal1_unitwireresis;
+		Metal0_unitwireresis =  Rho_Metal0 / ( Metal0*1e-9 * Metal0*1e-9 * AR_Metal0 );
+		Metal1_unitwireresis =  Rho_Metal1 / ( Metal1*1e-9 * Metal1*1e-9 * AR_Metal1 );
+
+		return max(Metal0_unitwireresis, Metal1_unitwireresis);
+	}
 }
 
 double CalculateWireCapacitance(
 		double permittivity, double wireWidth, double wireThickness, double wireSpacing,
 		double ildThickness, double millerValue, double horizontalDielectric,
-		double verticalDielectric, double fringeCap) {
-	double verticalCap, sidewallCap;
-	verticalCap = 2 * permittivity * verticalDielectric * wireWidth / ildThickness;
-	sidewallCap = 2 * permittivity * millerValue * horizontalDielectric * wireThickness / wireSpacing;
-	return (verticalCap + sidewallCap + fringeCap);
+		double verticalDielectric, double fringeCap, bool neurosim_wiring) {
+	if(!neurosim_wiring){
+		double verticalCap, sidewallCap;
+		verticalCap = 2 * permittivity * verticalDielectric * wireWidth / ildThickness;
+		sidewallCap = 2 * permittivity * millerValue * horizontalDielectric * wireThickness / wireSpacing;
+		return (verticalCap + sidewallCap + fringeCap);
+	}
+	else{
+		return 200 * 1e-12;
+	}
+
 }
 
 // 1.4 update: add on resistance calculation without effective resistance multiplier 

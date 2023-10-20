@@ -200,8 +200,8 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 
 	/* Derived parameters */
 	numSenseAmp = numColumn / muxSenseAmp;
-	lenWordline = (double)numColumn * cell->widthInFeatureSize * devtech->featureSize;
-	lenBitline = (double)numRow * cell->heightInFeatureSize * devtech->featureSize;
+	lenWordline = (double)numColumn * cell->widthInFeatureSize * tech->cellFeatureSize;
+	lenBitline = (double)numRow * cell->heightInFeatureSize * tech->cellFeatureSize;
 	/* Add stitching overhead if necessary */
 	if (cell->stitching) {
 		lenWordline += ((numColumn - 1) / cell->stitching + 1) * STITCHING_OVERHEAD * devtech->featureSize;
@@ -217,6 +217,9 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	resWordline = lenWordline * localWire->resWirePerUnit * num3DLevels;
 	capBitline = lenBitline * localWire->capWirePerUnit * num3DLevels;
 	resBitline = lenBitline * localWire->resWirePerUnit * num3DLevels;
+
+	//cout << "capWirePerUnit: " << localWire->capWirePerUnit * 1e12 << endl;
+	//cout << "resWirePerUnit: " << localWire->resWirePerUnit << endl;
 
 	/* Caclulate the load resistance and capacitance for Mux Decoders */
 	double capMuxLoad, resMuxLoad;
