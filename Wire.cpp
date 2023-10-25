@@ -47,8 +47,214 @@ void Wire::Initialize(int _featureSizeInNano, WireType _wireType, WireRepeaterTy
 
 	double copper_resistivity = COPPER_RESISTIVITY;
 	/* Initialize copper resistivity */
+	
+	double Metal2_pitch = M2_PITCH;
+	double Metal3_pitch = M3_PITCH;
 
-	if (_featureSizeInNano <= 22) {
+	if (_featureSizeInNano <= 14){
+		featureSize = _featureSizeInNano * 1e-9;
+		switch (wireType) {
+		case local_aggressive:
+			barrierThickness = 0.00e-6;
+			horizontalDielectric = 2.55;
+			aspectRatio = 1.9;
+			ildThickness = aspectRatio * featureSize;
+			copper_resistivity =  6.0e-8;
+			switch(_featureSizeInNano){
+				case 14:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_14nm/M2_PITCH);
+						break;
+				case 10:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_10nm/M2_PITCH);
+						break;
+				case 7:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_7nm/M2_PITCH);
+						break;
+				case 5:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_5nm/M2_PITCH);
+						break;
+				case 3:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_3nm/M2_PITCH);
+						break;
+				case 2:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_2nm/M2_PITCH);
+						break;
+				case 1:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_1nm/M2_PITCH);
+						break;
+				default:
+						wirePitch = 2 * featureSize;
+						break;
+			} break;
+		case local_conservative:
+			barrierThickness = 0.0021e-6;
+			horizontalDielectric = 3;
+			aspectRatio = 1.9;
+			ildThickness = aspectRatio * featureSize;
+			copper_resistivity =  6.0e-8;
+			switch(_featureSizeInNano){
+				case 14:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_14nm/M2_PITCH);
+						break;
+				case 10:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_10nm/M2_PITCH);
+						break;
+				case 7:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_7nm/M2_PITCH);
+						break;
+				case 5:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_5nm/M2_PITCH);
+						break;
+				case 3:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_3nm/M2_PITCH);
+						break;
+				case 2:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_2nm/M2_PITCH);
+						break;
+				case 1:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_1nm/M2_PITCH);
+						break;
+				default:
+						wirePitch = 2 * featureSize;
+						break;
+			} break;
+		case semi_aggressive:
+			barrierThickness = 0.00e-6;
+			horizontalDielectric = 2.55;
+			aspectRatio = 1.9;
+			ildThickness = 2 * aspectRatio * featureSize;
+			copper_resistivity =  6.0e-8;
+			switch(_featureSizeInNano){
+				case 14:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_14nm/M2_PITCH);
+						break;
+				case 10:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_10nm/M2_PITCH);
+						break;
+				case 7:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_7nm/M2_PITCH);
+						break;
+				case 5:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_5nm/M2_PITCH);
+						break;
+				case 3:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_3nm/M2_PITCH);
+						break;
+				case 2:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_2nm/M2_PITCH);
+						break;
+				case 1:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_1nm/M2_PITCH);
+						break;
+				default:
+						wirePitch = 4 * featureSize;
+						break;
+			} break;
+		case semi_conservative:
+			barrierThickness = 0.0021e-6;
+			horizontalDielectric = 3;
+			aspectRatio = 1.9;
+			ildThickness = 2 * aspectRatio * featureSize;
+			copper_resistivity =  6.0e-8;
+			switch(_featureSizeInNano){
+				case 14:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_14nm/M2_PITCH);
+						break;
+				case 10:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_10nm/M2_PITCH);
+						break;
+				case 7:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_7nm/M2_PITCH);
+						break;
+				case 5:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_5nm/M2_PITCH);
+						break;
+				case 3:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_3nm/M2_PITCH);
+						break;
+				case 2:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_2nm/M2_PITCH);
+						break;
+				case 1:
+						wirePitch = Metal2_pitch * ( (double)M2_PITCH_1nm/M2_PITCH);
+						break;
+				default:
+						wirePitch = 4 * featureSize;
+						break;
+			} break;
+		case global_aggressive:
+			barrierThickness = 0.00e-6;
+			horizontalDielectric = 2.55;
+			aspectRatio = 2.34;
+			ildThickness = 0.42e-6 * 22 / 32;
+			copper_resistivity =  3.0e-8; /* TO-DO confusing data in ITRS */
+			switch(_featureSizeInNano){
+				case 14:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_14nm/M3_PITCH);
+						break;
+				case 10:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_10nm/M3_PITCH);
+						break;
+				case 7:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_7nm/M3_PITCH);
+						break;
+				case 5:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_5nm/M3_PITCH);
+						break;
+				case 3:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_3nm/M3_PITCH);
+						break;
+				case 2:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_2nm/M3_PITCH);
+						break;
+				case 1:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_1nm/M3_PITCH);
+						break;
+				default:
+						wirePitch = 8 * featureSize;
+						break;
+			} break;
+		case global_conservative:
+			barrierThickness = 0.0063e-6; /* TO-DO No data in ITRS */
+			horizontalDielectric = 3;
+			aspectRatio = 2.34;
+			ildThickness = 0.385e-6 * 22 / 32;
+			copper_resistivity =  3.0e-8; /* TO-DO confusing data in ITRS */
+			switch(_featureSizeInNano){
+				case 14:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_14nm/M3_PITCH);
+						break;
+				case 10:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_10nm/M3_PITCH);
+						break;
+				case 7:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_7nm/M3_PITCH);
+						break;
+				case 5:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_5nm/M3_PITCH);
+						break;
+				case 3:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_3nm/M3_PITCH);
+						break;
+				case 2:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_2nm/M3_PITCH);
+						break;
+				case 1:
+						wirePitch = Metal3_pitch * ( (double)M3_PITCH_1nm/M3_PITCH);
+						break;
+				default:
+						wirePitch = 8 * featureSize;
+						break;
+			}break;
+		default:	/* dram_wordline */
+			/* TO-DO CACTI does not have a detailed model for it */
+			barrierThickness = 0e-6;
+			horizontalDielectric = 0;
+			wirePitch = 2 * featureSize;
+			aspectRatio = 0;
+			ildThickness = 0e-6;
+		}
+		} else if (_featureSizeInNano <= 22) {
 		featureSize = 22e-9;
 		switch (wireType) {
 		case local_aggressive:
@@ -446,7 +652,11 @@ void Wire::Initialize(int _featureSizeInNano, WireType _wireType, WireRepeaterTy
 	/* TO-DO: here we only support copper wire, aluminum is to be added */
 	copper_resistivity = copper_resistivity
 			* (1 + COPPER_RESISTIVITY_TEMPERATURE_COEFFICIENT * (temperature - 293));
-	resWirePerUnit = CalculateWireResistance(copper_resistivity, wireWidth, wireThickness, barrierThickness,
+	resWirePerUnit = CalculateWireResistance_MX(copper_resistivity, wireWidth, wireThickness, barrierThickness,
+			0 /* Dishing Thickness */, 1 /* Alpha Scatter */, tech->neurosim_wiring, *tech);
+	resWirePerUnit_M0 = CalculateWireResistance_M0(copper_resistivity, wireWidth, wireThickness, barrierThickness,
+			0 /* Dishing Thickness */, 1 /* Alpha Scatter */, tech->neurosim_wiring, *tech);
+	resWirePerUnit_M1 = CalculateWireResistance_MX(copper_resistivity, wireWidth, wireThickness, barrierThickness,
 			0 /* Dishing Thickness */, 1 /* Alpha Scatter */, tech->neurosim_wiring, *tech);
 	capWirePerUnit = CalculateWireCapacitance(PERMITTIVITY, wireWidth, wireThickness, wireSpacing,
 		ildThickness, 1.5 /* miller value */, horizontalDielectric, 3.9 /* Vertical Dielectric */,

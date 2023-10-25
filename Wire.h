@@ -55,6 +55,8 @@ public:
 	double repeatedWirePitch;		/* For repeated wire only, translate the repeaterSize into meter, Unit: m */
 
 	double resWirePerUnit;			/* Unit: ohm/m */
+	double resWirePerUnit_M0;			/* Unit: ohm/m */
+	double resWirePerUnit_M1;			/* Unit: ohm/m */
 	double capWirePerUnit;			/* Unit: F/m */
 
 	SenseAmp * senseAmp;

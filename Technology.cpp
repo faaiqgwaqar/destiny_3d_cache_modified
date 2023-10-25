@@ -2695,30 +2695,6 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
 	}
 
 	neurosim_wiring = true;
-
-	if(neurosim_wiring){
-		switch (featureSizeInNano){
-			case 130: 	wireWidth=175; cellFeatureSize = wireWidth*1e-9; break;  
-			case 90: 	wireWidth=110; cellFeatureSize = wireWidth*1e-9; break;  
-			case 65:	wireWidth=105; cellFeatureSize = wireWidth*1e-9; break;  
-			case 45:	wireWidth=80;  cellFeatureSize = wireWidth*1e-9; break;  
-			case 32:	wireWidth=56;  cellFeatureSize = wireWidth*1e-9; break;  
-			case 22:	wireWidth=40;  cellFeatureSize = wireWidth*1e-9; break; 
-			case 14:	wireWidth=32;  cellFeatureSize = wireWidth*1e-9; break;  
-			case 10:	wireWidth=22;  cellFeatureSize = wireWidth*1e-9; break;  
-			case 7:		wireWidth=20;  cellFeatureSize = wireWidth*1e-9; break;  
-			case 5:		wireWidth=15;  cellFeatureSize = wireWidth*1e-9; break;  
-			case 3:		wireWidth=12;  cellFeatureSize = wireWidth*1e-9; break; 
-			case 2:		wireWidth=10;  cellFeatureSize = wireWidth*1e-9; break;  
-			case 1:		wireWidth=8;   cellFeatureSize = wireWidth*1e-9; break;    
-			case -1:	break;	
-			default:	exit(-1); puts("Wire width out of range"); 
-	}
-	} else {
-		cellFeatureSize = featureSize;
-		//cout << "featureSize" << tech->featureSize << endl;
-	}
-
 	initialized = true;
 }
 

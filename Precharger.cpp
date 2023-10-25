@@ -28,8 +28,8 @@ void Precharger::Initialize(double _voltagePrecharge, int _numColumn, double _ca
 	numColumn  = _numColumn;
 	capBitline = _capBitline;
 	resBitline = _resBitline;
-	capWireLoadPerColumn = cell->widthInFeatureSize * tech->cellFeatureSize * localWire->capWirePerUnit;
-	resWireLoadPerColumn = cell->widthInFeatureSize * tech->cellFeatureSize * localWire->resWirePerUnit;
+	capWireLoadPerColumn = cell->widthInFeatureSize * tech->featureSize * localWire->capWirePerUnit;
+	resWireLoadPerColumn = cell->widthInFeatureSize * tech->featureSize * localWire->resWirePerUnit;
 	widthInvNmos = MIN_NMOS_SIZE * tech->featureSize;
 	widthInvPmos = widthInvNmos * tech->pnSizeRatio;
 	widthPMOSBitlineEqual      = MIN_NMOS_SIZE * tech->featureSize;

@@ -197,11 +197,58 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	//	/* TO-DO: different memory technology might have different values here */
 	//	senseVoltage = cell->minSenseVoltage;
 	//}
+	double MIN_CELL_HEIGHT = MAX_TRANSISTOR_HEIGHT;  //set real layout cell height
+	double MIN_CELL_WIDTH = (MIN_GAP_BET_GATE_POLY + POLY_WIDTH) * 2;  //set real layout cell width
+	double ISOLATION_REGION = MIN_POLY_EXT_DIFF*2 + MIN_GAP_BET_FIELD_POLY; // 1.4 update : new variable
+
+	/* Add cell relaxation parameters from NeurSim 1.4 */
+	switch(tech->featureSizeInNano){
+		case 14:
+			MIN_CELL_HEIGHT *= (MAX_TRANSISTOR_HEIGHT_14nm/MAX_TRANSISTOR_HEIGHT);
+			ISOLATION_REGION *= (OUTER_HEIGHT_REGION_14nm/(MIN_POLY_EXT_DIFF*2 + MIN_GAP_BET_FIELD_POLY));
+			MIN_CELL_WIDTH  *= ((POLY_WIDTH_FINFET + MIN_GAP_BET_GATE_POLY_FINFET )/(MIN_GAP_BET_GATE_POLY + POLY_WIDTH));
+			break;
+		case 10:
+			MIN_CELL_HEIGHT *= (MAX_TRANSISTOR_HEIGHT_10nm /MAX_TRANSISTOR_HEIGHT);
+			ISOLATION_REGION *= (OUTER_HEIGHT_REGION_10nm/(MIN_POLY_EXT_DIFF*2 + MIN_GAP_BET_FIELD_POLY));
+			MIN_CELL_WIDTH  *= (CPP_10nm /(MIN_GAP_BET_GATE_POLY + POLY_WIDTH));
+			break;
+		case 7:
+			MIN_CELL_HEIGHT *= (MAX_TRANSISTOR_HEIGHT_7nm /MAX_TRANSISTOR_HEIGHT);
+			ISOLATION_REGION *= (OUTER_HEIGHT_REGION_7nm/(MIN_POLY_EXT_DIFF*2 + MIN_GAP_BET_FIELD_POLY));
+			MIN_CELL_WIDTH  *= (CPP_7nm /(MIN_GAP_BET_GATE_POLY + POLY_WIDTH));
+			break;
+		case 5:
+			MIN_CELL_HEIGHT *= (MAX_TRANSISTOR_HEIGHT_5nm /MAX_TRANSISTOR_HEIGHT);
+			ISOLATION_REGION *= (OUTER_HEIGHT_REGION_5nm/(MIN_POLY_EXT_DIFF*2 + MIN_GAP_BET_FIELD_POLY));
+			MIN_CELL_WIDTH  *= (CPP_5nm /(MIN_GAP_BET_GATE_POLY + POLY_WIDTH));
+			break;
+		case 3:
+			MIN_CELL_HEIGHT *= (MAX_TRANSISTOR_HEIGHT_3nm /MAX_TRANSISTOR_HEIGHT);
+			ISOLATION_REGION *= (OUTER_HEIGHT_REGION_3nm/(MIN_POLY_EXT_DIFF*2 + MIN_GAP_BET_FIELD_POLY));
+			MIN_CELL_WIDTH  *= (CPP_3nm /(MIN_GAP_BET_GATE_POLY + POLY_WIDTH));
+			break;
+		case 2:
+			MIN_CELL_HEIGHT *= (MAX_TRANSISTOR_HEIGHT_2nm /MAX_TRANSISTOR_HEIGHT);
+			ISOLATION_REGION *= (OUTER_HEIGHT_REGION_2nm/(MIN_POLY_EXT_DIFF*2 + MIN_GAP_BET_FIELD_POLY));
+			MIN_CELL_WIDTH  *= (CPP_2nm /(MIN_GAP_BET_GATE_POLY + POLY_WIDTH));
+			break;
+		case 1:
+			MIN_CELL_HEIGHT *= (MAX_TRANSISTOR_HEIGHT_1nm /MAX_TRANSISTOR_HEIGHT);
+			ISOLATION_REGION *= (OUTER_HEIGHT_REGION_1nm/(MIN_POLY_EXT_DIFF*2 + MIN_GAP_BET_FIELD_POLY));
+			MIN_CELL_WIDTH  *= (CPP_1nm/(MIN_GAP_BET_GATE_POLY + POLY_WIDTH));
+			break;
+	}
 
 	/* Derived parameters */
 	numSenseAmp = numColumn / muxSenseAmp;
-	lenWordline = (double)numColumn * cell->widthInFeatureSize * tech->cellFeatureSize;
-	lenBitline = (double)numRow * cell->heightInFeatureSize * tech->cellFeatureSize;
+	if(inputParameter->relaxSRAMCell){
+		lenWordline = (double)numColumn * MAX(cell->widthInFeatureSize, MIN_CELL_HEIGHT) * tech->featureSize;
+		lenBitline = (double)numRow * MAX(cell->heightInFeatureSize, MIN_CELL_WIDTH) * tech->featureSize;
+	} else {
+		lenWordline = (double)numColumn * cell->widthInFeatureSize * tech->featureSize;
+		lenBitline = (double)numRow * cell->heightInFeatureSize * tech->featureSize;
+	}
 	/* Add stitching overhead if necessary */
 	if (cell->stitching) {
 		lenWordline += ((numColumn - 1) / cell->stitching + 1) * STITCHING_OVERHEAD * devtech->featureSize;
@@ -214,9 +261,9 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 	/* Calculate wire resistance/capacitance */
 	capWordline = lenWordline * localWire->capWirePerUnit * num3DLevels;
-	resWordline = lenWordline * localWire->resWirePerUnit * num3DLevels;
+	resWordline = lenWordline * localWire->resWirePerUnit_M1 * num3DLevels;
 	capBitline = lenBitline * localWire->capWirePerUnit * num3DLevels;
-	resBitline = lenBitline * localWire->resWirePerUnit * num3DLevels;
+	resBitline = lenBitline * localWire->resWirePerUnit_M0 * num3DLevels;
 
 	//cout << "capWirePerUnit: " << localWire->capWirePerUnit * 1e12 << endl;
 	//cout << "resWirePerUnit: " << localWire->resWirePerUnit << endl;
@@ -249,7 +296,8 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		resCellAccess = CalculateOnResistance(cell->widthAccessCMOS * tech->featureSize, NMOS, inputParameter->temperature, *tech);
 		capCellAccess = CalculateDrainCap(cell->widthAccessCMOS * tech->featureSize, NMOS, cell->widthInFeatureSize * tech->featureSize, *tech);
 		capWordline += 2 * CalculateGateCap(cell->widthAccessCMOS * tech->featureSize, *tech) * numColumn;
-		capBitline  += capCellAccess * numRow / 2;	/* Due to shared contact */
+		if(tech->featureSize <= 14 * 1e-9){ capBitline += tech->cap_draintotal * cell->widthAccessCMOS * tech->effective_width * numRow / 2;}
+		else {capBitline  += capCellAccess * numRow / 2;	/* Due to shared contact */}
 		voltagePrecharge = tech->vdd / 2;	/* SRAM read voltage is always half of vdd */
 	} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
 		/* DRAM and eDRAM only has one access transistors */
@@ -519,7 +567,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 
 		if (cell->memCellType == SRAM) {
 			/* Codes below calculate the bitline latency */
-			double resPullDown = CalculateOnResistance(cell->widthSRAMCellNMOS * tech->featureSize, NMOS,
+			double resPullDown = CalculateOnResistance(cell->widthSRAMCellNMOS * ((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, NMOS,
 					inputParameter->temperature, *tech);
 			double tau = (resCellAccess + resPullDown) * (capCellAccess + capBitline + bitlineMux.capForPreviousDelayCalculation)
 					+ resBitline * (bitlineMux.capForPreviousDelayCalculation + capBitline / 2);
@@ -527,7 +575,12 @@ void SubArray::CalculateLatency(double _rampInput) {
 			double gm = CalculateTransconductance(cell->widthAccessCMOS * tech->featureSize, NMOS, *tech);
 			double beta = 1 / (resPullDown * gm);
 			double bitlineRamp = 0;
-			bitlineDelay = horowitz(tau, beta, rowDecoder.rampOutput, &bitlineRamp);
+			// From NeuroSim - Elmore BL (from IDRS 2022: More Moore)
+			double BLCap_perCell = capBitline / numRow + capCellAccess; // Anni update
+			double BLRes_perCell = resBitline / numRow;
+			double Elmore_BL = (resCellAccess + resPullDown) * BLCap_perCell * numRow   + BLCap_perCell * BLRes_perCell * numRow  * ( numRow +1 )  /2;
+			bitlineDelay = Elmore_BL * log(tech->vdd / (tech->vdd - cell->minSenseVoltage / 2));
+			//bitlineDelay = horowitz(tau, beta, rowDecoder.rampOutput, &bitlineRamp);
 			bitlineMux.CalculateLatency(bitlineRamp);
 			if (internalSenseAmp) {
 				senseAmp.CalculateLatency(bitlineMuxDecoder.rampOutput);

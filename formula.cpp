@@ -15,8 +15,19 @@ bool isPow2(int n) {
 }
 
 double CalculateGateCap(double width, Technology tech) {
-	return (tech.capIdealGate + tech.capOverlap + 3 * tech.capFringe) * width
-			+ tech.phyGateLength * tech.capPolywire;
+	    double widthEff = 0;
+    if (tech.featureSize >= 22 * 1e-9) {
+        widthEff = width;
+	// 1.4 update: add more cases
+    } else if (tech.featureSize >= 3 * 1e-9) { // 1.4 update : 3 nm and above - FinFET case 
+        width *= 1/(2 * tech.featureSize);
+        widthEff = int (ceil(width))*(tech.effective_width);
+    } else { // 1.4 update : 2 nm and below - GAA case 
+        width *= 1/(2 * tech.featureSize);
+        widthEff = int (ceil(width))*tech.effective_width*tech.max_sheet_num/tech.max_fin_per_GAA;
+    }
+    return (tech.capIdealGate + tech.capOverlap + tech.capFringe) * widthEff   // 3 * tech.capFringe
+           + tech.phyGateLength * tech.capPolywire;
 }
 
 double CalculateFBRAMGateCap(double width, double thicknessFactor, Technology tech) {
@@ -33,84 +44,354 @@ double CalculateGateArea(
 		double widthNMOS, double widthPMOS,
 		double heightTransistorRegion, Technology tech,
 		double *height, double *width) {
-	double	ratio = widthPMOS / (widthPMOS + widthNMOS);
+	 int speciallayout = 0;
 
-	double maxWidthPMOS, maxWidthNMOS;
-	double unitWidthRegionP, unitWidthRegionN;
-	double widthRegionP, widthRegionN;
-	double heightRegionP, heightRegionN;
+    if (heightTransistorRegion != tech.featureSize * MAX_TRANSISTOR_HEIGHT) speciallayout = 1;
 
-	if (ratio == 0) {	/* no PMOS */
-		maxWidthPMOS = 0;
-		maxWidthNMOS = heightTransistorRegion;
-	} else if (ratio == 1) {	/* no NMOS */
-		maxWidthPMOS = heightTransistorRegion;
-		maxWidthNMOS = 0;
-	} else {
-		maxWidthPMOS = ratio * (heightTransistorRegion - MIN_GAP_BET_P_AND_N_DIFFS * tech.featureSize);
-		maxWidthNMOS = maxWidthPMOS / ratio * (1 - ratio);
-	}
+	if (tech.featureSize <= 14 * 1e-9) {  // 1.4 update : FinFET or GAA
+	
+		if (tech.featureSize > 2 * 1e-9) { // 1.4 update: for FinFET case
 
-	if (widthPMOS > 0) {
-		if (widthPMOS < maxWidthPMOS) { /* No folding */
-			unitWidthRegionP = tech.featureSize;
-			heightRegionP = widthPMOS;
-		} else {	/* Folding */
-			int numFoldedPMOS = (int)(ceil(widthPMOS / (maxWidthPMOS - 3 * tech.featureSize)));	/* 3F for folding overhead */
-			unitWidthRegionP = numFoldedPMOS * tech.featureSize + (numFoldedPMOS-1) * tech.featureSize * MIN_GAP_BET_POLY;
-			heightRegionP = maxWidthPMOS;
+			widthNMOS = widthNMOS * 1/(2 * tech.featureSize); 
+			widthPMOS = widthPMOS *1/(2 * tech.featureSize);  
 		}
-	} else {
-		unitWidthRegionP = 0;
-		heightRegionP = 0;
-	}
 
-	if (widthNMOS > 0) {
-		if (widthNMOS < maxWidthNMOS) { /* No folding */
-			unitWidthRegionN = tech.featureSize;
-			heightRegionN = widthNMOS;
-		} else {	/* Folding */
-			int numFoldedNMOS = (int)(ceil(widthNMOS / (maxWidthNMOS - 3 * tech.featureSize)));	/* 3F for folding overhead */
-			unitWidthRegionN = numFoldedNMOS * tech.featureSize + (numFoldedNMOS-1) * tech.featureSize * MIN_GAP_BET_POLY;
-			heightRegionN = maxWidthNMOS;
+		else if (tech.featureSize <= 2 * 1e-9) { // 1.4 update: for GAA case
+
+		widthNMOS = widthNMOS *1/(2 * tech.featureSize); // earn the fin number
+		widthPMOS = widthPMOS *1/(2 * tech.featureSize); // earn the fin number
+
 		}
-	} else {
-		unitWidthRegionN = 0;
-		heightRegionN = 0;
-	}
 
-	switch (gateType) {
-	case INV:
-		widthRegionP = 2 * tech.featureSize * (CONTACT_SIZE + MIN_GAP_BET_CONTACT_POLY * 2) + unitWidthRegionP;
-		widthRegionN = 2 * tech.featureSize * (CONTACT_SIZE + MIN_GAP_BET_CONTACT_POLY * 2) + unitWidthRegionN;
-		break;
-	case NOR:
-		widthRegionP = 2 * tech.featureSize * (CONTACT_SIZE + MIN_GAP_BET_CONTACT_POLY * 2)
-						+ unitWidthRegionP * numInput + (numInput - 1) * tech.featureSize * MIN_GAP_BET_POLY;
-		widthRegionN = 2 * tech.featureSize * (CONTACT_SIZE + MIN_GAP_BET_CONTACT_POLY * 2)
-						+ unitWidthRegionN * numInput
-						+ (numInput - 1) * tech.featureSize * (CONTACT_SIZE + MIN_GAP_BET_CONTACT_POLY * 2);
-		break;
-	case NAND:
-		widthRegionN = 2 * tech.featureSize * (CONTACT_SIZE + MIN_GAP_BET_CONTACT_POLY * 2)
-						+ unitWidthRegionN * numInput + (numInput - 1) * tech.featureSize * MIN_GAP_BET_POLY;
-		widthRegionP = 2 * tech.featureSize * (CONTACT_SIZE + MIN_GAP_BET_CONTACT_POLY * 2)
-						+ unitWidthRegionP * numInput
-						+ (numInput - 1) * tech.featureSize * (CONTACT_SIZE + MIN_GAP_BET_CONTACT_POLY * 2);
-		break;
-	default:
-		widthRegionN = widthRegionP = 0;
-	}
+		heightTransistorRegion *= ((double)MAX_TRANSISTOR_HEIGHT_FINFET/(double)MAX_TRANSISTOR_HEIGHT);
 
-	*width = MAX(widthRegionN, widthRegionP);
-	if (widthPMOS > 0 && widthNMOS > 0) {	/* it is a gate */
-		*height = heightRegionN + heightRegionP + tech.featureSize * MIN_GAP_BET_P_AND_N_DIFFS
-					+ 2 * tech.featureSize * MIN_WIDTH_POWER_RAIL;
-	} else {	/* it is a transistor */
-		*height = heightRegionN + heightRegionP;	/* one of them is zero, and no power rail is added */
-	}
+		// 1.4 update: account for new cell height technology trend
 
-	return (*width)*(*height);
+		if (tech.featureSize == 14 * 1e-9)
+		heightTransistorRegion *= ( (double)MAX_TRANSISTOR_HEIGHT_14nm /(double)MAX_TRANSISTOR_HEIGHT_FINFET);
+		else if (tech.featureSize == 10 * 1e-9)
+		heightTransistorRegion *= ( (double)MAX_TRANSISTOR_HEIGHT_10nm /(double)MAX_TRANSISTOR_HEIGHT_FINFET);
+		else if (tech.featureSize == 7 * 1e-9)
+		heightTransistorRegion *= ( (double)MAX_TRANSISTOR_HEIGHT_7nm /(double)MAX_TRANSISTOR_HEIGHT_FINFET);
+		else if (tech.featureSize == 5 * 1e-9)
+		heightTransistorRegion *= ( (double)MAX_TRANSISTOR_HEIGHT_5nm /(double)MAX_TRANSISTOR_HEIGHT_FINFET);
+		else if (tech.featureSize == 3 * 1e-9)
+		heightTransistorRegion *= ( (double)MAX_TRANSISTOR_HEIGHT_3nm /(double)MAX_TRANSISTOR_HEIGHT_FINFET);
+		else if (tech.featureSize == 2 * 1e-9)
+		heightTransistorRegion *= ( (double)MAX_TRANSISTOR_HEIGHT_2nm /(double)MAX_TRANSISTOR_HEIGHT_FINFET);
+		else if (tech.featureSize == 1 * 1e-9)
+		heightTransistorRegion *= ( (double)MAX_TRANSISTOR_HEIGHT_1nm /(double)MAX_TRANSISTOR_HEIGHT_FINFET);
+		else
+		heightTransistorRegion *= 1;
+
+	}
+	
+    double	ratio = widthPMOS / (widthPMOS + widthNMOS);
+    double maxWidthPMOS, maxWidthNMOS;
+    int maxNumPFin, maxNumNFin;	/* Max number of fins for the specified cell height */
+    double unitWidthRegionP, unitWidthRegionN;
+    double widthRegionP, widthRegionN;
+    double heightRegionP, heightRegionN;
+    int numFoldedPMOS = 1, numFoldedNMOS = 1;
+
+    // 1.4 update: add GAA - related variables
+    int NumPSheet=0;
+    int NumNSheet=0;
+    double maxNumPSheet=0;
+    double maxNumNSheet=0;
+
+    // 1.4 update: add CPP paramter
+    double CPP = POLY_WIDTH + MIN_GAP_BET_GATE_POLY;
+    double CPP_advanced= POLY_WIDTH_FINFET + MIN_GAP_BET_GATE_POLY_FINFET;
+
+    // 1.4 update: account for new cell height technology trend
+    if (tech.featureSize == 14 * 1e-9)
+    CPP_advanced = CPP_14nm;
+    else if (tech.featureSize == 10 * 1e-9)
+    CPP_advanced = CPP_10nm;
+    else if (tech.featureSize == 7 * 1e-9)
+    CPP_advanced =  CPP_7nm;
+    else if (tech.featureSize == 5 * 1e-9)
+    CPP_advanced =  CPP_5nm;
+    else if (tech.featureSize == 3 * 1e-9)
+    CPP_advanced =  CPP_3nm;
+    else if (tech.featureSize == 2 * 1e-9)
+    CPP_advanced =  CPP_2nm;
+    else if (tech.featureSize == 1 * 1e-9)
+    CPP_advanced = CPP_1nm;
+    else
+    CPP *= 1;
+    
+	// 1.4 update: replace with the added variables (CPP)
+    if (tech.featureSize >= 22 * 1e-9) { // Bulk
+
+        
+        if (ratio == 0) {   /* no PMOS */
+            maxWidthPMOS = 0;
+            maxWidthNMOS = heightTransistorRegion - (MIN_POLY_EXT_DIFF + MIN_GAP_BET_FIELD_POLY/2) * 2 * tech.featureSize;
+        } else if (ratio == 1) {    /* no NMOS */
+            maxWidthPMOS = heightTransistorRegion - (MIN_POLY_EXT_DIFF + MIN_GAP_BET_FIELD_POLY/2) * 2 * tech.featureSize;
+            maxWidthNMOS = 0;
+        } else {
+            maxWidthPMOS = ratio * (heightTransistorRegion - MIN_GAP_BET_P_AND_N_DIFFS * tech.featureSize - (MIN_POLY_EXT_DIFF + MIN_GAP_BET_FIELD_POLY/2) * 2 * tech.featureSize);
+            maxWidthNMOS = maxWidthPMOS / ratio * (1 - ratio);
+        }
+
+        if (widthPMOS > 0) {
+            if (widthPMOS <= maxWidthPMOS) { /* No folding */
+                unitWidthRegionP = 2 * (CPP) * tech.featureSize;
+                heightRegionP = widthPMOS;
+            } else {    /* Folding */
+                numFoldedPMOS = (int)(ceil(widthPMOS / maxWidthPMOS));
+                unitWidthRegionP = (numFoldedPMOS + 1) * (CPP) * tech.featureSize;
+                heightRegionP = maxWidthPMOS;
+            }
+        } else {
+            unitWidthRegionP = 0;
+            heightRegionP = 0;
+        }
+
+        if (widthNMOS > 0) {
+            if (widthNMOS <= maxWidthNMOS) { /* No folding */
+                unitWidthRegionN = 2 * (CPP) * tech.featureSize;
+                heightRegionN = widthNMOS;
+            } else {    /* Folding */
+                numFoldedNMOS = (int)(ceil(widthNMOS / maxWidthNMOS));
+                unitWidthRegionN = (numFoldedNMOS + 1) * (CPP) * tech.featureSize;
+                heightRegionN = maxWidthNMOS;
+            }
+        } else {
+            unitWidthRegionN = 0;
+            heightRegionN = 0;
+        }
+        
+    } else { // 1.4 update: FinFET, GAA, or beyond
+
+		// 1.4 update: setting the maximum number of fins
+        if (!speciallayout) {
+
+        if (tech.featureSize == 14 * 1e-9) { 
+            maxNumPFin = maxNumNFin = tech.max_fin_num; 
+        } else if (tech.featureSize == 10 * 1e-9) {
+            maxNumPFin = maxNumNFin = tech.max_fin_num;
+        } else if (tech.featureSize == 7 * 1e-9) {
+            maxNumPFin = maxNumNFin = tech.max_fin_num;
+        } else if (tech.featureSize == 5 * 1e-9) {
+            maxNumPFin = maxNumNFin = tech.max_fin_num;
+        } else if (tech.featureSize == 3 * 1e-9) {
+            maxNumPFin =  maxNumNFin = tech.max_fin_num;
+        } else if (tech.featureSize == 2 * 1e-9) {
+            maxNumPSheet= maxNumNSheet = tech.max_fin_per_GAA;
+        } else if (tech.featureSize == 1 * 1e-9) {
+            maxNumPSheet= maxNumNSheet = tech.max_fin_per_GAA;
+        } 
+
+        }
+
+        else {
+
+        if (tech.featureSize == 14 * 1e-9) { 
+
+            maxNumPFin = maxNumNFin =  (floor)( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_14nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_14nm * tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
+        } else if (tech.featureSize == 10 * 1e-9) {
+            maxNumPFin = maxNumNFin = (floor) ( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_10nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_10nm * tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
+        } else if (tech.featureSize == 7 * 1e-9) {
+            maxNumPFin = maxNumNFin = (floor)( ( (heightTransistorRegion -   (double) MIN_GAP_BET_P_AND_N_DIFFS_7nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_7nm * tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
+        } else if (tech.featureSize == 5 * 1e-9) {
+            maxNumPFin = maxNumNFin = (floor)( ( (heightTransistorRegion -  (double)  MIN_GAP_BET_P_AND_N_DIFFS_5nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_5nm * tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
+        } else if (tech.featureSize == 3 * 1e-9) {
+            maxNumPFin = maxNumNFin = (floor)( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_3nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_3nm * tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
+        } else if (tech.featureSize == 2 * 1e-9) {
+            maxNumPSheet= maxNumNSheet =  (floor)( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_2nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_2nm * tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
+        } else if (tech.featureSize == 1 * 1e-9) {
+            maxNumPSheet= maxNumNSheet = (floor)( ( (heightTransistorRegion -  (double) MIN_GAP_BET_P_AND_N_DIFFS_1nm * tech.featureSize -  (double) OUTER_HEIGHT_REGION_1nm* tech.featureSize) + tech.PitchFin ) / 2.0 / (tech.widthFin + tech.PitchFin) );
+        } 
+            
+
+        }
+
+		// 1.4 update: temp_P, temp_N, temp_P_NS, temp_N_NS
+		// 1.4 update: temp_N_ratio, temp_P_ratio, temp_N_NS_ratio, temp_P_NS_ratio
+
+        double temp_P=2*maxNumPFin;
+        double temp_N=2*maxNumNFin;
+        double temp_P_NS=2*maxNumPSheet;
+        double temp_N_NS=2*maxNumNSheet;
+
+        int temp_N_ratio;
+        int temp_P_ratio;
+        int temp_N_NS_ratio;
+        int temp_P_NS_ratio;
+
+		// 1.4 update: setting the maximum number of fin for folding
+
+        if (ratio == 0) {   /* no PFinFET */
+
+            maxNumPFin = 0;
+            maxNumNFin = temp_N;
+            maxNumPSheet = 0;
+            maxNumNSheet= temp_N_NS;
+
+        } else if (ratio == 1) {    /* no NFinFET */
+
+            maxNumPFin = temp_P;
+            maxNumNFin = 0;
+            maxNumPSheet = temp_P_NS;
+            maxNumNSheet= 0;
+
+        } else {
+
+            if (ratio>0.5) {
+            temp_N_ratio=int (temp_N*(1-ratio));
+            temp_P_ratio= temp_N-temp_N_ratio;
+            temp_N_NS_ratio=tech.max_fin_per_GAA; // maximum fin for GAA is fixed to 1 
+            temp_P_NS_ratio= tech.max_fin_per_GAA; // maximum fin for GAA is fixed to 1
+            }
+
+            else {
+            temp_P_ratio=int (temp_P*(ratio));
+            temp_N_ratio= temp_P - temp_P_ratio;
+            temp_P_NS_ratio=tech.max_fin_per_GAA; // maximum fin for GAA is fixed to 1
+            temp_N_NS_ratio=tech.max_fin_per_GAA; // maximum fin for GAA is fixed to 1
+            }
+
+            if (temp_P_ratio==0) {temp_P_ratio +=1; temp_N_ratio = 2*maxNumPFin-temp_P_ratio;} // handle max fin number = 0 casees, since they don't make sense 
+            if (temp_N_ratio==0) {temp_N_ratio +=1; temp_P_ratio = 2*maxNumNFin-temp_N_ratio;} // handle max fin number = 0 casees, since they don't make sense
+            if (temp_P_NS_ratio==0) {temp_P_NS_ratio +=1; temp_N_NS_ratio = 2*maxNumPSheet-temp_P_NS_ratio;} // handle max fin number = 0 casees, since they don't make sense
+            if (temp_N_NS_ratio==0) {temp_N_NS_ratio +=1; temp_P_NS_ratio = 2*maxNumNSheet-temp_N_NS_ratio;} // handle max fin number = 0 casees, since they don't make sense
+
+            maxNumPFin = temp_P_ratio;
+            maxNumNFin = temp_N_ratio;
+            maxNumPSheet = temp_P_NS_ratio; 
+            maxNumNSheet = temp_N_NS_ratio; 
+        }
+
+		// Folding is implemented differently for FinFET, GAA cases
+
+		if (tech.featureSize<= 14*1e-9 && tech.featureSize >= 3 * 1e-9){ // 1.4 update: FinFET case folding 
+
+        int NumPFin = (int)(ceil(widthPMOS));
+
+        if (NumPFin > 0) {
+            if (NumPFin <= maxNumPFin) { /* No folding */
+                unitWidthRegionP = 2 * (CPP_advanced) * tech.featureSize;
+                heightRegionP = (NumPFin-1) * tech.PitchFin + 2 * tech.widthFin/2; // not needed
+            } else {    /* Folding */
+                numFoldedPMOS = (int)(ceil(NumPFin / maxNumPFin));
+                unitWidthRegionP = (numFoldedPMOS + 1) * (CPP_advanced) * tech.featureSize;
+                heightRegionP = (maxNumPFin-1) * tech.PitchFin + 2 * tech.widthFin/2; // not needed
+            }
+        } else {
+            unitWidthRegionP = 0;
+            heightRegionP = 0;
+        }
+
+        int NumNFin = (int)(ceil(widthNMOS));
+
+        if (NumNFin > 0) {
+            if (NumNFin <= maxNumNFin) { /* No folding */
+                unitWidthRegionN = 2 * (CPP_advanced) * tech.featureSize;
+                heightRegionN = (NumNFin-1) * tech.PitchFin + 2 * tech.widthFin/2; // not needed
+            } else {    /* Folding */
+                numFoldedNMOS = (int)(ceil(NumNFin / maxNumNFin));
+                unitWidthRegionN = (numFoldedNMOS + 1) * (CPP_advanced) * tech.featureSize;
+                heightRegionN = (maxNumNFin-1) * tech.PitchFin + 2 * tech.widthFin/2; // not needed
+            }
+        } else {
+            unitWidthRegionN = 0;
+            heightRegionN = 0;
+        }
+
+		} else { // 1.4 update: GAA case folding 
+
+        int NumPSheet = (int)(ceil(widthPMOS));
+        
+        
+        if (NumPSheet > 0) {
+            if (NumPSheet <= maxNumPSheet) { /* No folding */
+                unitWidthRegionP = 2 * (CPP_advanced) * tech.featureSize;
+                heightRegionP = 0; // not needed 
+            } else {    /* Folding */
+                numFoldedPMOS = (int)(ceil(NumPSheet/ maxNumPSheet));
+                unitWidthRegionP = (numFoldedPMOS + 1) * (CPP_advanced) * tech.featureSize;
+                heightRegionP = 0; // not needed 
+            }
+        } else {
+            unitWidthRegionP = 0;
+            heightRegionP = 0;
+        }
+
+        int NumNSheet = (int)(ceil(widthNMOS));
+
+        if (NumNSheet > 0) {
+            if (NumNSheet <= maxNumNSheet) { /* No folding */
+                unitWidthRegionN = 2 * (CPP_advanced) * tech.featureSize;
+                heightRegionN = 0; // not needed 
+            } else {    /* Folding */
+                numFoldedNMOS = (int)(ceil(NumNSheet / maxNumNSheet));
+                unitWidthRegionN = (numFoldedNMOS + 1) * (CPP_advanced) * tech.featureSize;
+                heightRegionN = 0; // not needed 
+            }
+        } else {
+            unitWidthRegionN = 0;
+            heightRegionN = 0;
+        }
+
+		}
+
+    }
+
+	// 1.4 update: replace with added variables such as CPP, CPP_advanced
+
+    switch (gateType) {
+    case INV:
+        widthRegionP = unitWidthRegionP;
+        widthRegionN = unitWidthRegionN;
+        break;
+    case NOR:
+        if (numFoldedPMOS == 1 && numFoldedNMOS == 1) { // Need to subtract the source/drain sharing region
+            if (tech.featureSize >= 22 * 1e-9) { // Bulk
+                widthRegionP = unitWidthRegionP * numInput
+                               - (numInput-1) * tech.featureSize * (CPP);
+                widthRegionN = unitWidthRegionN * numInput
+                               - (numInput-1) * tech.featureSize * (CPP);
+            } else {
+                widthRegionP = unitWidthRegionP * numInput
+                               - (numInput-1) * tech.featureSize * (CPP_advanced);
+                widthRegionN = unitWidthRegionN * numInput
+                               - (numInput-1) * tech.featureSize * (CPP_advanced);
+            }
+        } else {    // If either PMOS or NMOS has folding, there is no source/drain sharing among different PMOS and NMOS devices.
+            widthRegionP = unitWidthRegionP * numInput;
+            widthRegionN = unitWidthRegionN * numInput;
+        }
+        break;
+    case NAND:
+        if (numFoldedPMOS == 1 && numFoldedNMOS == 1) { // Need to subtract the source/drain sharing region
+            if (tech.featureSize >= 22 * 1e-9 ) { // Bulk
+                widthRegionP = unitWidthRegionP * numInput
+                               - (numInput-1) * tech.featureSize * (CPP);
+                widthRegionN = unitWidthRegionN * numInput
+                               - (numInput-1) * tech.featureSize * (CPP);
+            } else {
+                widthRegionP = unitWidthRegionP * numInput
+                               - (numInput-1) * tech.featureSize * (CPP_advanced);
+                widthRegionN = unitWidthRegionN * numInput
+                               - (numInput-1) * tech.featureSize * (CPP_advanced);
+            }
+        } else {    // If either PMOS or NMOS has folding, there is no source/drain sharing among different PMOS and NMOS devices.
+            widthRegionP = unitWidthRegionP * numInput;
+            widthRegionN = unitWidthRegionN * numInput;
+        }
+        break;
+    default:
+        widthRegionN = widthRegionP = 0;
+    }
+
+    *width = MAX(widthRegionN, widthRegionP);
+    *height = heightTransistorRegion;	// Fixed standard cell height
+
+    return (*width)*(*height);
 }
 
 void CalculateGateCapacitance(
@@ -802,7 +1083,49 @@ double horowitz(double tr, double beta, double rampInput, double *rampOutput) {
 	return result;
 }
 
-double CalculateWireResistance(
+double CalculateWireCapacitance(
+		double permittivity, double wireWidth, double wireThickness, double wireSpacing,
+		double ildThickness, double millerValue, double horizontalDielectric,
+		double verticalDielectric, double fringeCap, bool neurosim_wiring) {
+	if(!neurosim_wiring){
+		double verticalCap, sidewallCap;
+		verticalCap = 2 * permittivity * verticalDielectric * wireWidth / ildThickness;
+		sidewallCap = 2 * permittivity * millerValue * horizontalDielectric * wireThickness / wireSpacing;
+		return (verticalCap + sidewallCap + fringeCap);
+	}
+	else{
+		return 0.2e-15/1e-6;
+	}
+
+}
+
+// 1.4 update: add on resistance calculation without effective resistance multiplier 
+
+double CalculateOnResistance_normal(double width, int type, double temperature, Technology tech) {
+    double r;
+    int tempIndex = (int)temperature - 300;
+    if ((tempIndex > 100) || (tempIndex < 0)) {
+        cout<<"Error: Temperature is out of range"<<endl;
+        exit(-1);
+    }
+	double widthEff = 0;
+	if (tech.featureSize < 22 * 1e-9  && tech.featureSize >=  3 * 1e-9 ) { // 1.4 update : up to FinFET 7 nm
+        width = width/(2 * tech.featureSize);
+        widthEff = (ceil(width))*(tech.effective_width);
+    } else { // 1.4 update : GAA case
+        width = width/(2 * tech.featureSize);
+        widthEff = (ceil(width))*tech.effective_width*tech.max_sheet_num/tech.max_fin_per_GAA;
+    }
+
+    if (type == NMOS)
+        r = tech.vdd / (tech.currentOnNmos[tempIndex] * widthEff);
+    else
+        r =  tech.vdd / (tech.currentOnPmos[tempIndex] * widthEff);
+	
+    return r;
+}
+
+double CalculateWireResistance_M0(
 		double resistivity, double wireWidth, double wireThickness,
 		double barrierThickness, double dishingThickness, double alphaScatter, bool neurosim_wiring, Technology tech) {
 	if(!neurosim_wiring){
@@ -958,48 +1281,166 @@ double CalculateWireResistance(
 		Metal0_unitwireresis =  Rho_Metal0 / ( Metal0*1e-9 * Metal0*1e-9 * AR_Metal0 );
 		Metal1_unitwireresis =  Rho_Metal1 / ( Metal1*1e-9 * Metal1*1e-9 * AR_Metal1 );
 
-		return max(Metal0_unitwireresis, Metal1_unitwireresis);
+		return Metal0_unitwireresis;
 	}
 }
 
-double CalculateWireCapacitance(
-		double permittivity, double wireWidth, double wireThickness, double wireSpacing,
-		double ildThickness, double millerValue, double horizontalDielectric,
-		double verticalDielectric, double fringeCap, bool neurosim_wiring) {
+double CalculateWireResistance_MX(
+		double resistivity, double wireWidth, double wireThickness,
+		double barrierThickness, double dishingThickness, double alphaScatter, bool neurosim_wiring, Technology tech) {
 	if(!neurosim_wiring){
-		double verticalCap, sidewallCap;
-		verticalCap = 2 * permittivity * verticalDielectric * wireWidth / ildThickness;
-		sidewallCap = 2 * permittivity * millerValue * horizontalDielectric * wireThickness / wireSpacing;
-		return (verticalCap + sidewallCap + fringeCap);
+		return(alphaScatter * resistivity / (wireThickness - barrierThickness - dishingThickness)
+			/ (wireWidth - 2 * barrierThickness));
+	} else {
+		double Metal0, Metal1, wirewidth, barrierthickness, featuresize;
+		switch (tech.featureSizeInNano){
+			case 130: 	Metal0=175; Metal1=175; wirewidth=175; barrierthickness=10.0e-9; featuresize = wirewidth*1e-9; break;  
+			case 90: 	Metal0=110; Metal1=110; wirewidth=110; barrierthickness=10.0e-9; featuresize = wirewidth*1e-9; break;  
+			case 65:	Metal0=105; Metal1=105; wirewidth=105; barrierthickness=7.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 45:	Metal0=80; Metal1=80;   wirewidth=80;  barrierthickness=5.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 32:	Metal0=56; Metal1=56;   wirewidth=56;  barrierthickness=4.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 22:	Metal0=40; Metal1=40;   wirewidth=40;  barrierthickness=2.5e-9;  featuresize = wirewidth*1e-9; break; 
+			case 14:	Metal0=32; Metal1=39;   wirewidth=32;  barrierthickness=2.5e-9;  featuresize = wirewidth*1e-9; break;  
+			case 10:	Metal0=22; Metal1=32;   wirewidth=22;  barrierthickness=2.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 7:		Metal0=20; Metal1=28.5; wirewidth=20;  barrierthickness=2.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 5:		Metal0=15; Metal1=17;   wirewidth=15;  barrierthickness=2.0e-9;  featuresize = wirewidth*1e-9; break;  
+			case 3:		Metal0=12; Metal1=16;   wirewidth=12;  barrierthickness=1.5e-9;  featuresize = wirewidth*1e-9; break; 
+			case 2:		Metal0=10; Metal1=11.5; wirewidth=10;  barrierthickness=0.5e-9;  featuresize = wirewidth*1e-9; break;  
+			case 1:		Metal0=8;  Metal1=10;   wirewidth=8;   barrierthickness=0.2e-9;  featuresize = wirewidth*1e-9; break;    
+			case -1:	break;	
+			default:	exit(-1); puts("Wire width out of range"); 
+		}
+
+		double AR, Rho;
+		// 1.4 update: wirewidth
+		if (wirewidth >= 175) {
+			AR = 1.6; 
+			Rho = 2.01*1e-8;
+		} else if ((110 <= wirewidth) &&  (wirewidth < 175)) {
+			AR = 1.6; 
+			Rho = 2.20*1e-8;
+		} else if ((105 <= wirewidth) &&  (wirewidth < 110)) {
+			AR = 1.7; 
+			Rho = 2.21*1e-8;
+		} else if ((80 <= wirewidth) &&  (wirewidth < 105)){
+			AR = 1.7; 
+			Rho = 2.37*1e-8;
+		} else if ((56 <= wirewidth) &&  (wirewidth < 80)){
+			AR = 1.8; 
+			Rho = 2.63*1e-8;
+		} else if ((40 <= wirewidth) &&  (wirewidth < 56)) {
+			AR = 1.9; 
+			Rho = 2.97*1e-8;
+		} else if ((32 <= wirewidth) &&  (wirewidth < 40)) {
+			AR = 2.0; 
+			Rho = 3.25*1e-8;
+		} else if ((22 <= wirewidth) &&  (wirewidth < 32)){
+			AR = 2.00; Rho = 3.95*1e-8;
+		} else if ((20 <= wirewidth) &&  (wirewidth < 22)){
+			AR = 2.00; Rho = 4.17*1e-8; 
+		} else if ((15 <= wirewidth) &&  (wirewidth < 20)){
+			AR = 2.00; Rho = 4.98*1e-8; 
+		} else if ((12 <= wirewidth) &&  (wirewidth < 15)){
+			AR = 2.00; Rho = 5.8*1e-8; 
+		} else if ((10 <= wirewidth) &&  (wirewidth < 12)){
+			// AR = 3.00; Rho = 6.65*1e-8; 
+			AR = 2.00; Rho = 6.61*1e-8; 
+		} else if ((8 <= wirewidth) &&  (wirewidth < 10)){
+			AR = 3.00; Rho = 7.87*1e-8; 
+		} else {
+			exit(-1); puts("Wire width out of range"); 
+		}
+
+		Rho = Rho * 1 / (1- ( (2*AR*wirewidth + wirewidth)*barrierthickness / (AR*pow(wirewidth,2) ) ));
+
+		double AR_Metal0, Rho_Metal0;
+		// 1.4 update: Metal0
+		if (Metal0 >= 175) {
+			AR_Metal0 = 1.6; 
+			Rho_Metal0 = 2.01*1e-8;
+		} else if ((110 <= Metal0) &&  (Metal0< 175)) {
+			AR_Metal0 = 1.6; 
+			Rho_Metal0 = 2.20*1e-8;
+		} else if ((105 <= Metal0) &&  (Metal0< 110)){
+			AR_Metal0 = 1.7; 
+			Rho_Metal0 = 2.21*1e-8;
+		} else if ((80 <= Metal0) &&  (Metal0< 105)) {
+			AR_Metal0 = 1.7; 
+			Rho_Metal0 = 2.37*1e-8;
+		} else if ((56 <= Metal0) &&  (Metal0< 80)){
+			AR_Metal0 = 1.8; 
+			Rho_Metal0 = 2.63*1e-8;
+		} else if ((40 <= Metal0) &&  (Metal0< 56)) {
+			AR_Metal0 = 1.9; 
+			Rho_Metal0 = 2.97*1e-8;
+		} else if ((32 <= Metal0) &&  (Metal0< 40)) {
+			AR_Metal0 = 2.0; 
+			Rho_Metal0 = 3.25*1e-8;
+		} else if ((22 <= Metal0) &&  (Metal0< 32)){
+			AR_Metal0 = 2.00; Rho_Metal0 = 3.95*1e-8;
+		} else if ((20 <= Metal0) &&  (Metal0< 22)){
+			AR_Metal0 = 2.00; Rho_Metal0 = 4.17*1e-8; 
+		} else if ((15 <= Metal0) &&  (Metal0< 20)){
+			AR_Metal0 = 2.00; Rho_Metal0 = 4.98*1e-8; 
+		} else if ((12 <= Metal0) &&  (Metal0< 15)){
+			AR_Metal0 = 2.00; Rho_Metal0 = 5.8*1e-8; 
+		} else if ((10 <= Metal0) &&  (Metal0< 12)){
+			// AR_Metal0 = 3.00; Rho_Metal0 = 6.65*1e-8; 
+			AR_Metal0 = 2.00; Rho_Metal0 = 6.61*1e-8; 
+		} else if ((8 <= Metal0) &&  (Metal0< 10)){
+			AR_Metal0 = 3.00; Rho_Metal0 = 7.87*1e-8; 
+		} else {
+			exit(-1); puts("Wire width out of range"); 
+		}
+
+		Rho_Metal0 = Rho_Metal0 * 1 / (1- ( (2*AR_Metal0*Metal0 + Metal0)*barrierthickness / (AR_Metal0*pow(Metal0,2) ) ));
+
+		double AR_Metal1, Rho_Metal1;
+		// 1.4 update: Metal1
+		if (Metal1 >= 175) {
+			AR_Metal1 = 1.6; 
+			Rho_Metal1 = 2.01*1e-8;
+		} else if ((110 <= Metal1) &&  (Metal1 < 175)) {
+			AR_Metal1 = 1.6; 
+			Rho_Metal1 = 2.20*1e-8;
+		} else if ((105 <= Metal1) &&  (Metal1 < 110)) {
+			AR_Metal1 = 1.7; 
+			Rho_Metal1 = 2.21*1e-8;
+		} else if ((80 <= Metal1) &&  (Metal1 <105)) {
+			AR_Metal1 = 1.7; 
+			Rho_Metal1 = 2.37*1e-8;
+		} else if ((56 <= Metal1) &&  (Metal1 < 80)) {
+			AR_Metal1 = 1.8; 
+			Rho_Metal1 = 2.63*1e-8;
+		} else if ((40 <= Metal1) &&  (Metal1 < 56)){
+			AR_Metal1 = 1.9; 
+			Rho_Metal1 = 2.97*1e-8;
+		} else if ((32 <= Metal1) &&  (Metal1 < 40)) {
+			AR_Metal1 = 2.0; 
+			Rho_Metal1 = 3.25*1e-8;
+		} else if ((22 <= Metal1) &&  (Metal1 < 32)){
+			AR_Metal1 = 2.00; Rho_Metal1 = 3.95*1e-8;
+		} else if ((20 <= Metal1) &&  (Metal1 < 22)){
+			AR_Metal1 = 2.00; Rho_Metal1 = 4.17*1e-8; 
+		} else if ((15 <= Metal1) &&  (Metal1 < 20)){
+			AR_Metal1 = 2.00; Rho_Metal1 = 4.98*1e-8; 
+		} else if ((12 <= Metal1) &&  (Metal1 < 15)){
+			AR_Metal1 = 2.00; Rho_Metal1 = 5.8*1e-8; 
+		} else if ((10 <= Metal1) &&  (Metal1 < 12)){
+			// AR_Metal1 = 3.00; Rho_Metal1 = 6.65*1e-8; 
+			AR_Metal1 = 2.00; Rho_Metal1 = 6.61*1e-8;
+		} else if ((8 <= Metal1) &&  (Metal1 < 10)){
+			AR_Metal1 = 3.00; Rho_Metal1 = 7.87*1e-8; 
+		} else {
+			exit(-1); puts("Wire width out of range"); 
+		}
+
+		Rho_Metal1 = Rho_Metal1 * 1 / (1- ( (2*AR_Metal1*Metal1 + Metal1)*barrierthickness / (AR_Metal1*pow(Metal1,2) ) ));
+
+		double Metal0_unitwireresis, Metal1_unitwireresis;
+		Metal0_unitwireresis =  Rho_Metal0 / ( Metal0*1e-9 * Metal0*1e-9 * AR_Metal0 );
+		Metal1_unitwireresis =  Rho_Metal1 / ( Metal1*1e-9 * Metal1*1e-9 * AR_Metal1 );
+
+		return Metal1_unitwireresis;
 	}
-	else{
-		return 200 * 1e-12;
-	}
-
-}
-
-// 1.4 update: add on resistance calculation without effective resistance multiplier 
-
-double CalculateOnResistance_normal(double width, int type, double temperature, Technology tech) {
-    double r;
-    int tempIndex = (int)temperature - 300;
-    if ((tempIndex > 100) || (tempIndex < 0)) {
-        cout<<"Error: Temperature is out of range"<<endl;
-        exit(-1);
-    }
-	double widthEff = 0;
-	if (tech.featureSize < 22 * 1e-9  && tech.featureSize >=  3 * 1e-9 ) { // 1.4 update : up to FinFET 7 nm
-        width = width/(2 * tech.featureSize);
-        widthEff = (ceil(width))*(tech.effective_width);
-    } else { // 1.4 update : GAA case
-        width = width/(2 * tech.featureSize);
-        widthEff = (ceil(width))*tech.effective_width*tech.max_sheet_num/tech.max_fin_per_GAA;
-    }
-
-    if (type == NMOS)
-        r = tech.vdd / (tech.currentOnNmos[tempIndex] * widthEff);
-    else
-        r =  tech.vdd / (tech.currentOnPmos[tempIndex] * widthEff);
-	
-    return r;
 }

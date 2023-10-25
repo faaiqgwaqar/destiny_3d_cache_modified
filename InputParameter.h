@@ -49,6 +49,7 @@ public:
 	bool isConstraintApplied;		/* If any design constraint is applied */
 	bool isPruningEnabled;			/* Whether to prune the results during the exploration */
 	bool useCactiAssumption;		/* Use the CACTI assumptions on the array organization */
+	bool relaxSRAMCell;				/* Use Cell Relaxation scheme from NeuroSim*/
 
 	int associativity;				/* Associativity, for cache design only */
 	CacheAccessMode cacheAccessMode;	/* Access mode (for cache only) : normal, sequential, fast */

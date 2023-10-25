@@ -60,7 +60,11 @@ double CalculateTransconductance(double width, int type, Technology tech);
 
 double horowitz(double tr, double beta, double rampInput, double *rampOutput);
 
-double CalculateWireResistance(
+double CalculateWireResistance_M0(
+		double resistivity, double wireWidth, double wireThickness,
+		double barrierThickness, double dishingThickness, double alphaScatter, bool neurosim_wiring, Technology tech);
+
+double CalculateWireResistance_MX(
 		double resistivity, double wireWidth, double wireThickness,
 		double barrierThickness, double dishingThickness, double alphaScatter, bool neurosim_wiring, Technology tech);
 
