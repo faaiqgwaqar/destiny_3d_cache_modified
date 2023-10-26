@@ -11,27 +11,27 @@ Cache Associativity: 16 Ways
 
 Searching for the best solution that is optimized for write latency ...
 Using cell file: 2D_SRAM_Benchmarker/SRAM_cell_7nm.cell
-numSolutions = 158707 / numDesigns = 15604974
+numSolutions = 174964 / numDesigns = 15604974
 
 =======================
 CACHE DESIGN -- SUMMARY
 =======================
 Access Mode: Normal
 Area:
- - Total Area = 62.551mm^2
- |--- Data Array Area = 10490.532um x 5642.223um = 59.190mm^2
- |--- Tag Array Area  = 2627.706um x 1278.983um = 3.361mm^2
+ - Total Area = 8.104mm^2
+ |--- Data Array Area = 3750.786um x 2030.056um = 7.614mm^2
+ |--- Tag Array Area  = 1011.477um x 484.327um = 0.490mm^2
 Timing:
- - Cache Hit Latency   = 93.613ns
- - Cache Miss Latency  = 4.482ns
- - Cache Write Latency = 62.204ns
+ - Cache Hit Latency   = 19.580ns
+ - Cache Miss Latency  = 1.971ns
+ - Cache Write Latency = 11.906ns
 Power:
- - Cache Hit Dynamic Energy   = 1.090nJ per access
- - Cache Miss Dynamic Energy  = 1.090nJ per access
- - Cache Write Dynamic Energy = 0.010nJ per access
- - Cache Total Leakage Power  = 98.478mW
- |--- Cache Data Array Leakage Power = 93.053mW
- |--- Cache Tag Array Leakage Power  = 5.425mW
+ - Cache Hit Dynamic Energy   = 0.654nJ per access
+ - Cache Miss Dynamic Energy  = 0.654nJ per access
+ - Cache Write Dynamic Energy = 0.092nJ per access
+ - Cache Total Leakage Power  = 101.170mW
+ |--- Cache Data Array Leakage Power = 95.460mW
+ |--- Cache Tag Array Leakage Power  = 5.710mW
 
 CACHE DATA ARRAY DETAILS    
     =============
@@ -48,13 +48,13 @@ CACHE DATA ARRAY DETAILS
     =============
     CONFIGURATION
     =============
-    Bank Organization: 1 x 1
+    Bank Organization: 1 x 4
      - Row Activation   : 1 / 1
-     - Column Activation: 1 / 1
+     - Column Activation: 2 / 4
     Mat Organization: 2 x 2
      - Row Activation   : 2 / 2
-     - Column Activation: 1 / 2
-     - Subarray Size    : 16384 Rows x 4096 Columns
+     - Column Activation: 2 / 2
+     - Subarray Size    : 16384 Rows x 1024 Columns
     Mux Level:
      - Senseamp Mux      : 1
      - Output Level-1 Mux: 1
@@ -73,52 +73,52 @@ CACHE DATA ARRAY DETAILS
        RESULT
     =============
     Area:
-     - Total Area = 10.491mm x 5.642mm = 59.190mm^2
-     |--- Mat Area      = 10.491mm x 5.642mm = 59.190mm^2   (12.242%)
-     |--- Subarray Area = 5.243mm x 2.821mm = 14.792mm^2   (12.246%)
-     - Area Efficiency = 12.242%
+     - Total Area = 3.751mm x 2.030mm = 7.614mm^2
+     |--- Mat Area      = 3.751mm x 507.514um = 1.904mm^2   (95.162%)
+     |--- Subarray Area = 1.871mm x 253.757um = 474894.632um^2   (95.362%)
+     - Area Efficiency = 95.162%
     Timing:
-     -  Read Latency = 62.204ns
-     |--- H-Tree Latency = 0.000ps
-     |--- Mat Latency    = 62.204ns
-        |--- Predecoder Latency = 469.553ps
-        |--- Subarray Latency   = 61.734ns
-           |--- Row Decoder Latency = 32.234ns
-           |--- Bitline Latency     = 29.499ns
-           |--- Senseamp Latency    = 0.155ps
-           |--- Mux Latency         = 0.939ps
-           |--- Precharge Latency   = 105.564ns
-     - Write Latency = 62.204ns
-     |--- H-Tree Latency = 0.000ps
-     |--- Mat Latency    = 62.204ns
-        |--- Predecoder Latency = 469.553ps
-        |--- Subarray Latency   = 61.734ns
-           |--- Row Decoder Latency = 32.234ns
-           |--- Charge Latency      = 108.424ns
-     - Read Bandwidth  = 473.850MB/s
-     - Write Bandwidth = 1.037GB/s
+     -  Read Latency = 19.108ns
+     |--- H-Tree Latency = 14.405ns
+     |--- Mat Latency    = 4.704ns
+        |--- Predecoder Latency = 206.465ps
+        |--- Subarray Latency   = 4.497ns
+           |--- Row Decoder Latency = 772.408ps
+           |--- Bitline Latency     = 3.717ns
+           |--- Senseamp Latency    = 1.233ps
+           |--- Mux Latency         = 6.937ps
+           |--- Precharge Latency   = 21.992ns
+     - Write Latency = 11.906ns
+     |--- H-Tree Latency = 7.202ns
+     |--- Mat Latency    = 4.704ns
+        |--- Predecoder Latency = 206.465ps
+        |--- Subarray Latency   = 4.497ns
+           |--- Row Decoder Latency = 772.408ps
+           |--- Charge Latency      = 23.498ns
+     - Read Bandwidth  = 2.489GB/s
+     - Write Bandwidth = 14.231GB/s
     Power:
-     -  Read Dynamic Energy = 1.059nJ
-     |--- H-Tree Dynamic Energy = 0.000pJ
-     |--- Mat Dynamic Energy    = 1.059nJ per mat
-        |--- Predecoder Dynamic Energy = 1.585pJ
-        |--- Subarray Dynamic Energy   = 528.726pJ per active subarray
-           |--- Row Decoder Dynamic Energy = 0.310pJ
-           |--- Mux Decoder Dynamic Energy = 0.906pJ
-           |--- Senseamp Dynamic Energy    = 0.046pJ
-           |--- Mux Dynamic Energy         = 0.041pJ
-           |--- Precharge Dynamic Energy   = 0.540pJ
-     - Write Dynamic Energy = 8.214pJ
-     |--- H-Tree Dynamic Energy = 0.000pJ
-     |--- Mat Dynamic Energy    = 8.214pJ per mat
-        |--- Predecoder Dynamic Energy = 1.585pJ
-        |--- Subarray Dynamic Energy   = 3.315pJ per active subarray
-           |--- Row Decoder Dynamic Energy = 0.310pJ
-           |--- Mux Decoder Dynamic Energy = 0.906pJ
-           |--- Mux Dynamic Energy         = 0.041pJ
-     - Leakage Power = 93.053mW
+     -  Read Dynamic Energy = 648.291pJ
+     |--- H-Tree Dynamic Energy = 80.175pJ
+     |--- Mat Dynamic Energy    = 284.058pJ per mat
+        |--- Predecoder Dynamic Energy = 0.445pJ
+        |--- Subarray Dynamic Energy   = 70.903pJ per active subarray
+           |--- Row Decoder Dynamic Energy = 0.156pJ
+           |--- Mux Decoder Dynamic Energy = 0.286pJ
+           |--- Senseamp Dynamic Energy    = 0.091pJ
+           |--- Mux Dynamic Energy         = 0.079pJ
+           |--- Precharge Dynamic Energy   = 0.579pJ
+     - Write Dynamic Energy = 87.405pJ
+     |--- H-Tree Dynamic Energy = 80.175pJ
+     |--- Mat Dynamic Energy    = 3.615pJ per mat
+        |--- Predecoder Dynamic Energy = 0.445pJ
+        |--- Subarray Dynamic Energy   = 0.793pJ per active subarray
+           |--- Row Decoder Dynamic Energy = 0.156pJ
+           |--- Mux Decoder Dynamic Energy = 0.286pJ
+           |--- Mux Dynamic Energy         = 0.079pJ
+     - Leakage Power = 95.460mW
      |--- H-Tree Leakage Power     = 0.000pW
-     |--- Mat Leakage Power        = 93.053mW per mat
+     |--- Mat Leakage Power        = 23.865mW per mat
 
 CACHE TAG ARRAY DETAILS    
     =============
@@ -135,17 +135,17 @@ CACHE TAG ARRAY DETAILS
     =============
     CONFIGURATION
     =============
-    Bank Organization: 1 x 1
-     - Row Activation   : 1 / 1
-     - Column Activation: 1 / 1
+    Bank Organization: 16 x 2
+     - Row Activation   : 1 / 16
+     - Column Activation: 1 / 2
     Mat Organization: 2 x 2
      - Row Activation   : 1 / 2
      - Column Activation: 1 / 2
-     - Subarray Size    : 4096 Rows x 928 Columns
+     - Subarray Size    : 256 Rows x 464 Columns
     Mux Level:
      - Senseamp Mux      : 1
      - Output Level-1 Mux: 1
-     - Output Level-2 Mux: 2
+     - Output Level-2 Mux: 1
      - One set is partitioned into 1 rows
     Local Wire:
      - Wire Type :     Local Aggressive
@@ -160,52 +160,52 @@ CACHE TAG ARRAY DETAILS
        RESULT
     =============
     Area:
-     - Total Area = 2.628mm x 1.279mm = 3.361mm^2
-     |--- Mat Area      = 2.628mm x 1.279mm = 3.361mm^2   (12.212%)
-     |--- Subarray Area = 1.311mm x 639.491um = 838461.386um^2   (12.237%)
-     - Area Efficiency = 12.212%
+     - Total Area = 1.011mm x 484.327um = 489885.491um^2
+     |--- Mat Area      = 63.217um x 242.164um = 15308.922um^2   (83.777%)
+     |--- Subarray Area = 31.435um x 118.790um = 3734.171um^2   (85.865%)
+     - Area Efficiency = 83.777%
     Timing:
-     -  Read Latency = 4.482ns
-     |--- H-Tree Latency = 0.000ps
-     |--- Mat Latency    = 4.482ns
-        |--- Predecoder Latency = 121.434ps
-        |--- Subarray Latency   = 4.357ns
-           |--- Row Decoder Latency = 1.698ns
-           |--- Bitline Latency     = 2.659ns
-           |--- Senseamp Latency    = 0.155ps
-           |--- Mux Latency         = 0.014ps
-           |--- Precharge Latency   = 7.744ns
-        |--- Comparator Latency  = 4.265ps
-     - Write Latency = 4.478ns
-     |--- H-Tree Latency = 0.000ps
-     |--- Mat Latency    = 4.478ns
-        |--- Predecoder Latency = 121.434ps
-        |--- Subarray Latency   = 4.357ns
-           |--- Row Decoder Latency = 1.698ns
-           |--- Charge Latency      = 6.963ns
-     - Read Bandwidth  = 348.449MB/s
-     - Write Bandwidth = 832.037MB/s
+     -  Read Latency = 1.971ns
+     |--- H-Tree Latency = 1.606ns
+     |--- Mat Latency    = 365.246ps
+        |--- Predecoder Latency = 82.075ps
+        |--- Subarray Latency   = 250.570ps
+           |--- Row Decoder Latency = 222.267ps
+           |--- Bitline Latency     = 27.070ps
+           |--- Senseamp Latency    = 1.233ps
+           |--- Mux Latency         = 0.000ps
+           |--- Precharge Latency   = 61.503ps
+        |--- Comparator Latency  = 32.602ps
+     - Write Latency = 1.136ns
+     |--- H-Tree Latency = 802.898ps
+     |--- Mat Latency    = 332.644ps
+        |--- Predecoder Latency = 82.075ps
+        |--- Subarray Latency   = 250.570ps
+           |--- Row Decoder Latency = 222.267ps
+           |--- Charge Latency      = 4.578ps
+     - Read Bandwidth  = 40.365GB/s
+     - Write Bandwidth = 14.467GB/s
     Power:
-     -  Read Dynamic Energy = 30.741pJ
-     |--- H-Tree Dynamic Energy = 0.000pJ
-     |--- Mat Dynamic Energy    = 30.741pJ per mat
-        |--- Predecoder Dynamic Energy = 0.454pJ
-        |--- Subarray Dynamic Energy   = 30.287pJ per active subarray
-           |--- Row Decoder Dynamic Energy = 0.071pJ
-           |--- Mux Decoder Dynamic Energy = 0.208pJ
-           |--- Senseamp Dynamic Energy    = 0.042pJ
+     -  Read Dynamic Energy = 5.833pJ
+     |--- H-Tree Dynamic Energy = 4.131pJ
+     |--- Mat Dynamic Energy    = 1.701pJ per mat
+        |--- Predecoder Dynamic Energy = 0.560pJ
+        |--- Subarray Dynamic Energy   = 1.142pJ per active subarray
+           |--- Row Decoder Dynamic Energy = 0.077pJ
+           |--- Mux Decoder Dynamic Energy = 0.138pJ
+           |--- Senseamp Dynamic Energy    = 0.165pJ
            |--- Mux Dynamic Energy         = 0.000pJ
-           |--- Precharge Dynamic Energy   = 0.123pJ
-     - Write Dynamic Energy = 1.666pJ
-     |--- H-Tree Dynamic Energy = 0.000pJ
-     |--- Mat Dynamic Energy    = 1.666pJ per mat
-        |--- Predecoder Dynamic Energy = 0.454pJ
-        |--- Subarray Dynamic Energy   = 1.212pJ per active subarray
-           |--- Row Decoder Dynamic Energy = 0.071pJ
-           |--- Mux Decoder Dynamic Energy = 0.208pJ
+           |--- Precharge Dynamic Energy   = 0.268pJ
+     - Write Dynamic Energy = 4.937pJ
+     |--- H-Tree Dynamic Energy = 4.131pJ
+     |--- Mat Dynamic Energy    = 0.805pJ per mat
+        |--- Predecoder Dynamic Energy = 0.560pJ
+        |--- Subarray Dynamic Energy   = 0.245pJ per active subarray
+           |--- Row Decoder Dynamic Energy = 0.077pJ
+           |--- Mux Decoder Dynamic Energy = 0.138pJ
            |--- Mux Dynamic Energy         = 0.000pJ
-     - Leakage Power = 5.425mW
+     - Leakage Power = 5.710mW
      |--- H-Tree Leakage Power     = 0.000pW
-     |--- Mat Leakage Power        = 5.425mW per mat
+     |--- Mat Leakage Power        = 178.428uW per mat
 
 Finished!
