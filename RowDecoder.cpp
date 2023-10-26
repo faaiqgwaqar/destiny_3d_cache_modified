@@ -55,14 +55,14 @@ void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
 			logicEffortNand = (3+tech->pnSizeRatio) / (1+tech->pnSizeRatio);
 		}
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
-		capNand = CalculateGateCap(widthNandN, *tech) + CalculateGateCap(widthNandP, *tech);
+		capNand = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
 		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, areaOptimizationLevel, minDriverCurrent);
 	} else {
 		/* we only need an 1-level output buffer to driver the wordline */
 		double capInv;
 		widthNandN = MIN_NMOS_SIZE * tech->featureSize;
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
-		capInv = CalculateGateCap(widthNandN, *tech) + CalculateGateCap(widthNandP, *tech);
+		capInv = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
 		outputDriver.Initialize(1, capInv, capLoad, resLoad, true, areaOptimizationLevel, minDriverCurrent);
 	}
 
@@ -124,10 +124,10 @@ void RowDecoder::CalculateLatency(double _rampInput) {
 			double beta;	/* for horowitz calculation */
 			double rampInputForDriver;
 
-			resPullDown = CalculateOnResistance(widthNandN, NMOS, inputParameter->temperature, *tech) * numNandInput;
+			resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, NMOS, inputParameter->temperature, *tech) * numNandInput;
 			capLoad = capNandOutput + outputDriver.capInput[0];
 			tr = resPullDown * capLoad;
-			gm = CalculateTransconductance(widthNandN, NMOS, *tech);
+			gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, NMOS, *tech);
 			beta = 1 / (resPullDown * gm);
 			readLatency = horowitz(tr, beta, rampInput, &rampInputForDriver);
 

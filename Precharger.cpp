@@ -34,11 +34,11 @@ void Precharger::Initialize(double _voltagePrecharge, int _numColumn, double _ca
 	widthInvPmos = widthInvNmos * tech->pnSizeRatio;
 	widthPMOSBitlineEqual      = MIN_NMOS_SIZE * tech->featureSize;
 	widthPMOSBitlinePrecharger = 6 * tech->featureSize;
-	capLoadInv  = CalculateGateCap(widthPMOSBitlineEqual, *tech) + 2 * CalculateGateCap(widthPMOSBitlinePrecharger, *tech)
-			+ CalculateDrainCap(widthInvNmos, NMOS, tech->featureSize*40, *tech)
-			+ CalculateDrainCap(widthInvPmos, PMOS, tech->featureSize*40, *tech);
-	capOutputBitlinePrecharger = CalculateDrainCap(widthPMOSBitlinePrecharger, PMOS, tech->featureSize*40, *tech) + CalculateDrainCap(widthPMOSBitlineEqual, PMOS, tech->featureSize*40, *tech);
-	double capInputInv         = CalculateGateCap(widthInvNmos, *tech) + CalculateGateCap(widthInvPmos, *tech);
+	capLoadInv  = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSBitlineEqual, *tech) + 2 * CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSBitlinePrecharger, *tech)
+			+ CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNmos, NMOS, tech->featureSize*40, *tech)
+			+ CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvPmos, PMOS, tech->featureSize*40, *tech);
+	capOutputBitlinePrecharger = CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSBitlinePrecharger, PMOS, tech->featureSize*40, *tech) + CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSBitlineEqual, PMOS, tech->featureSize*40, *tech);
+	double capInputInv         = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNmos, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvPmos, *tech);
 	capLoadPerColumn           = capInputInv + capWireLoadPerColumn;
 	double capLoadOutputDriver = numColumn * capLoadPerColumn;
 	outputDriver.Initialize(1, capInputInv, capLoadOutputDriver, 0 /* TO-DO */, true, latency_first, 0);  /* Always Latency First */
@@ -89,16 +89,16 @@ void Precharger::CalculateLatency(double _rampInput){
 		double gm;	/* transconductance */
 		double beta;	/* for horowitz calculation */
 		double temp;
-		resPullDown = CalculateOnResistance(widthInvNmos, NMOS, inputParameter->temperature, *tech);
+		resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNmos, NMOS, inputParameter->temperature, *tech);
 		tr = resPullDown * capLoadInv;
-		gm = CalculateTransconductance(widthInvNmos, NMOS, *tech);
+		gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNmos, NMOS, *tech);
 		beta = 1 / (resPullDown * gm);
 		enableLatency += horowitz(tr, beta, outputDriver.rampOutput, &temp);
 		readLatency = 0;
-		double resPullUp = CalculateOnResistance(widthPMOSBitlinePrecharger, PMOS,
+		double resPullUp = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSBitlinePrecharger, PMOS,
 				inputParameter->temperature, *tech);
 		double tau = resPullUp * (capBitline + capOutputBitlinePrecharger) + resBitline * capBitline / 2;
-		gm = CalculateTransconductance(widthPMOSBitlinePrecharger, PMOS, *tech);
+		gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSBitlinePrecharger, PMOS, *tech);
 		beta = 1 / (resPullUp * gm);
 		readLatency += horowitz(tau, beta, temp, &rampOutput);
 		writeLatency = readLatency;

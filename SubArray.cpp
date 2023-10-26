@@ -293,17 +293,17 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	/* Add transistor resistance/capacitance */
 	if (cell->memCellType == SRAM) {
 		/* SRAM has two access transistors */
-		resCellAccess = CalculateOnResistance(cell->widthAccessCMOS * tech->featureSize, NMOS, inputParameter->temperature, *tech);
-		capCellAccess = CalculateDrainCap(cell->widthAccessCMOS * tech->featureSize, NMOS, cell->widthInFeatureSize * tech->featureSize, *tech);
-		capWordline += 2 * CalculateGateCap(cell->widthAccessCMOS * tech->featureSize, *tech) * numColumn;
+		resCellAccess = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * tech->featureSize, NMOS, inputParameter->temperature, *tech);
+		capCellAccess = CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * tech->featureSize, NMOS, cell->widthInFeatureSize * tech->featureSize, *tech);
+		capWordline += 2 * CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * tech->featureSize, *tech) * numColumn;
 		if(tech->featureSize <= 14 * 1e-9){ capBitline += tech->cap_draintotal * cell->widthAccessCMOS * tech->effective_width * numRow / 2;}
 		else {capBitline  += capCellAccess * numRow / 2;	/* Due to shared contact */}
 		voltagePrecharge = tech->vdd / 2;	/* SRAM read voltage is always half of vdd */
 	} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
 		/* DRAM and eDRAM only has one access transistors */
-		resCellAccess = CalculateOnResistance(cell->widthAccessCMOS * devtech->featureSize, NMOS, inputParameter->temperature, *devtech);
-		capCellAccess = CalculateDrainCap(cell->widthAccessCMOS * devtech->featureSize, NMOS, cell->widthInFeatureSize * devtech->featureSize, *devtech);
-		capWordline += CalculateGateCap(cell->widthAccessCMOS * devtech->featureSize, *devtech) * numColumn;
+		resCellAccess = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, NMOS, inputParameter->temperature, *devtech);
+		capCellAccess = CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, NMOS, cell->widthInFeatureSize * devtech->featureSize, *devtech);
+		capWordline += CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, *devtech) * numColumn;
 		capBitline  += capCellAccess * numRow / 2;	/* Due to shared contact */
 		voltagePrecharge = devtech->vdd / 2;	/* DRAM read voltage is always half of vdd */
 	} else if (cell->memCellType == FBRAM){ /* Floating Body RAM */
@@ -342,9 +342,9 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	} else if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor) {
 		/* MRAM, PCRAM, and memristor have three types of access devices: CMOS, BJT, and diode */
 		if (cell->accessType == CMOS_access) {
-			resCellAccess = CalculateOnResistance(cell->widthAccessCMOS * tech->featureSize, NMOS, inputParameter->temperature, *tech);
-			capCellAccess = CalculateDrainCap(cell->widthAccessCMOS * tech->featureSize, NMOS, cell->widthInFeatureSize * tech->featureSize, *tech);
-			capWordline += CalculateGateCap(cell->widthAccessCMOS * tech->featureSize, *tech) * numColumn;
+			resCellAccess = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * tech->featureSize, NMOS, inputParameter->temperature, *tech);
+			capCellAccess = CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * tech->featureSize, NMOS, cell->widthInFeatureSize * tech->featureSize, *tech);
+			capWordline += CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * tech->featureSize, *tech) * numColumn;
 			capBitline  += capCellAccess * numRow / 2;	/* Due to shared contact */
 		} else if (cell->accessType == BJT_access) {
 			// TO-DO
@@ -405,10 +405,10 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		/* Calculate the NAND flash string length, which is the page count per block plus 2 (two select transistors) */
 		int pageCount = inputParameter->flashBlockSize / inputParameter->pageSize;
 		int stringLength = pageCount + 2;
-		resCellAccess = CalculateOnResistance(tech->featureSize, NMOS, inputParameter->temperature, *tech) * stringLength;
-		capCellAccess = CalculateDrainCap(tech->featureSize, NMOS, cell->widthInFeatureSize * tech->featureSize, *tech);
+		resCellAccess = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, NMOS, inputParameter->temperature, *tech) * stringLength;
+		capCellAccess = CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, NMOS, cell->widthInFeatureSize * tech->featureSize, *tech);
 		/* The capacitance of each cell at the gate terminal is the series of C_control_gate | C_floating_gate */
-		capWordline += CalculateGateCap(tech->featureSize, *tech) * numColumn * cell->gateCouplingRatio / (cell->gateCouplingRatio + 1);
+		capWordline += CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, *tech) * numColumn * cell->gateCouplingRatio / (cell->gateCouplingRatio + 1);
 		capBitline  += capCellAccess * (numRow / pageCount) / 2;	/* 2 is due to shared contact and the effective row count is numRow/pageCount */
 		voltagePrecharge = tech->vdd * 0.6;	/* SLC NAND flash bitline precharge voltage is assumed to 0.6Vdd */
 	} else {	/* MLC NAND flash */
@@ -572,7 +572,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 			double tau = (resCellAccess + resPullDown) * (capCellAccess + capBitline + bitlineMux.capForPreviousDelayCalculation)
 					+ resBitline * (bitlineMux.capForPreviousDelayCalculation + capBitline / 2);
 			tau *= log(voltagePrecharge / (voltagePrecharge - senseVoltage / 2));	/* one signal raises and the other drops, so senseVoltage/2 is enough */
-			double gm = CalculateTransconductance(cell->widthAccessCMOS * tech->featureSize, NMOS, *tech);
+			double gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * tech->featureSize, NMOS, *tech);
 			double beta = 1 / (resPullDown * gm);
 			double bitlineRamp = 0;
 			// From NeuroSim - Elmore BL (from IDRS 2022: More Moore)
@@ -685,13 +685,13 @@ void SubArray::CalculateLatency(double _rampInput) {
 			int pageCount = inputParameter->flashBlockSize / inputParameter->pageSize;
 			int stringLength = pageCount + 2;
 			/* Codes below calculate the bitline latency */
-			double resPullDown = CalculateOnResistance(tech->featureSize, NMOS, inputParameter->temperature, *tech)
+			double resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, NMOS, inputParameter->temperature, *tech)
 					* stringLength;
 			double tau = resPullDown * (capCellAccess + capBitline + bitlineMux.capForPreviousDelayCalculation)
 					+ resBitline * (bitlineMux.capForPreviousDelayCalculation + capBitline / 2);
 			/* in one case the bitline is unchanged, and in the other case the bitline drops from 0.6V to 0.4V */
 			tau *= log((voltagePrecharge)/ (voltagePrecharge - senseVoltage));
-			double gm = CalculateTransconductance(tech->featureSize, NMOS, *tech);	/* minimum size transistor */
+			double gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, NMOS, *tech);	/* minimum size transistor */
 			double beta = 1 / (resPullDown * gm);
 			double bitlineRamp = 0;
 			bitlineDelay = horowitz(tau, beta, rowDecoder.rampOutput, &bitlineRamp);

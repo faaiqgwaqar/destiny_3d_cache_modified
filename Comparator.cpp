@@ -73,9 +73,9 @@ void Comparator::CalculateRC() {
 		double capComp, capTemp;
 		CalculateGateCapacitance(NAND, 2, widthNMOSComp, 0, tech->featureSize*40, *tech, &capTemp, &capComp);
 		capBottom = capOutput[COMPARATOR_INV_CHAIN_LEN-1] + numTagBits * capComp;
-		capTop = numTagBits * capComp + CalculateDrainCap(widthPMOSComp, PMOS, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech) + capLoad;
-		resBottom = CalculateOnResistance(widthNMOSInv[COMPARATOR_INV_CHAIN_LEN-1], NMOS, inputParameter->temperature, *tech);
-		resTop = 2 * CalculateOnResistance(widthNMOSComp, NMOS, inputParameter->temperature, *tech);
+		capTop = numTagBits * capComp + CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSComp, PMOS, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech) + capLoad;
+		resBottom = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOSInv[COMPARATOR_INV_CHAIN_LEN-1], NMOS, inputParameter->temperature, *tech);
+		resTop = 2 * CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOSComp, NMOS, inputParameter->temperature, *tech);
 	}
 }
 
@@ -92,10 +92,10 @@ void Comparator::CalculateLatency(double _rampInput) {
 		double temp;
 		readLatency = 0;
 		for (int i = 0; i < COMPARATOR_INV_CHAIN_LEN - 1; i++) {
-			resPullDown = CalculateOnResistance(widthNMOSInv[i], NMOS, inputParameter->temperature, *tech);
+			resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOSInv[i], NMOS, inputParameter->temperature, *tech);
 			capNode = capOutput[i] + capInput[i+1];
 			tr = resPullDown * capNode;
-			gm = CalculateTransconductance(widthNMOSInv[i], NMOS, *tech);
+			gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOSInv[i], NMOS, *tech);
 			beta = 1 / (resPullDown * gm);
 			readLatency += horowitz(tr, beta, rampInput, &temp);
 			rampInput = temp;	/* for next stage */

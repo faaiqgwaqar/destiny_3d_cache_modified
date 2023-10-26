@@ -188,19 +188,19 @@ void OutputDriver::CalculateLatency(double _rampInput) {
 		double temp;
 		readLatency = 0;
 		for (int i = 0; i < numStage - 1; i++) {
-			resPullDown = CalculateOnResistance(widthNMOS[i], NMOS, inputParameter->temperature, *tech);
+			resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOS[i], NMOS, inputParameter->temperature, *tech);
 			capLoad = capOutput[i] + capInput[i+1];
 			tr = resPullDown * capLoad;
-			gm = CalculateTransconductance(widthNMOS[i], NMOS, *tech);
+			gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOS[i], NMOS, *tech);
 			beta = 1 / (resPullDown * gm);
 			readLatency += horowitz(tr, beta, rampInput, &temp);
 			rampInput = temp;	/* for next stage */
 		}
 		/* Last level inverter */
-		resPullDown = CalculateOnResistance(widthNMOS[numStage-1], NMOS, inputParameter->temperature, *tech);
+		resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOS[numStage-1], NMOS, inputParameter->temperature, *tech);
 		capLoad = capOutput[numStage-1] + outputCap;
 		tr = resPullDown * capLoad + outputCap * outputRes / 2;
-		gm = CalculateTransconductance(widthNMOS[numStage-1], NMOS, *tech);
+		gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOS[numStage-1], NMOS, *tech);
 		beta = 1 / (resPullDown * gm);
 		readLatency += horowitz(tr, beta, rampInput, &rampOutput);
 		rampInput = _rampInput;

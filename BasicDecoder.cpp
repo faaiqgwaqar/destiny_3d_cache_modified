@@ -35,7 +35,7 @@ void BasicDecoder::Initialize(int _numAddressBit, double _capLoad, double _resLo
 		double logicEffortInv = 1;
 		double widthInvN = MIN_NMOS_SIZE * tech->featureSize;
 		double widthInvP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
-		double capInv = CalculateGateCap(widthInvN, *tech) + CalculateGateCap(widthInvP, *tech);
+		double capInv = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvP, *tech);
 		outputDriver.Initialize(logicEffortInv, capInv, capLoad, resLoad, true, latency_first, 0);  /* Always Latency First */
 	}
 	else{
@@ -51,7 +51,7 @@ void BasicDecoder::Initialize(int _numAddressBit, double _capLoad, double _resLo
 			logicEffortNand = (3+tech->pnSizeRatio) / (1+tech->pnSizeRatio);
 		}
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
-		capNand = CalculateGateCap(widthNandN, *tech) + CalculateGateCap(widthNandP, *tech);
+		capNand = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
 		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, latency_first, 0);  /* Always Latency First */
 	}
 	initialized = true;
@@ -105,10 +105,10 @@ void BasicDecoder::CalculateLatency(double _rampInput) {
         	double beta;	/* for horowitz calculation */
         	double rampInputForDriver;
 
-        	resPullDown = CalculateOnResistance(widthNandN, NMOS, inputParameter->temperature, *tech) * numNandInput;
+        	resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, NMOS, inputParameter->temperature, *tech) * numNandInput;
         	capLoad = capNandOutput + outputDriver.capInput[0];
         	tr = resPullDown * capLoad;
-        	gm = CalculateTransconductance(widthNandN, NMOS, *tech);
+        	gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, NMOS, *tech);
         	beta = 1 / (resPullDown * gm);
         	readLatency = horowitz(tr, beta, rampInput, &rampInputForDriver);
 
