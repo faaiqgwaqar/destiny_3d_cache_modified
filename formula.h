@@ -75,4 +75,6 @@ double CalculateWireCapacitance(
 
 double CalculateOnResistance_normal(double width, int type, double temperature, Technology tech);
 
+void EnlargeSize(double *widthNMOS, double *widthPMOS, double heightTransistorRegion, Technology tech);
+
 #endif /* FORMULA_H_ */

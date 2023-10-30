@@ -1444,3 +1444,112 @@ double CalculateWireResistance_MX(
 		return Metal1_unitwireresis;
 	}
 }
+
+/* enlarge min size transister to max with same layout area */
+void EnlargeSize(double *widthNMOS, double *widthPMOS, double heightTransistorRegion, Technology tech) {	
+    double	ratio = *widthPMOS / (*widthPMOS + *widthNMOS);
+    double maxWidthPMOS, maxWidthNMOS;
+    int maxNumPFin, maxNumNFin;	/* Max number of fins for the specified cell height */
+    double unitWidthRegionP, unitWidthRegionN;
+    double widthRegionP, widthRegionN;
+    double heightRegionP, heightRegionN;
+    int numFoldedPMOS = 1, numFoldedNMOS = 1;
+
+    double temp_widthPMOS = *widthPMOS;
+    double temp_widthNMOS = *widthNMOS;
+
+    if (tech.featureSize >= 22 * 1e-9) {	// Bulk
+        if (ratio == 0) {	/* no PMOS */
+            maxWidthPMOS = 0;
+            maxWidthNMOS = heightTransistorRegion - (MIN_POLY_EXT_DIFF + MIN_GAP_BET_FIELD_POLY/2) * 2 * tech.featureSize;
+        } else if (ratio == 1) {	/* no NMOS */
+            maxWidthPMOS = heightTransistorRegion - (MIN_POLY_EXT_DIFF + MIN_GAP_BET_FIELD_POLY/2) * 2 * tech.featureSize;
+            maxWidthNMOS = 0;
+        } else {
+            maxWidthPMOS = ratio * (heightTransistorRegion - MIN_GAP_BET_P_AND_N_DIFFS * tech.featureSize - (MIN_POLY_EXT_DIFF + MIN_GAP_BET_FIELD_POLY/2) * 2 * tech.featureSize);
+            maxWidthNMOS = maxWidthPMOS / ratio * (1 - ratio);
+        }
+		if (ratio == 0 && *widthNMOS < maxWidthNMOS){
+			*widthNMOS = maxWidthNMOS;
+		} else if (ratio == 1 && *widthPMOS < maxWidthPMOS){
+			*widthPMOS = maxWidthPMOS;
+		} else if (*widthPMOS > 0 && *widthPMOS < maxWidthPMOS && *widthNMOS > 0 && *widthNMOS < maxWidthNMOS){
+			*widthPMOS = maxWidthPMOS;
+			*widthNMOS = maxWidthNMOS;
+		}
+	} else if ((tech.featureSize <= 14 * 1e-9) && (tech.featureSize >= 3 * 1e-9)){ // 1.4 update : FinFET
+
+		//  1.4 update : setting the maximum number of fins
+
+        if (tech.featureSize == 14 * 1e-9) { 
+            maxNumPFin = maxNumNFin = tech.max_fin_num; 
+        } else if (tech.featureSize == 10 * 1e-9) {
+            maxNumPFin = maxNumNFin = tech.max_fin_num;
+        } else if (tech.featureSize == 7 * 1e-9) {
+            maxNumPFin = maxNumNFin = tech.max_fin_num;
+        } else if (tech.featureSize == 5 * 1e-9) {
+            maxNumPFin = maxNumNFin = tech.max_fin_num;
+        } else if (tech.featureSize == 3 * 1e-9) {
+            maxNumPFin = maxNumNFin = tech.max_fin_num;
+        } 
+
+
+        temp_widthPMOS= temp_widthPMOS/(2.0 * tech.featureSize);
+        temp_widthNMOS= temp_widthNMOS/(2.0 * tech.featureSize);
+        double temp_ratio = ratio;
+
+        int NumPFin = (int)(ceil(*widthPMOS/(2.0 * tech.featureSize)));
+        int NumNFin = (int)(ceil(*widthNMOS/(2.0 * tech.featureSize)));
+
+
+		if (temp_ratio == 0 && NumNFin <= maxNumNFin){
+			NumNFin = maxNumNFin;
+			*widthNMOS = (double) NumNFin * 2 * tech.featureSize;
+		} else if (temp_ratio == 1 && NumPFin <= maxNumPFin){
+			NumPFin = maxNumPFin;
+			*widthPMOS = (double) NumPFin * 2 * tech.featureSize;
+		} else if (NumPFin > 0 && NumPFin <= maxNumPFin && NumNFin > 0 && NumNFin <= maxNumNFin){
+            if(temp_ratio >= 0.5){      
+                if ( (maxNumPFin /temp_ratio * (1 - temp_ratio) )- (int) ( maxNumPFin /temp_ratio * (1 - temp_ratio))==0 ) {
+                // 1.4 update: Enlarge only when the fin number is integer
+				NumNFin =  (maxNumPFin /temp_ratio * (1 - temp_ratio));
+                NumPFin = maxNumPFin ;
+                }
+            } else {
+                if (  (maxNumNFin /(1-temp_ratio) * (temp_ratio)) - (int) (maxNumNFin /(1-temp_ratio) * (temp_ratio)) ==0 ) {
+                // 1.4 update: Enlarge only when the fin number is integer
+				NumPFin = (maxNumNFin /(1-temp_ratio) * (temp_ratio));
+                NumNFin = maxNumNFin;
+                }
+            }
+			*widthNMOS = (double) NumNFin * 2 * tech.featureSize;			
+			*widthPMOS = (double) NumPFin * 2 * tech.featureSize;
+		}
+	} else { // 1.4 update : GAA
+
+    double tempPSheet = *widthPMOS/( 2 * tech.featureSize);
+    double tempNSheet = *widthNMOS/( 2 * tech.featureSize);
+
+    int NumPSheet = (int)(ceil(tempPSheet));
+    int NumNSheet = (int)(ceil(tempNSheet));
+
+        if (ratio == 0 && NumNSheet <= 2){
+            NumNSheet = 2; // 1.4 update : fix to 2, but later continuous width tuning strategy can be applied in layout
+            *widthNMOS = (double) NumNSheet * 2 * tech.featureSize;
+        } else if (ratio == 1 && NumPSheet <= 2){
+            NumPSheet = 2; // 1.4 update : fix to 2, but later continuous width tuning strategy can be applied in layout
+            *widthPMOS = (double) NumPSheet * 2 * tech.featureSize;
+        } else if (NumPSheet > 0 && NumPSheet <= 1 && NumNSheet > 0 && NumNSheet <= 1){
+            if(ratio >= 0.5){       
+                NumPSheet =  1; // 1.4 update : fix to 1, but later continuous width tuning strategy can be applied in layout
+                NumNSheet =  1; // 1.4 update : fix to 1, but later continuous width tuning strategy can be applied in layout
+            } else{
+                NumNSheet = 1; // 1.4 update : fix to 1, but later continuous width tuning strategy can be applied in layout
+                NumPSheet = 1; // 1.4 update : fix to 1, but later continuous width tuning strategy can be applied in layout
+            }
+
+            *widthNMOS = (double) NumNSheet * 2 * tech.featureSize;         
+            *widthPMOS = (double) NumPSheet * 2 * tech.featureSize;
+        }
+	}
+}

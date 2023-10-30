@@ -52,6 +52,7 @@ void Mux::Initialize(int _numInput, long long _numMux, double _capLoad, double _
 		} else {
 			widthNMOSPassTransistor = MAX(6 * MIN_NMOS_SIZE * tech->featureSize, minNMOSWidth);
 		}
+		EnlargeSize(&widthNMOSPassTransistor, 0, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 	}
 
 	initialized = true;

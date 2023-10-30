@@ -88,6 +88,7 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 					widthNMOS[i] = MIN_NMOS_SIZE * tech->featureSize;
 				}
 				widthPMOS[i] = widthNMOS[i] * tech->pnSizeRatio;
+				EnlargeSize(&widthNMOS[i], &widthPMOS[i], tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 			}
 		}
 	}

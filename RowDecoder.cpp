@@ -55,6 +55,7 @@ void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
 			logicEffortNand = (3+tech->pnSizeRatio) / (1+tech->pnSizeRatio);
 		}
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
+		EnlargeSize(&widthNandN, &widthNandP, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 		capNand = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
 		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, areaOptimizationLevel, minDriverCurrent);
 	} else {
@@ -62,6 +63,7 @@ void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
 		double capInv;
 		widthNandN = MIN_NMOS_SIZE * tech->featureSize;
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
+		EnlargeSize(&widthNandN, &widthNandP, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 		capInv = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
 		outputDriver.Initialize(1, capInv, capLoad, resLoad, true, areaOptimizationLevel, minDriverCurrent);
 	}

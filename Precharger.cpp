@@ -32,13 +32,18 @@ void Precharger::Initialize(double _voltagePrecharge, int _numColumn, double _ca
 	resWireLoadPerColumn = cell->widthInFeatureSize * tech->featureSize * localWire->resWirePerUnit;
 	widthInvNmos = MIN_NMOS_SIZE * tech->featureSize;
 	widthInvPmos = widthInvNmos * tech->pnSizeRatio;
+	EnlargeSize(&widthInvNmos, &widthInvPmos, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 	widthPMOSBitlineEqual      = MIN_NMOS_SIZE * tech->featureSize;
+	
+	double temp = 0;
+	EnlargeSize(&temp, &widthPMOSBitlineEqual, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 	widthPMOSBitlinePrecharger = 6 * tech->featureSize;
-	capLoadInv  = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSBitlineEqual, *tech) + 2 * CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSBitlinePrecharger, *tech)
-			+ CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNmos, NMOS, tech->featureSize*40, *tech)
-			+ CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvPmos, PMOS, tech->featureSize*40, *tech);
-	capOutputBitlinePrecharger = CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSBitlinePrecharger, PMOS, tech->featureSize*40, *tech) + CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthPMOSBitlineEqual, PMOS, tech->featureSize*40, *tech);
-	double capInputInv         = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNmos, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvPmos, *tech);
+	EnlargeSize(&temp, &widthPMOSBitlinePrecharger, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
+	capLoadInv  = CalculateGateCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthPMOSBitlineEqual, *tech) + 2 * CalculateGateCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthPMOSBitlinePrecharger, *tech)
+			+ CalculateDrainCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthInvNmos, NMOS, tech->featureSize*40, *tech)
+			+ CalculateDrainCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthInvPmos, PMOS, tech->featureSize*40, *tech);
+	capOutputBitlinePrecharger = CalculateDrainCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthPMOSBitlinePrecharger, PMOS, tech->featureSize*40, *tech) + CalculateDrainCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthPMOSBitlineEqual, PMOS, tech->featureSize*40, *tech);
+	double capInputInv         = CalculateGateCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthInvNmos, *tech) + CalculateGateCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthInvPmos, *tech);
 	capLoadPerColumn           = capInputInv + capWireLoadPerColumn;
 	double capLoadOutputDriver = numColumn * capLoadPerColumn;
 	outputDriver.Initialize(1, capInputInv, capLoadOutputDriver, 0 /* TO-DO */, true, latency_first, 0);  /* Always Latency First */

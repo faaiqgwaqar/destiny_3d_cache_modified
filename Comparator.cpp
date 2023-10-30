@@ -50,10 +50,12 @@ void Comparator::CalculateArea() {
 		double totalWidth = 0;
 		double h, w;
 		for (int i = 0; i < COMPARATOR_INV_CHAIN_LEN; i++) {
+			EnlargeSize(&widthNMOSInv[i], &widthPMOSInv[i], tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 			CalculateGateArea(INV, 1, widthNMOSInv[i], widthPMOSInv[i], tech->featureSize*40, *tech, &h, &w);
 			totalHeight = MAX(totalHeight, h);
 			totalWidth += w;
 		}
+		EnlargeSize(&widthNMOSComp, &widthPMOSComp, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 		CalculateGateArea(NAND, 2, widthNMOSComp, 0, tech->featureSize*40, *tech, &h, &w);
 		totalHeight += h;
 		totalWidth = MAX(totalWidth, numTagBits * w);

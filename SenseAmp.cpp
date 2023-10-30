@@ -51,21 +51,21 @@ void SenseAmp::CalculateArea() {
 		double tempHeight = 0;
 		double tempWidth = 0;
 
-		CalculateGateArea(INV, 1, 0, W_SENSE_P * tech->featureSize,
+		CalculateGateArea(INV, 1, 0, ((tech->featureSize <= 14*1e-9)? 2:1) * W_SENSE_P * tech->featureSize,
 				pitchSenseAmp, *tech, &tempWidth, &tempHeight);	/* exchange width and height for senseamp layout */
 		width = MAX(width, tempWidth);
 		height += 2 * tempHeight;
-		CalculateGateArea(INV, 1, 0, W_SENSE_ISO * tech->featureSize,
+		CalculateGateArea(INV, 1, 0, ((tech->featureSize <= 14*1e-9)? 2:1) * W_SENSE_ISO * tech->featureSize,
 				pitchSenseAmp, *tech, &tempWidth, &tempHeight);	/* exchange width and height for senseamp layout */
 		width = MAX(width, tempWidth);
 		height += tempHeight;
 		height += 2 * MIN_GAP_BET_SAME_TYPE_DIFFS * tech->featureSize;
 
-		CalculateGateArea(INV, 1, W_SENSE_N * tech->featureSize, 0,
+		CalculateGateArea(INV, 1, ((tech->featureSize <= 14*1e-9)? 2:1) * W_SENSE_N * tech->featureSize, 0,
 				pitchSenseAmp, *tech, &tempWidth, &tempHeight);	/* exchange width and height for senseamp layout */
 		width = MAX(width, tempWidth);
 		height += 2 * tempHeight;
-		CalculateGateArea(INV, 1, W_SENSE_EN * tech->featureSize, 0,
+		CalculateGateArea(INV, 1,((tech->featureSize <= 14*1e-9)? 2:1) *  W_SENSE_EN * tech->featureSize, 0,
 				pitchSenseAmp, *tech, &tempWidth, &tempHeight);	/* exchange width and height for senseamp layout */
 		width = MAX(width, tempWidth);
 		height += tempHeight;
@@ -91,11 +91,11 @@ void SenseAmp::CalculateRC() {
 	} else if (invalid) {
 		readLatency = writeLatency = invalid_value;
 	} else {
-		capLoad = CalculateGateCap((W_SENSE_P + W_SENSE_N) * tech->featureSize, *tech)
-				+ CalculateDrainCap(W_SENSE_N * tech->featureSize, NMOS, pitchSenseAmp, *tech)
-				+ CalculateDrainCap(W_SENSE_P * tech->featureSize, PMOS, pitchSenseAmp, *tech)
-				+ CalculateDrainCap(W_SENSE_ISO * tech->featureSize, PMOS, pitchSenseAmp, *tech)
-				+ CalculateDrainCap(W_SENSE_MUX * tech->featureSize, NMOS, pitchSenseAmp, *tech);
+		capLoad = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * (W_SENSE_P + W_SENSE_N) * tech->featureSize, *tech)
+				+ CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * W_SENSE_N * tech->featureSize, NMOS, pitchSenseAmp, *tech)
+				+ CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * W_SENSE_P * tech->featureSize, PMOS, pitchSenseAmp, *tech)
+				+ CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * W_SENSE_ISO * tech->featureSize, PMOS, pitchSenseAmp, *tech)
+				+ CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * W_SENSE_MUX * tech->featureSize, NMOS, pitchSenseAmp, *tech);
 	}
 }
 
@@ -123,8 +123,8 @@ void SenseAmp::CalculateLatency(double _rampInput) {	/* _rampInput is actually n
 		}
 
 		/* Voltage sense amplifier */
-		double gm = CalculateTransconductance(W_SENSE_N * tech->featureSize, NMOS, *tech)
-				+ CalculateTransconductance(W_SENSE_P * tech->featureSize, PMOS, *tech);
+		double gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * W_SENSE_N * tech->featureSize, NMOS, *tech)
+				+ CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * W_SENSE_P * tech->featureSize, PMOS, *tech);
 		double tau = capLoad / gm;
 		readLatency += tau * log(tech->vdd / senseVoltage);
         refreshLatency = readLatency;
@@ -164,7 +164,7 @@ void SenseAmp::CalculatePower() {
 
 		/* Voltage sense amplifier */
 		readDynamicEnergy += capLoad * tech->vdd * tech->vdd;
-		double idleCurrent =  CalculateGateLeakage(INV, 1, W_SENSE_EN * tech->featureSize, 0,
+		double idleCurrent =  CalculateGateLeakage(INV, 1, ((tech->featureSize <= 14*1e-9)? 2:1) * W_SENSE_EN * tech->featureSize, 0,
 				inputParameter->temperature, *tech) * tech->vdd;
 		leakage += idleCurrent * tech->vdd;
 
