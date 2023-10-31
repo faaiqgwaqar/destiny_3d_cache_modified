@@ -65,7 +65,7 @@ void Mux::CalculateArea(){
 	} else {
 		if ((numInput > 1) && (numMux > 0 )) {
 			double h,w;
-			CalculateGateArea(INV, 1, widthNMOSPassTransistor, 0, tech->featureSize*40, *tech, &h, &w);
+			CalculateGateArea(INV, 1, ((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOSPassTransistor, 0, tech->featureSize*40, *tech, &h, &w);
 			width = numMux * numInput * w;
 			height = h;
 			area = width * height;
@@ -80,11 +80,11 @@ void Mux::CalculateRC() {
 		cout << "[Mux] Error: Require initialization first!" << endl;
 	} else {
 		if ((numInput > 1) && (numMux > 0 )) {
-			capNMOSPassTransistor = CalculateDrainCap(widthNMOSPassTransistor, NMOS, tech->featureSize*40, *tech);
+			capNMOSPassTransistor = CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOSPassTransistor, NMOS, tech->featureSize*40, *tech);
 			capForPreviousPowerCalculation = capNMOSPassTransistor;
 			capOutput = numInput * capNMOSPassTransistor;
 			capForPreviousDelayCalculation = capOutput + capNMOSPassTransistor + capLoad;
-			resNMOSPassTransistor = CalculateOnResistance(widthNMOSPassTransistor, NMOS, inputParameter->temperature, *tech);
+			resNMOSPassTransistor = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOSPassTransistor, NMOS, inputParameter->temperature, *tech);
 		} else {
 			;	/* nothing to do */
 		}

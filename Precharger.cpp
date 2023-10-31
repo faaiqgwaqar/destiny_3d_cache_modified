@@ -46,7 +46,7 @@ void Precharger::Initialize(double _voltagePrecharge, int _numColumn, double _ca
 	double capInputInv         = CalculateGateCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthInvNmos, *tech) + CalculateGateCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthInvPmos, *tech);
 	capLoadPerColumn           = capInputInv + capWireLoadPerColumn;
 	double capLoadOutputDriver = numColumn * capLoadPerColumn;
-	outputDriver.Initialize(1, capInputInv, capLoadOutputDriver, 0 /* TO-DO */, true, latency_first, 0);  /* Always Latency First */
+	outputDriver.Initialize(1, capInputInv, capLoadOutputDriver, 0 /* TO-DO */, true, latency_first, 0, false);  /* Always Latency First */
 
 	initialized = true;
 }

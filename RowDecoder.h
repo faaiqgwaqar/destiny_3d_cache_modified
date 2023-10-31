@@ -21,7 +21,7 @@ public:
 	/* Functions */
 	void PrintProperty();
 	void Initialize(int _numRow, double _capLoad, double _resLoad,
-			bool _multipleRowPerSet, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent);
+			bool _multipleRowPerSet, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent, bool _MUX);
 	void CalculateArea();
 	void CalculateRC();
 	void CalculateLatency(double _rampInput);

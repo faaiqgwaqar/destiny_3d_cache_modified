@@ -420,7 +420,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	precharger.Initialize(tech->vdd, numColumn, capBitline, resBitline);
 	precharger.CalculateRC();
 
-	rowDecoder.Initialize(numRow, capWordline, resWordline, multipleRowPerSet, areaOptimizationLevel, maxWordlineCurrent);
+	rowDecoder.Initialize(numRow, capWordline, resWordline, multipleRowPerSet, areaOptimizationLevel, maxWordlineCurrent, false);
 	if (rowDecoder.invalid) {
 		invalid = true;
 		return;
@@ -428,7 +428,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	rowDecoder.CalculateRC();
 
 	if (!invalid) {
-		bitlineMuxDecoder.Initialize(muxSenseAmp, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0);
+		bitlineMuxDecoder.Initialize(muxSenseAmp, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true);
 		if (bitlineMuxDecoder.invalid)
 			invalid = true;
 		else
@@ -436,7 +436,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	if (!invalid) {
-		senseAmpMuxLev1Decoder.Initialize(muxOutputLev1, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0);
+		senseAmpMuxLev1Decoder.Initialize(muxOutputLev1, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true);
 		if (senseAmpMuxLev1Decoder.invalid)
 			invalid = true;
 		else
@@ -444,7 +444,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	if (!invalid) {
-		senseAmpMuxLev2Decoder.Initialize(muxOutputLev2, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0);
+		senseAmpMuxLev2Decoder.Initialize(muxOutputLev2, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true);
 		if (senseAmpMuxLev2Decoder.invalid)
 			invalid = true;
 		else

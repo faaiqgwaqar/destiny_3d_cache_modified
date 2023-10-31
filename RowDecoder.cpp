@@ -21,7 +21,7 @@ RowDecoder::~RowDecoder() {
 }
 
 void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
-		bool _multipleRowPerSet, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent) {
+		bool _multipleRowPerSet, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent, bool _MUX) {
 	if (initialized)
 		cout << "[Row Decoder] Warning: Already initialized!" << endl;
 
@@ -57,7 +57,7 @@ void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
 		EnlargeSize(&widthNandN, &widthNandP, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 		capNand = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
-		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, areaOptimizationLevel, minDriverCurrent);
+		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, areaOptimizationLevel, minDriverCurrent, _MUX /*false*/);
 	} else {
 		/* we only need an 1-level output buffer to driver the wordline */
 		double capInv;
@@ -65,7 +65,7 @@ void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
 		EnlargeSize(&widthNandN, &widthNandP, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 		capInv = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
-		outputDriver.Initialize(1, capInv, capLoad, resLoad, true, areaOptimizationLevel, minDriverCurrent);
+		outputDriver.Initialize(1, capInv, capLoad, resLoad, true, areaOptimizationLevel, minDriverCurrent, _MUX /*false*/);
 	}
 
 	if (outputDriver.invalid) {

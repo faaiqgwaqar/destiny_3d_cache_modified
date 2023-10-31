@@ -36,7 +36,7 @@ void BasicDecoder::Initialize(int _numAddressBit, double _capLoad, double _resLo
 		double widthInvN = MIN_NMOS_SIZE * tech->featureSize;
 		double widthInvP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
 		double capInv = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvP, *tech);
-		outputDriver.Initialize(logicEffortInv, capInv, capLoad, resLoad, true, latency_first, 0);  /* Always Latency First */
+		outputDriver.Initialize(logicEffortInv, capInv, capLoad, resLoad, true, latency_first, 0, false);  /* Always Latency First */
 	}
 	else{
 		double logicEffortNand;
@@ -52,7 +52,7 @@ void BasicDecoder::Initialize(int _numAddressBit, double _capLoad, double _resLo
 		}
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
 		capNand = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
-		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, latency_first, 0);  /* Always Latency First */
+		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, latency_first, 0, false);  /* Always Latency First */
 	}
 	initialized = true;
 }
