@@ -274,6 +274,9 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
         capMuxLoad = CalculateGateCap(minBitlineMuxWidth, *tech) * numColumn;
         capMuxLoad += capWordline;
 
+		//cout << "capMuxLoad: " << capMuxLoad * 1e9 << endl;
+		//cout << "resMuxLoad: " << resMuxLoad * 1e9 << endl;
+
 	if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
 		senseVoltage = devtech->vdd / 2 * cell->capDRAMCell / (cell->capDRAMCell + capBitline);
 		if (senseVoltage < cell->minSenseVoltage) {		/* Bitline is too long */

@@ -133,12 +133,12 @@ void RowDecoder::CalculateLatency(double _rampInput) {
 			beta = 1 / (resPullDown * gm);
 			readLatency = horowitz(tr, beta, rampInput, &rampInputForDriver);
 
-			//cout << "readLatency (No Output Driver): RowDecoder: " << readLatency * 1e9 << endl;
+			//cout << "RowDecoder Internal Latency: " << readLatency * 1e9 << endl;
 
 			outputDriver.CalculateLatency(rampInputForDriver);
 			readLatency += outputDriver.readLatency;
 
-			//cout << "readLatency (With Output Driver): RowDecoder: " << readLatency * 1e9 << endl;
+			//cout << "RowDecoder Driver Latency %: " << outputDriver.readLatency/readLatency << endl;
 
 			writeLatency = readLatency;
 			rampOutput = outputDriver.rampOutput;
