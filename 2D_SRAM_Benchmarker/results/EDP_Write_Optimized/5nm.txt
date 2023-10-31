@@ -11,7 +11,7 @@ Cache Associativity: 16 Ways
 
 Searching for the best solution that is optimized for write energy-delay-product ...
 Using cell file: 2D_SRAM_Benchmarker/SRAM_cell_5nm.cell
-numSolutions = 154700 / numDesigns = 15604974
+numSolutions = 155757 / numDesigns = 15604974
 
 =======================
 CACHE DESIGN -- SUMMARY

@@ -57,7 +57,7 @@ void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
 		EnlargeSize(&widthNandN, &widthNandP, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 		capNand = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
-		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, areaOptimizationLevel, minDriverCurrent, _MUX /*false*/);
+		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, latency_first, minDriverCurrent, /*_MUX*/ false);
 	} else {
 		/* we only need an 1-level output buffer to driver the wordline */
 		double capInv;
@@ -65,7 +65,7 @@ void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
 		EnlargeSize(&widthNandN, &widthNandP, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 		capInv = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
-		outputDriver.Initialize(1, capInv, capLoad, resLoad, true, areaOptimizationLevel, minDriverCurrent, _MUX /*false*/);
+		outputDriver.Initialize(1, capInv, capLoad, resLoad, true, latency_first, minDriverCurrent, /*_MUX*/ false);
 	}
 
 	if (outputDriver.invalid) {
@@ -133,8 +133,13 @@ void RowDecoder::CalculateLatency(double _rampInput) {
 			beta = 1 / (resPullDown * gm);
 			readLatency = horowitz(tr, beta, rampInput, &rampInputForDriver);
 
+			//cout << "readLatency (No Output Driver): RowDecoder: " << readLatency * 1e9 << endl;
+
 			outputDriver.CalculateLatency(rampInputForDriver);
 			readLatency += outputDriver.readLatency;
+
+			//cout << "readLatency (With Output Driver): RowDecoder: " << readLatency * 1e9 << endl;
+
 			writeLatency = readLatency;
 			rampOutput = outputDriver.rampOutput;
 		}

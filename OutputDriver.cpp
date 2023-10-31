@@ -37,7 +37,8 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 
 
 	// Introduce sizing factors directly from
-	if(_MUX){	
+	if(_MUX){
+		//cout << "resizing" << endl;
 		switch (tech->featureSizeInNano){ 
 			case 22:	sizingfactor_MUX=110; break; 
 			case 14:	sizingfactor_MUX=130; break;  
@@ -58,7 +59,7 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 		return;
 	}
 
-	minNMOSDriverWidth *= sizingfactor_MUX;
+	//minNMOSDriverWidth *= sizingfactor_MUX;
 
 	int optimalNumStage;
 
@@ -76,6 +77,8 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 		}
 
 		numStage = optimalNumStage;
+
+		//cout << "numStage: " << numStage << endl;
 
 		double f = pow(F, 1.0 / (optimalNumStage + 1));	/* Logic effort per stage */
 		double inputCapLast = outputCap / f;

@@ -11,7 +11,7 @@ Cache Associativity: 16 Ways
 
 Searching for the best solution that is optimized for write energy-delay-product ...
 Using cell file: 2D_SRAM_Benchmarker/SRAM_cell_7nm.cell
-numSolutions = 151998 / numDesigns = 15604974
+numSolutions = 152166 / numDesigns = 15604974
 
 =======================
 CACHE DESIGN -- SUMMARY
@@ -22,7 +22,7 @@ Area:
  |--- Data Array Area = 3749.915um x 2021.485um = 7.580mm^2
  |--- Tag Array Area  = 949.824um x 473.638um = 0.450mm^2
 Timing:
- - Cache Hit Latency   = 20.041ns
+ - Cache Hit Latency   = 20.059ns
  - Cache Miss Latency  = 1.219ns
  - Cache Write Latency = 14.078ns
 Power:
@@ -98,23 +98,23 @@ CACHE DATA ARRAY DETAILS
      - Read Bandwidth  = 2.656GB/s
      - Write Bandwidth = 4.588GB/s
     Power:
-     -  Read Dynamic Energy = 570.329pJ
+     -  Read Dynamic Energy = 570.347pJ
      |--- H-Tree Dynamic Energy = 0.000pJ
-     |--- Mat Dynamic Energy    = 570.329pJ per mat
+     |--- Mat Dynamic Energy    = 570.347pJ per mat
         |--- Predecoder Dynamic Energy = 0.596pJ
-        |--- Subarray Dynamic Energy   = 284.867pJ per active subarray
+        |--- Subarray Dynamic Energy   = 284.876pJ per active subarray
            |--- Row Decoder Dynamic Energy = 0.594pJ
-           |--- Mux Decoder Dynamic Energy = 1.050pJ
+           |--- Mux Decoder Dynamic Energy = 1.060pJ
            |--- Senseamp Dynamic Energy    = 0.729pJ
            |--- Mux Dynamic Energy         = 0.628pJ
            |--- Precharge Dynamic Energy   = 3.014pJ
-     - Write Dynamic Energy = 7.321pJ
+     - Write Dynamic Energy = 7.339pJ
      |--- H-Tree Dynamic Energy = 0.000pJ
-     |--- Mat Dynamic Energy    = 7.321pJ per mat
+     |--- Mat Dynamic Energy    = 7.339pJ per mat
         |--- Predecoder Dynamic Energy = 0.596pJ
-        |--- Subarray Dynamic Energy   = 3.362pJ per active subarray
+        |--- Subarray Dynamic Energy   = 3.372pJ per active subarray
            |--- Row Decoder Dynamic Energy = 0.594pJ
-           |--- Mux Decoder Dynamic Energy = 1.050pJ
+           |--- Mux Decoder Dynamic Energy = 1.060pJ
            |--- Mux Dynamic Energy         = 0.628pJ
      - Leakage Power = 92.963mW
      |--- H-Tree Leakage Power     = 0.000pW
@@ -186,23 +186,23 @@ CACHE TAG ARRAY DETAILS
      - Read Bandwidth  = 1.700GB/s
      - Write Bandwidth = 3.187GB/s
     Power:
-     -  Read Dynamic Energy = 18.228pJ
+     -  Read Dynamic Energy = 18.224pJ
      |--- H-Tree Dynamic Energy = 0.000pJ
-     |--- Mat Dynamic Energy    = 18.228pJ per mat
+     |--- Mat Dynamic Energy    = 18.224pJ per mat
         |--- Predecoder Dynamic Energy = 0.676pJ
-        |--- Subarray Dynamic Energy   = 17.553pJ per active subarray
+        |--- Subarray Dynamic Energy   = 17.548pJ per active subarray
            |--- Row Decoder Dynamic Energy = 0.144pJ
-           |--- Mux Decoder Dynamic Energy = 0.261pJ
+           |--- Mux Decoder Dynamic Energy = 0.257pJ
            |--- Senseamp Dynamic Energy    = 0.660pJ
            |--- Mux Dynamic Energy         = 0.001pJ
            |--- Precharge Dynamic Energy   = 0.692pJ
-     - Write Dynamic Energy = 1.575pJ
+     - Write Dynamic Energy = 1.571pJ
      |--- H-Tree Dynamic Energy = 0.000pJ
-     |--- Mat Dynamic Energy    = 1.575pJ per mat
+     |--- Mat Dynamic Energy    = 1.571pJ per mat
         |--- Predecoder Dynamic Energy = 0.676pJ
-        |--- Subarray Dynamic Energy   = 0.900pJ per active subarray
+        |--- Subarray Dynamic Energy   = 0.895pJ per active subarray
            |--- Row Decoder Dynamic Energy = 0.144pJ
-           |--- Mux Decoder Dynamic Energy = 0.261pJ
+           |--- Mux Decoder Dynamic Energy = 0.257pJ
            |--- Mux Dynamic Energy         = 0.001pJ
      - Leakage Power = 5.457mW
      |--- H-Tree Leakage Power     = 0.000pW
