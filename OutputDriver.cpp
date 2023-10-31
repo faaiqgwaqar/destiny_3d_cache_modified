@@ -37,19 +37,19 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 
 
 	// Introduce sizing factors directly from
-	if(_MUX){
-		//cout << "resizing" << endl;
-		switch (tech->featureSizeInNano){ 
-			case 22:	sizingfactor_MUX=110; break; 
-			case 14:	sizingfactor_MUX=130; break;  
-			case 10:	sizingfactor_MUX=80;  break;  
-			case 7:		sizingfactor_MUX=60;  break;  
-			case 5:		sizingfactor_MUX=50;  break;  
-			case 3:		sizingfactor_MUX=25;  break; 
-			case 2:		sizingfactor_MUX=25;  break;  
-			case 1:		sizingfactor_MUX=30;  break; 
-		}
-	}
+	//if(_MUX){
+	//	//cout << "resizing" << endl;
+	//	switch (tech->featureSizeInNano){ 
+	//		case 22:	sizingfactor_MUX=110; break; 
+	//		case 14:	sizingfactor_MUX=130; break;  
+	//		case 10:	sizingfactor_MUX=80;  break;  
+	//		case 7:		sizingfactor_MUX=60;  break;  
+	//		case 5:		sizingfactor_MUX=50;  break;  
+	//		case 3:		sizingfactor_MUX=25;  break; 
+	//		case 2:		sizingfactor_MUX=25;  break;  
+	//		case 1:		sizingfactor_MUX=30;  break; 
+	//	}
+	//}
 	
 	double minNMOSDriverWidth = minDriverCurrent / tech->currentOnNmos[inputParameter->temperature - 300];
 	minNMOSDriverWidth = MAX(MIN_NMOS_SIZE * tech->featureSize, minNMOSDriverWidth);
