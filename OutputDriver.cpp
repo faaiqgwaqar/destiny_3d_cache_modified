@@ -76,12 +76,12 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 			optimalNumStage = MAX_INV_CHAIN_LEN;
 		}
 
-		if(_MUX){
-			optimalNumStage = MAX_INV_CHAIN_LEN;
-			numStage = MAX_INV_CHAIN_LEN;
-		} else {	
+		//if(_MUX){
+		//	optimalNumStage = MAX_INV_CHAIN_LEN;
+		//	numStage = MAX_INV_CHAIN_LEN;
+		//} else {	
 			numStage = optimalNumStage;
-		}
+		//}
 
 		//cout << "numStage: " << numStage << endl;
 
@@ -91,7 +91,7 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 		widthNMOS[optimalNumStage-1] = MAX(MIN_NMOS_SIZE * tech->featureSize,
 				inputCapLast / CalculateGateCap(1/*meter*/, *tech) / (1.0 + tech->pnSizeRatio));
 
-		if (widthNMOS[optimalNumStage-1] > inputParameter->maxNmosSize * tech->featureSize || _MUX) {
+		if (widthNMOS[optimalNumStage-1] > inputParameter->maxNmosSize * tech->featureSize /*|| _MUX*/) {
 			if (WARNING)
 				cout << "[WARNING] Exceed maximum NMOS size!" << endl;
 			widthNMOS[optimalNumStage-1] = inputParameter->maxNmosSize * tech->featureSize;

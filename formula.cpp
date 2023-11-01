@@ -1077,6 +1077,7 @@ double horowitz(double tr, double beta, double rampInput, double *rampOutput) {
 	double alpha;
 	alpha = 1 / rampInput / tr;
 	double vs = 0.5;	/* Normalized switching voltage */
+	beta = 0.5;	// Just use beta=0.5 as CACTI because we do not want to consider gm anymore
 	double result = tr * sqrt(log(vs) * log(vs) + 2 * alpha * beta * (1 - vs));
 	if (rampOutput)
 		*rampOutput = (1 - vs) / result;
