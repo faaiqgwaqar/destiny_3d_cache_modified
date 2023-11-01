@@ -77,6 +77,7 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 		}
 
 		if(_MUX){
+			optimalNumStage = MAX_INV_CHAIN_LEN;
 			numStage = MAX_INV_CHAIN_LEN;
 		} else {	
 			numStage = optimalNumStage;
