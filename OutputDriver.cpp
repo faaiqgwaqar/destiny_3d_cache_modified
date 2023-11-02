@@ -231,15 +231,9 @@ void OutputDriver::CalculateLatency(double _rampInput) {
 		gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOS[numStage-1], NMOS, *tech);
 		beta = 1 / (resPullDown * gm);
 		//readLatency += horowitz(tr, beta, rampInput, &rampOutput);
-		readLatency = 0.69 * resPullDown * outputCap  + 0.38 * outputRes * outputCap;
+		readLatency += 0.69 * resPullDown * outputCap  + 0.38 * outputRes * outputCap;
 		rampInput = _rampInput;
 		writeLatency = readLatency;
-
-		temp_resPullDown = resPullDown;
-		temp_capLoad = capLoad;
-		temp_tr = tr;
-		temp_gm = gm;
-		temp_beta = beta;
 	}
 }
 

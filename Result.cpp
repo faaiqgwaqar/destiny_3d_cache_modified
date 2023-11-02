@@ -371,15 +371,15 @@ void Result::print(int indent) {
 	cout << string(indent, ' ') << "    |--- Predecoder Latency = " << TO_SECOND(bank->mat.predecoderLatency) << endl;
 	cout << string(indent, ' ') << "    |--- Subarray Latency   = " << TO_SECOND(bank->mat.subarray.readLatency) << endl;
 	cout << string(indent, ' ') << "       |--- Row Decoder Latency = " << TO_SECOND(bank->mat.subarray.rowDecoder.readLatency) << endl;
-	cout << string(indent, ' ') << "       		|--- Row Decoder Driver Latency = " << TO_SECOND(bank->mat.subarray.rowDecoder.outputDriver.readLatency) << endl;
-	cout << string(indent, ' ') << "       			|--- resPullDown = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_resPullDown) << endl;
-	cout << string(indent, ' ') << "       			|--- capLoad = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_capLoad) << endl;
-	cout << string(indent, ' ') << "       			|--- tr = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_tr) << endl;
-	cout << string(indent, ' ') << "       				|--- outputCap = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.outputCap) << endl;
-	cout << string(indent, ' ') << "       				|--- outputRes = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.outputRes) << endl;
-	cout << string(indent, ' ') << "       			|--- gm = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_gm) << endl;
-	cout << string(indent, ' ') << "       			|--- beta = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_beta) << endl;
-	cout << string(indent, ' ') << "       			|--- rampInput = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.rampInput) << endl;
+	//cout << string(indent, ' ') << "       		|--- Row Decoder Driver Latency = " << TO_SECOND(bank->mat.subarray.rowDecoder.outputDriver.readLatency) << endl;
+	//cout << string(indent, ' ') << "       			|--- resPullDown = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_resPullDown) << endl;
+	//cout << string(indent, ' ') << "       			|--- capLoad = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_capLoad) << endl;
+	//cout << string(indent, ' ') << "       			|--- tr = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_tr) << endl;
+	//cout << string(indent, ' ') << "       				|--- outputCap = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.outputCap) << endl;
+	//cout << string(indent, ' ') << "       				|--- outputRes = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.outputRes) << endl;
+	//cout << string(indent, ' ') << "       			|--- gm = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_gm) << endl;
+	//cout << string(indent, ' ') << "       			|--- beta = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_beta) << endl;
+	//cout << string(indent, ' ') << "       			|--- rampInput = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.rampInput) << endl;
 	cout << string(indent, ' ') << "       |--- Bitline Latency     = " << TO_SECOND(bank->mat.subarray.bitlineDelay) << endl;
 	if (inputParameter->internalSensing)
 		cout << string(indent, ' ') << "       |--- Senseamp Latency    = " << TO_SECOND(bank->mat.subarray.senseAmp.readLatency) << endl;

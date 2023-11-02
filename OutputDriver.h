@@ -44,13 +44,6 @@ public:
 	double capInput[MAX_INV_CHAIN_LEN];
 	double capOutput[MAX_INV_CHAIN_LEN];
 	double rampInput, rampOutput;
-
-	// debugging variables
-	double temp_resPullDown;
-	double temp_capLoad;
-	double temp_tr;	/* time constant */
-	double temp_gm;	/* transconductance */
-	double temp_beta;	/* for horowitz calculation */
 };
 
 #endif /* OUTPUTDRIVER_H_ */
