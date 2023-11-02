@@ -266,7 +266,8 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	resBitline = lenBitline * localWire->resWirePerUnit_M0 * num3DLevels;
 
 	//cout << "capWirePerUnit: " << localWire->capWirePerUnit * 1e12 << endl;
-	//cout << "resWirePerUnit: " << localWire->resWirePerUnit << endl;
+	//cout << "resWirePerUnit_M0: " << localWire->resWirePerUnit_M0 * 1e-6 << endl;
+	//cout << "resWirePerUnit_M1: " << localWire->resWirePerUnit_M1 * 1e-6<< endl;
 
 	/* Caclulate the load resistance and capacitance for Mux Decoders */
 	double capMuxLoad, resMuxLoad;
