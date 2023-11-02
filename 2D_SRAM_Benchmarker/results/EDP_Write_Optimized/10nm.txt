@@ -11,7 +11,7 @@ Cache Associativity: 16 Ways
 
 Searching for the best solution that is optimized for write energy-delay-product ...
 Using cell file: 2D_SRAM_Benchmarker/SRAM_cell_10nm.cell
-numSolutions = 876699 / numDesigns = 15604974
+numSolutions = 157080 / numDesigns = 15604974
 
 =======================
 CACHE DESIGN -- SUMMARY
@@ -66,7 +66,7 @@ CACHE DATA ARRAY DETAILS
      - Low Swing :     No
     Global Wire:
      - Wire Type :     Global Aggressive
-     - Repeater Type:     Fully-Optimized Repeaters
+     - Repeater Type:     No Repeaters
      - Low Swing :     No
     Buffer Design Style:     Latency-Optimized
     =============
