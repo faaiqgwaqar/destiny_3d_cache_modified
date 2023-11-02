@@ -32,6 +32,7 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 	inv = _inv;
 	areaOptimizationLevel = _areaOptimizationLevel;
 	minDriverCurrent = _minDriverCurrent;
+	MUX = _MUX;
 
 	double sizingfactor_MUX = 1;
 
@@ -230,8 +231,8 @@ void OutputDriver::CalculateLatency(double _rampInput) {
 		tr = resPullDown * capLoad + outputCap * outputRes / 2;
 		gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOS[numStage-1], NMOS, *tech);
 		beta = 1 / (resPullDown * gm);
-		//readLatency += horowitz(tr, beta, rampInput, &rampOutput);
-		readLatency += 0.69 * resPullDown * outputCap  + 0.38 * outputRes * outputCap;
+		if (MUX) readLatency += 0.69 * resPullDown * outputCap  + 0.38 * outputRes * outputCap;
+		else readLatency += horowitz(tr, beta, rampInput, &rampOutput);
 		rampInput = _rampInput;
 		writeLatency = readLatency;
 	}

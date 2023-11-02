@@ -35,6 +35,7 @@ public:
 	double inputCap;	/* Input capacitance, unit: F */
 	double outputCap;	/* Output capacitance, unit: F */
 	double outputRes;	/* Output resistance, unit: ohm */
+	bool MUX;
 	bool inv;			/* Whether the invert chain causes a flip */
 	int numStage;		/* Number of inverter chain stages */
 	BufferDesignTarget areaOptimizationLevel; /* 0 for latency, 2 for area */
