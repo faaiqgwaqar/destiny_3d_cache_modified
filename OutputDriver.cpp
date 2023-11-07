@@ -21,7 +21,7 @@ OutputDriver::~OutputDriver() {
 }
 
 void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _outputCap, double _outputRes,
-		bool _inv, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent, bool _MUX) {
+		bool _inv, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent, bool _addRepeaters, double _wireLength) {
 	if (initialized)
 		cout << "[Output Driver] Warning: Already initialized!" << endl;
 
@@ -32,25 +32,10 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 	inv = _inv;
 	areaOptimizationLevel = _areaOptimizationLevel;
 	minDriverCurrent = _minDriverCurrent;
-	MUX = _MUX;
+	addRepeaters = _addRepeaters;
+	wireLength - _wireLength;
 
 	double sizingfactor_MUX = 1;
-
-
-	// Introduce sizing factors directly from
-	//if(_MUX){
-	//	//cout << "resizing" << endl;
-	//	switch (tech->featureSizeInNano){ 
-	//		case 22:	sizingfactor_MUX=110; break; 
-	//		case 14:	sizingfactor_MUX=130; break;  
-	//		case 10:	sizingfactor_MUX=80;  break;  
-	//		case 7:		sizingfactor_MUX=60;  break;  
-	//		case 5:		sizingfactor_MUX=50;  break;  
-	//		case 3:		sizingfactor_MUX=25;  break; 
-	//		case 2:		sizingfactor_MUX=25;  break;  
-	//		case 1:		sizingfactor_MUX=30;  break; 
-	//	}
-	//}
 	
 	double minNMOSDriverWidth = minDriverCurrent / tech->currentOnNmos[inputParameter->temperature - 300];
 	minNMOSDriverWidth = MAX(MIN_NMOS_SIZE * tech->featureSize, minNMOSDriverWidth);
@@ -59,8 +44,6 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 		invalid = true;
 		return;
 	}
-
-	//minNMOSDriverWidth *= sizingfactor_MUX;
 
 	int optimalNumStage;
 
@@ -77,14 +60,8 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 			optimalNumStage = MAX_INV_CHAIN_LEN;
 		}
 
-		//if(_MUX){
-		//	optimalNumStage = MAX_INV_CHAIN_LEN;
-		//	numStage = MAX_INV_CHAIN_LEN;
-		//} else {	
 			numStage = optimalNumStage;
-		//}
-
-		//cout << "numStage: " << numStage << endl;
+			
 
 		double f = pow(F, 1.0 / (optimalNumStage + 1));	/* Logic effort per stage */
 		double inputCapLast = outputCap / f;
@@ -165,6 +142,49 @@ void OutputDriver::Initialize(double _logicEffort, double _inputCap, double _out
 	/* Restore the original buffer design style */
 	areaOptimizationLevel = _areaOptimizationLevel;
 
+	/* Add Repeater Calculation Strategy */
+
+	unitLengthWireCap = localWire->capWirePerUnit;
+	unitLengthWireResistance = localWire->resWirePerUnit_M1;
+
+	// define min INV resistance and capacitance to calculate repeater size
+	widthMinInvN = MIN_NMOS_SIZE * tech->featureSize;
+	widthMinInvP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
+	CalculateGateArea(INV, 1, widthMinInvN, widthMinInvP, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech, &hMinInv, &wMinInv);
+	CalculateGateCapacitance(INV, 1, widthMinInvN, widthMinInvP, hMinInv, *tech, &capMinInvInput, &capMinInvOutput);
+	// 1.4 update: change the formula
+	double resOnRep = (CalculateOnResistance(widthMinInvN, NMOS, inputParameter->temperature, *tech) + CalculateOnResistance(widthMinInvP, PMOS, inputParameter->temperature, *tech))/2;
+	
+	// optimal repeater design to achieve highest speed
+	repeaterSize = floor(sqrt(resOnRep*unitLengthWireCap/capMinInvInput/unitLengthWireResistance));
+	minDist = sqrt(2*resOnRep*(capMinInvOutput+capMinInvInput)/(unitLengthWireResistance*unitLengthWireCap));
+	CalculateGateArea(INV, 1, MIN_NMOS_SIZE * tech->featureSize * repeaterSize, tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize * repeaterSize, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech, &hRep, &wRep);
+	CalculateGateCapacitance(INV, 1, MIN_NMOS_SIZE * tech->featureSize * repeaterSize, tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize * repeaterSize, hRep, *tech, &capRepInput, &capRepOutput);
+	// 1.4 update: change the formula
+	resOnRep = (CalculateOnResistance(MIN_NMOS_SIZE * tech->featureSize * repeaterSize, NMOS, inputParameter->temperature, *tech) + CalculateOnResistance(tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize * repeaterSize, PMOS, inputParameter->temperature, *tech))/2;
+	double minUnitLengthDelay = 0.7*(resOnRep*(capRepInput+capRepOutput+unitLengthWireCap*minDist)+0.54*unitLengthWireResistance*minDist*unitLengthWireCap*minDist+unitLengthWireResistance*minDist*capRepInput)/minDist;
+	double maxUnitLengthEnergy = (capRepInput+capRepOutput+unitLengthWireCap*minDist)*tech->vdd*tech->vdd/minDist;
+	
+	if (inputParameter->delaytolerance) {   // tradeoff: increase delay to decrease energy
+		double delay = 0;
+		double energy = 100;
+		while ((delay<minUnitLengthDelay*(1+inputParameter->delaytolerance)) && (repeaterSize >= 1)) {
+			repeaterSize -= 1;
+			minDist *= 0.9;
+			CalculateGateArea(INV, 1, MIN_NMOS_SIZE * tech->featureSize * repeaterSize, tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize * repeaterSize, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech, &hRep, &wRep);
+			CalculateGateCapacitance(INV, 1, MIN_NMOS_SIZE * tech->featureSize * repeaterSize, tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize * repeaterSize, hRep, *tech, &capRepInput, &capRepOutput);
+			// 1.4 update: change the formula
+			resOnRep = (CalculateOnResistance(MIN_NMOS_SIZE * tech->featureSize * repeaterSize, NMOS, inputParameter->temperature, *tech) + CalculateOnResistance(tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize * repeaterSize, PMOS, inputParameter->temperature, *tech))/2;
+			delay = 0.7*(resOnRep*(capRepInput+capRepOutput+unitLengthWireCap*minDist)+0.54*unitLengthWireResistance*minDist*unitLengthWireCap*minDist+unitLengthWireResistance*minDist*capRepInput)/minDist;
+			energy = (capRepInput+capRepOutput+unitLengthWireCap*minDist)*tech->vdd*tech->vdd/minDist;
+		}
+	}
+	
+	widthInvN = MAX(1,repeaterSize) * MIN_NMOS_SIZE * tech->featureSize;
+	widthInvP = MAX(1,repeaterSize) * tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
+
+	/*************************************/
+
 	initialized = true;
 }
 
@@ -232,7 +252,20 @@ void OutputDriver::CalculateLatency(double _rampInput) {
 		gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthNMOS[numStage-1], NMOS, *tech);
 		beta = 1 / (resPullDown * gm);
 		// if (MUX) readLatency += 0.69 * resPullDown * outputCap  + 0.38 * outputRes * outputCap;
-		readLatency += horowitz(tr, beta, rampInput, &rampOutput);
+		
+		double resOnRep = (CalculateOnResistance(widthInvN, NMOS, inputParameter->temperature, *tech) + CalculateOnResistance(widthInvP, PMOS, inputParameter->temperature, *tech))/2;
+		unitLatencyRep = 0.7*(resOnRep*(capInvInput+capInvOutput+unitLengthWireCap*minDist)+0.54*unitLengthWireResistance*minDist*unitLengthWireCap*minDist+unitLengthWireResistance*minDist*capInvInput)/minDist;
+		unitLatencyWire = 0.7*unitLengthWireResistance*minDist*unitLengthWireCap*minDist/minDist;
+
+		if(addRepeaters && numRepeater > 0){
+			readLatency += wireLength*unitLatencyRep;
+		} else if (addRepeaters) {
+			readLatency += wireLength*unitLatencyWire;
+		} else {
+			readLatency += horowitz(tr, beta, rampInput, &rampOutput);
+		}
+		
+		
 		rampInput = _rampInput;
 		writeLatency = readLatency;
 	}
@@ -250,6 +283,10 @@ void OutputDriver::CalculatePower() {
 			leakage += CalculateGateLeakage(INV, 1, widthNMOS[i], widthPMOS[i], inputParameter->temperature, *tech)
 					* tech->vdd;
 		}
+
+		unitLengthLeakage = CalculateGateLeakage(INV, 1, widthInvN, widthInvP, inputParameter->temperature, *tech) * tech->vdd / minDist;
+		leakage += unitLengthLeakage * wireLength /* * numBitAccess */;
+
 		/* Dynamic energy */
 		readDynamicEnergy = 0;
 		double capLoad;
@@ -260,6 +297,15 @@ void OutputDriver::CalculatePower() {
 		capLoad = capOutput[numStage-1] + outputCap;	/* outputCap here means the final load capacitance */
 		readDynamicEnergy += capLoad * tech->vdd * tech->vdd;
 		writeDynamicEnergy = readDynamicEnergy;
+
+		unitLengthEnergyRep = (capInvInput+capInvOutput+unitLengthWireCap*minDist)*tech->vdd*tech->vdd/minDist * 0.5 * /*param->outputtoggle*/ 0.5;
+		unitLengthEnergyWire = (unitLengthWireCap*minDist)*tech->vdd*tech->vdd/minDist * 0.5 * /*param->outputtoggle*/ 0.5;
+
+		if (numRepeater > 0 && addRepeaters) {
+			readDynamicEnergy += wireLength*unitLengthEnergyRep;
+		} else if (addRepeaters) {
+			readDynamicEnergy += wireLength*unitLengthEnergyWire;
+		}
 	}
 }
 

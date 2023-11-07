@@ -20,7 +20,7 @@ Precharger::~Precharger() {
 	// TODO Auto-generated destructor stub
 }
 
-void Precharger::Initialize(double _voltagePrecharge, int _numColumn, double _capBitline, double _resBitline){
+void Precharger::Initialize(double _voltagePrecharge, int _numColumn, double _capBitline, double _resBitline, double _wireLength){
 	if (initialized)
 		cout << "[Precharger] Warning: Already initialized!" << endl;
 
@@ -28,6 +28,7 @@ void Precharger::Initialize(double _voltagePrecharge, int _numColumn, double _ca
 	numColumn  = _numColumn;
 	capBitline = _capBitline;
 	resBitline = _resBitline;
+	wireLength = _wireLength;
 	capWireLoadPerColumn = cell->widthInFeatureSize * tech->featureSize * localWire->capWirePerUnit;
 	resWireLoadPerColumn = cell->widthInFeatureSize * tech->featureSize * localWire->resWirePerUnit;
 	widthInvNmos = MIN_NMOS_SIZE * tech->featureSize;
@@ -46,7 +47,7 @@ void Precharger::Initialize(double _voltagePrecharge, int _numColumn, double _ca
 	double capInputInv         = CalculateGateCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthInvNmos, *tech) + CalculateGateCap(/*((tech->featureSize <= 14*1e-9)? 2:1) */ widthInvPmos, *tech);
 	capLoadPerColumn           = capInputInv + capWireLoadPerColumn;
 	double capLoadOutputDriver = numColumn * capLoadPerColumn;
-	outputDriver.Initialize(1, capInputInv, capLoadOutputDriver, 0 /* TO-DO */, true, latency_first, 0, false);  /* Always Latency First */
+	outputDriver.Initialize(1, capInputInv, capLoadOutputDriver, 0 /* TO-DO */, true, latency_first, 0, false, wireLength);  /* Always Latency First */
 
 	initialized = true;
 }

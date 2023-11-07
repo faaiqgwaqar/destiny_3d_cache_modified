@@ -61,6 +61,7 @@ public:
 	bool internalSensing;
 
 	double maxNmosSize;				/* Default value is MAX_NMOS_SIZE in constant.h, however, user might change it, Unit: F */
+	double delaytolerance;
 
 	string outputFilePrefix;
 

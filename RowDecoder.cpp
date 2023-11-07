@@ -21,7 +21,7 @@ RowDecoder::~RowDecoder() {
 }
 
 void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
-		bool _multipleRowPerSet, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent, bool _MUX) {
+		bool _multipleRowPerSet, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent, bool _MUX, double _wireLength) {
 	if (initialized)
 		cout << "[Row Decoder] Warning: Already initialized!" << endl;
 
@@ -31,6 +31,7 @@ void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
 	multipleRowPerSet = _multipleRowPerSet;
 	areaOptimizationLevel = _areaOptimizationLevel;
 	minDriverCurrent = _minDriverCurrent;
+	wireLength = _wireLength;
 
 	if (numRow <= 8) {	/* The predecoder output is used directly */
 		if (multipleRowPerSet)
@@ -57,7 +58,7 @@ void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
 		EnlargeSize(&widthNandN, &widthNandP, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 		capNand = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
-		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, latency_first, minDriverCurrent, _MUX /*false*/);
+		outputDriver.Initialize(logicEffortNand, capNand, capLoad, resLoad, true, latency_first, minDriverCurrent, _MUX /*false*/, wireLength);
 	} else {
 		/* we only need an 1-level output buffer to driver the wordline */
 		double capInv;
@@ -65,7 +66,7 @@ void RowDecoder::Initialize(int _numRow, double _capLoad, double _resLoad,
 		widthNandP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;
 		EnlargeSize(&widthNandN, &widthNandP, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech);
 		capInv = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandN, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthNandP, *tech);
-		outputDriver.Initialize(1, capInv, capLoad, resLoad, true, latency_first, minDriverCurrent, _MUX /*false*/);
+		outputDriver.Initialize(1, capInv, capLoad, resLoad, true, latency_first, minDriverCurrent, _MUX /*false*/, wireLength);
 	}
 
 	if (outputDriver.invalid) {

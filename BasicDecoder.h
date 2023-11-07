@@ -18,7 +18,7 @@ public:
 
 	/* Functions */
 	void PrintProperty();
-	void Initialize(int _numAddressBit, double _capLoad, double _resLoad);
+	void Initialize(int _numAddressBit, double _capLoad, double _resLoad, double _wireLength);
 	void CalculateArea();
 	void CalculateRC();
 	void CalculateLatency(double _rampInput);
@@ -35,6 +35,7 @@ public:
 	double widthNandN, widthNandP;
 	double capNandInput, capNandOutput;
 	double rampInput, rampOutput;
+	double wireLength;
 	/* TO-DO: Basic decoder so far does not take OptPriority input because the output driver is already quite fixed in this module */
 
 };

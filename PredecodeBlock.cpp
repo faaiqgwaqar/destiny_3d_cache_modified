@@ -84,13 +84,13 @@ void PredecodeBlock::Initialize(int _numAddressBit, double _capLoad, double _res
 			rowDecoderStage1B = NULL;
 			rowDecoderStage1C = NULL;
 			rowDecoderStage1A = new RowDecoder;
-			rowDecoderStage1A->Initialize(numOutputAddressBit, capLoad, resLoad, numNandInputStage1A == 3, latency_first, 0, false);
+			rowDecoderStage1A->Initialize(numOutputAddressBit, capLoad, resLoad, numNandInputStage1A == 3, latency_first, 0, false, 0.0);
 			rowDecoderStage1A->CalculateRC();
 		} else {
 			rowDecoderStage2 = new RowDecoder;
 			double capLoadStage1A, capLoadStage1B, capLoadStage1C;
 			if (numBasicDecoder <= 6) {
-				rowDecoderStage2->Initialize(numOutputAddressBit, capLoad, resLoad, false, latency_first, 0, false);
+				rowDecoderStage2->Initialize(numOutputAddressBit, capLoad, resLoad, false, latency_first, 0, false, 0.0);
 				rowDecoderStage2->CalculateRC();
 				numNandInputStage1B = numBasicDecoder / 2;
 				numNandInputStage1A = numBasicDecoder - numNandInputStage1B;
@@ -102,13 +102,13 @@ void PredecodeBlock::Initialize(int _numAddressBit, double _capLoad, double _res
 				capLoadStage1B = numAddressBitStage1A * rowDecoderStage2->capNandInput;
 				rowDecoderStage1C = NULL;
 				rowDecoderStage1A = new RowDecoder;
-			    rowDecoderStage1A->Initialize(numAddressBitStage1A, capLoadStage1A, 0 /* TO-DO */, numNandInputStage1A == 3, latency_first, 0, false);
+			    rowDecoderStage1A->Initialize(numAddressBitStage1A, capLoadStage1A, 0 /* TO-DO */, numNandInputStage1A == 3, latency_first, 0, false, 0.0);
 			    rowDecoderStage1A->CalculateRC();
 			    rowDecoderStage1B = new RowDecoder;
-			    rowDecoderStage1B->Initialize(numAddressBitStage1B, capLoadStage1B, 0 /* TO-DO */, numNandInputStage1B == 3, latency_first, 0, false);
+			    rowDecoderStage1B->Initialize(numAddressBitStage1B, capLoadStage1B, 0 /* TO-DO */, numNandInputStage1B == 3, latency_first, 0, false, 0.0);
 			    rowDecoderStage1B->CalculateRC();
 			} else if (numBasicDecoder <= 9){
-				rowDecoderStage2->Initialize(numOutputAddressBit, capLoad, resLoad, true, latency_first, 0, false);
+				rowDecoderStage2->Initialize(numOutputAddressBit, capLoad, resLoad, true, latency_first, 0, false, 0.0);
 				rowDecoderStage2->CalculateRC();
 				if (numBasicDecoder == 7) {
 					numNandInputStage1A = 3;
@@ -135,13 +135,13 @@ void PredecodeBlock::Initialize(int _numAddressBit, double _capLoad, double _res
 				capLoadStage1B = numAddressBitStage1A * numAddressBitStage1C * rowDecoderStage2->capNandInput;
 				capLoadStage1C = numAddressBitStage1A * numAddressBitStage1B * rowDecoderStage2->capNandInput;
 				rowDecoderStage1A = new RowDecoder;
-				rowDecoderStage1A->Initialize(numAddressBitStage1A, capLoadStage1A, 0 /* TO-DO */, numNandInputStage1A == 3, latency_first, 0, false);
+				rowDecoderStage1A->Initialize(numAddressBitStage1A, capLoadStage1A, 0 /* TO-DO */, numNandInputStage1A == 3, latency_first, 0, false, 0.0);
 				rowDecoderStage1A->CalculateRC();
 				rowDecoderStage1B = new RowDecoder;
-				rowDecoderStage1B->Initialize(numAddressBitStage1B, capLoadStage1B, 0 /* TO-DO */, numNandInputStage1B == 3, latency_first, 0, false);
+				rowDecoderStage1B->Initialize(numAddressBitStage1B, capLoadStage1B, 0 /* TO-DO */, numNandInputStage1B == 3, latency_first, 0, false, 0.0);
 				rowDecoderStage1B->CalculateRC();
 				rowDecoderStage1C = new RowDecoder;
-				rowDecoderStage1C->Initialize(numAddressBitStage1C, capLoadStage1C, 0 /* TO-DO */, numNandInputStage1C == 3, latency_first, 0, false);
+				rowDecoderStage1C->Initialize(numAddressBitStage1C, capLoadStage1C, 0 /* TO-DO */, numNandInputStage1C == 3, latency_first, 0, false, 0.0);
 				rowDecoderStage1C->CalculateRC();
 			}
 		}
@@ -152,7 +152,7 @@ void PredecodeBlock::Initialize(int _numAddressBit, double _capLoad, double _res
 				capLoadBasicDecoderC = 64 * rowDecoderStage1C->capNandInput;
 			}
 			basicDecoderC = new BasicDecoder;
-			basicDecoderC->Initialize(3, capLoadBasicDecoderC, 0 /* TO-DO */);
+			basicDecoderC->Initialize(3, capLoadBasicDecoderC, 0 /* TO-DO */, 0.0);
 		} else {
 			basicDecoderC = NULL;
 		}
@@ -163,7 +163,7 @@ void PredecodeBlock::Initialize(int _numAddressBit, double _capLoad, double _res
 				capLoadBasicDecoderB = 64 * rowDecoderStage1B->capNandInput;
 			}
 			basicDecoderB = new BasicDecoder;
-			basicDecoderB->Initialize(3, capLoadBasicDecoderB, 0 /* TO-DO */);
+			basicDecoderB->Initialize(3, capLoadBasicDecoderB, 0 /* TO-DO */, 0.0);
 		} else {
 			basicDecoderB = NULL;
 		}
@@ -175,7 +175,7 @@ void PredecodeBlock::Initialize(int _numAddressBit, double _capLoad, double _res
 				numCapNandA1 = 1 << ( 3* (numNandInputStage1A - 1));
 				capLoadBasicDecoderA1 = numCapNandA1 * rowDecoderStage1A->capNandInput;
 				basicDecoderA1 = new BasicDecoder;
-				basicDecoderA1->Initialize(3, capLoadBasicDecoderA1, 0 /* TO-DO */);
+				basicDecoderA1->Initialize(3, capLoadBasicDecoderA1, 0 /* TO-DO */, 0.0);
 				basicDecoderA2 = NULL;
 			} else if (numDecoder24 == 1) {
 				numBasicDecoderA1 = 1;
@@ -185,23 +185,23 @@ void PredecodeBlock::Initialize(int _numAddressBit, double _capLoad, double _res
 				capLoadBasicDecoderA1 = numCapNandA1 * rowDecoderStage1A->capNandInput;
 				capLoadBasicDecoderA2 = numCapNandA2 * rowDecoderStage1A->capNandInput;
 				basicDecoderA1 = new BasicDecoder;
-			    basicDecoderA1->Initialize(2, capLoadBasicDecoderA1, 0 /* TO-DO */);
+			    basicDecoderA1->Initialize(2, capLoadBasicDecoderA1, 0 /* TO-DO */, 0.0);
 			    basicDecoderA2 = new BasicDecoder;
-			    basicDecoderA2->Initialize(3, capLoadBasicDecoderA2, 0 /* TO-DO */);
+			    basicDecoderA2->Initialize(3, capLoadBasicDecoderA2, 0 /* TO-DO */, 0.0);
 			} else if (numDecoder24 == 2) {
 				if (numNandInputStage1A == 2) {
 		    		numBasicDecoderA1 = 2;
 		    		numBasicDecoderA2 = 0;
 		    		basicDecoderA1 = new BasicDecoder;
-		    		basicDecoderA1->Initialize(2, 4 * rowDecoderStage1A->capNandInput, 0 /* TO-DO */);
+		    		basicDecoderA1->Initialize(2, 4 * rowDecoderStage1A->capNandInput, 0 /* TO-DO */, 0.0);
 		    		basicDecoderA2 = NULL;
 				} else {
 		    		numBasicDecoderA1 = 2;
 		    		numBasicDecoderA2 = 1;
 		    		basicDecoderA1 = new BasicDecoder;
-		    		basicDecoderA1->Initialize(2, 32 * rowDecoderStage1A->capNandInput, 0 /* TO-DO */);
+		    		basicDecoderA1->Initialize(2, 32 * rowDecoderStage1A->capNandInput, 0 /* TO-DO */, 0.0);
 		    		basicDecoderA2 = new BasicDecoder;
-		    		basicDecoderA2->Initialize(3, 16 * rowDecoderStage1A->capNandInput, 0 /* TO-DO */);
+		    		basicDecoderA2->Initialize(3, 16 * rowDecoderStage1A->capNandInput, 0 /* TO-DO */, 0.0);
 				}
 			}
 		}else {
@@ -210,11 +210,11 @@ void PredecodeBlock::Initialize(int _numAddressBit, double _capLoad, double _res
 			basicDecoderA1 = new BasicDecoder;
 			basicDecoderA2 = NULL;
 			if (numDecoder12 == 1) {
-				basicDecoderA1->Initialize(1, capLoad, resLoad);
+				basicDecoderA1->Initialize(1, capLoad, resLoad, 0.0);
 			} else if (numDecoder24 == 1) {
-				basicDecoderA1->Initialize(2, capLoad, resLoad);
+				basicDecoderA1->Initialize(2, capLoad, resLoad, 0.0);
 			} else if (numDecoder38 == 1)
-				basicDecoderA1->Initialize(3, capLoad, resLoad);
+				basicDecoderA1->Initialize(3, capLoad, resLoad, 0.0);
 		}
 	}
 	initialized = true;

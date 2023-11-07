@@ -421,10 +421,10 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 
 	/* Initialize sub-component */
 
-	precharger.Initialize(tech->vdd, numColumn, capBitline, resBitline);
+	precharger.Initialize(tech->vdd, numColumn, capBitline, resBitline, lenBitline);
 	precharger.CalculateRC();
 
-	rowDecoder.Initialize(numRow, capWordline, resWordline, multipleRowPerSet, areaOptimizationLevel, maxWordlineCurrent, false);
+	rowDecoder.Initialize(numRow, capWordline, resWordline, multipleRowPerSet, areaOptimizationLevel, maxWordlineCurrent, true, lenWordline);
 	if (rowDecoder.invalid) {
 		invalid = true;
 		return;
@@ -432,15 +432,15 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	rowDecoder.CalculateRC();
 
 	if (!invalid) {
-		bitlineMuxDecoder.Initialize(muxSenseAmp, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true);
+		bitlineMuxDecoder.Initialize(muxSenseAmp, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true, lenWordline);
 		if (bitlineMuxDecoder.invalid)
 			invalid = true;
 		else
 			bitlineMuxDecoder.CalculateRC();
 	}
 
-	if (!invalid) {
-		senseAmpMuxLev1Decoder.Initialize(muxOutputLev1, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true);
+	if (!invalid) { 
+		senseAmpMuxLev1Decoder.Initialize(muxOutputLev1, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true, lenWordline);
 		if (senseAmpMuxLev1Decoder.invalid)
 			invalid = true;
 		else
@@ -448,7 +448,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	if (!invalid) {
-		senseAmpMuxLev2Decoder.Initialize(muxOutputLev2, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true);
+		senseAmpMuxLev2Decoder.Initialize(muxOutputLev2, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true, lenWordline);
 		if (senseAmpMuxLev2Decoder.invalid)
 			invalid = true;
 		else

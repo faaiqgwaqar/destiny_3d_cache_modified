@@ -21,7 +21,7 @@ public:
 	/* Functions */
 	void PrintProperty();
 	void Initialize(int _numRow, double _capLoad, double _resLoad,
-			bool _multipleRowPerSet, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent, bool _MUX);
+			bool _multipleRowPerSet, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent, bool _MUX, double _wireLength);
 	void CalculateArea();
 	void CalculateRC();
 	void CalculateLatency(double _rampInput);
@@ -43,6 +43,7 @@ public:
 	double widthNandN, widthNandP;
 	double capNandInput, capNandOutput;
 	double rampInput, rampOutput;
+	double wireLength;
 };
 
 #endif /* ROWDECODER_H_ */

@@ -18,7 +18,7 @@ public:
 
 	/* Functions */
 	void PrintProperty();
-	void Initialize(double _voltagePrecharge, int _numColumn, double _capBitline, double _resBitline);
+	void Initialize(double _voltagePrecharge, int _numColumn, double _capBitline, double _resBitline, double _wireLength);
 	void CalculateArea();
 	void CalculateRC();
 	void CalculateLatency(double _rampInput);
@@ -39,6 +39,7 @@ public:
 	double widthInvNmos, widthInvPmos;
 	double capLoadPerColumn;
 	double rampInput, rampOutput;
+	double wireLength;
 
 };
 

@@ -21,7 +21,7 @@ public:
 	/* Functions */
 	void PrintProperty();
 	void Initialize(double _logicEffort, double _inputCap, double _outputCap, double _outputRes,
-			bool _inv, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent, bool _MUX);
+			bool _inv, BufferDesignTarget _areaOptimizationLevel, double _minDriverCurrent, bool _addRepeaters, double _wireLength);
 	void CalculateArea();
 	void CalculateRC();
 	void CalculateLatency(double _rampInput);
@@ -35,7 +35,7 @@ public:
 	double inputCap;	/* Input capacitance, unit: F */
 	double outputCap;	/* Output capacitance, unit: F */
 	double outputRes;	/* Output resistance, unit: ohm */
-	bool MUX;
+	bool addRepeaters;
 	bool inv;			/* Whether the invert chain causes a flip */
 	int numStage;		/* Number of inverter chain stages */
 	BufferDesignTarget areaOptimizationLevel; /* 0 for latency, 2 for area */
@@ -45,6 +45,13 @@ public:
 	double capInput[MAX_INV_CHAIN_LEN];
 	double capOutput[MAX_INV_CHAIN_LEN];
 	double rampInput, rampOutput;
-};
+	/* Repeater Insertion Parameters */
+	double widthMinInvN, widthMinInvP, wMinInv, hMinInv, capMinInvInput, capMinInvOutput, wRep, hRep, capRepInput, capRepOutput;
+	double widthInvN, widthInvP, wInv, hInv, capInvInput, capInvOutput;
+	double unitLengthWireResistance, unitLengthWireCap, minDist;
+	int numRepeater, repeaterSize;
+	double unitLatencyRep, unitLatencyWire, wireLength;
+	double unitLengthLeakage, unitLengthEnergyRep, unitLengthEnergyWire;
+	};
 
 #endif /* OUTPUTDRIVER_H_ */
