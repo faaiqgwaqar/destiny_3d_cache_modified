@@ -284,8 +284,10 @@ void OutputDriver::CalculatePower() {
 					* tech->vdd;
 		}
 
-		unitLengthLeakage = CalculateGateLeakage(INV, 1, widthInvN, widthInvP, inputParameter->temperature, *tech) * tech->vdd / minDist;
-		leakage += unitLengthLeakage * wireLength /* * numBitAccess */;
+		if(addRepeaters){
+			unitLengthLeakage = CalculateGateLeakage(INV, 1, widthInvN, widthInvP, inputParameter->temperature, *tech) * tech->vdd / minDist;
+			leakage += unitLengthLeakage * wireLength /* * numBitAccess */;
+		}
 
 		/* Dynamic energy */
 		readDynamicEnergy = 0;

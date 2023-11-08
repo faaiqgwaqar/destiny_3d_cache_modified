@@ -657,9 +657,11 @@ void Result::print(int indent) {
     } else if (bank->stackedDieCount > 1 && bank->partitionGranularity == 1) {
         cout << string(indent, ' ') << " |--- TSV Leakage              = " << TO_WATT(bank->tsvArray.leakage * (bank->stackedDieCount-1) * bank->tsvArray.numTotalBits + bank->mat.tsvArray.leakage * bank->numColumnMat * bank->numRowMat * bank->mat.tsvArray.numTotalBits) << endl;
     }
-	if (inputParameter->routingMode == h_tree)
+	if (inputParameter->routingMode == h_tree){
 		cout << string(indent, ' ') << " |--- H-Tree Leakage Power     = " << TO_WATT(bank->routingLeakage) << endl;
-	else
+		cout << string(indent, ' ') << " |--- minDist Output Driver     = " << TO_WATT(bank->mat.subarray.rowDecoder.outputDriver.numRepeater) << endl;
+		cout << string(indent, ' ') << " |--- unitLengthLeakage Output Driver     = " << TO_WATT(bank->mat.subarray.rowDecoder.outputDriver.unitLengthLeakage) << endl;
+	} else
 		cout << string(indent, ' ') << " |--- Non-H-Tree Leakage Power = " << TO_WATT(bank->routingLeakage) << endl;
 	cout << string(indent, ' ') << " |--- Mat Leakage Power        = " << TO_WATT(bank->mat.leakage) << " per mat" << endl;
     if (cell->memCellType == eDRAM) {
