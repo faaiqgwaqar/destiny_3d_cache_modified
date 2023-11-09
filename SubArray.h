@@ -30,6 +30,7 @@ public:
 	//void CalculateRC();
 	void CalculateLatency(double _rampInput);
 	void CalculatePower();
+	void CalculateRepeater(int numCol, int *numRepeaters, double *repeaterSize);
 	SubArray & operator=(const SubArray &);
 
 	/* Properties */

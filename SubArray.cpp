@@ -405,6 +405,10 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	/* Repeater Insertion Scheme */
 	double rowDecoderCap;
 	double muxDecoderCap;
+	int temp1;
+	double temp2;
+
+	CalculateRepeater(numColumn, &temp1, &temp2);
 
 	if (inputParameter->numRepeaters > 0) {
 
@@ -599,7 +603,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 		if(inputParameter->numRepeaters){
 			for(int i = 0; i < inputParameter->numRepeaters; i++){
 				
-				if(i > 0) capLoad = sectioncap;
+				if(i == 0) capLoad = sectioncap;
 				else capLoad = gateCapRep + sectioncap;
 				
 				resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, inputParameter->temperature, *tech);
@@ -627,7 +631,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 
 			for(int i = 0; i < inputParameter->numRepeaters; i++){
 				
-				if(i > 0) capLoad = sectioncapMux;
+				if(i == 0) capLoad = sectioncapMux;
 				else capLoad = gateCapRep + sectioncapMux;
 				
 				resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, inputParameter->temperature, *tech);
@@ -1067,6 +1071,101 @@ void SubArray::PrintProperty() {
 	cout << "bitlineDelay: " << bitlineDelay*1e12 << "ps" << endl;
 	cout << "chargeLatency: " << chargeLatency*1e12 << "ps" << endl;
 	cout << "columnDecoderLatency: " << columnDecoderLatency*1e12 << "ps" << endl;
+}
+
+void SubArray::CalculateRepeater(int numCol, int *numRepeaters, double *repeaterSize){
+
+	int optNumber, currentNumber;
+	double optSize;
+	double optEDP, currentEDP, currentEnergy, currentDelay;
+	double repeater_leakage;
+	double repeater_readDynamicEnergy;
+	double repeater_writeDynamicEnergy;
+	double repeater_readDynamicEnergyMux;
+	double repeater_writeDynamicEnergyMux;
+	double sectionresLoc, sectioncapLoc, targetdriveresLoc, widthInvNLoc, widthInvPLoc;
+	double resPullDown;
+	double capLoad;
+	double tr;	/* time constant */
+	double gm;	/* transconductance */
+	double beta;	/* for horowitz calculation */
+	double rampInput = 1e20;
+	double rampOutput = 1e20;
+	double rowDecoderRepeaterLatency;
+	double repCap;
+
+	optEDP = 3.5e30; // Really Big Value
+	optNumber = 0;
+	optSize = 0;
+
+	for(int i = 1; i < log2(numCol); i++){
+		for(int j = 1; j <= MAX_NMOS_SIZE; j++){
+
+			currentNumber = pow(2,i) - 1;
+
+			/* Study the Energy Consumption */
+
+			sectionresLoc = resWordline / (currentNumber+1);
+			sectioncapLoc = capWordline / (currentNumber+1);
+			targetdriveresLoc = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize * j, NMOS, inputParameter->temperature, *tech) ;
+			widthInvNLoc  = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, NMOS, inputParameter->temperature, *tech) / targetdriveresLoc * tech->featureSize;
+			widthInvPLoc = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, PMOS, inputParameter->temperature, *tech) / targetdriveresLoc * tech->featureSize ;
+			
+			if (tech->featureSize <= 14*1e-9){
+				widthInvNLoc = 2* ceil(widthInvNLoc / tech->featureSize) * tech->featureSize;
+				widthInvPLoc = 2* ceil(widthInvPLoc / tech->featureSize) * tech->featureSize;
+			}
+			 
+			repeater_leakage = CalculateGateLeakage(INV, 1, widthInvNLoc, widthInvPLoc, inputParameter->temperature, *tech) * currentNumber * 2 * (numRow + muxOutputLev1 + muxOutputLev2 + muxSenseAmp);
+			repeater_readDynamicEnergy = sectioncap * tech->vdd * tech->vdd * currentNumber * 2 * numRow * activityRowRead;
+			
+			currentEnergy = repeater_leakage + repeater_readDynamicEnergy + 1;
+
+			/* Study the Latency Consumption*/
+
+			rowDecoderRepeaterLatency = 0.0;
+			repCap = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNLoc * tech->featureSize, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvPLoc * tech->featureSize, *tech);
+
+			for(int k = 0; k < currentNumber; k++){
+				
+				if(k == 0) capLoad = sectioncapLoc;
+				else capLoad = repCap + sectioncapLoc;
+				
+				resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNLoc, NMOS, inputParameter->temperature, *tech);
+				tr = resPullDown * 2 * repCap + repCap * sectionresLoc / 2;
+				gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNLoc, NMOS, *tech);
+				beta = 1 / (resPullDown * gm);
+
+				rowDecoderRepeaterLatency += horowitz(tr, beta, rampInput, &rampOutput);
+				rampInput = rampOutput;
+
+				/* Two Inverters Per Repeater */
+
+				resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNLoc, NMOS, inputParameter->temperature, *tech);
+				tr = resPullDown * capLoad + sectioncapLoc * sectionresLoc / 2;
+				gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvNLoc, NMOS, *tech);
+				beta = 1 / (resPullDown * gm);
+
+				rowDecoderRepeaterLatency += horowitz(tr, beta, rampInput, &rampOutput);
+				rampInput = rampOutput;
+
+			}
+
+			currentDelay = rowDecoderRepeaterLatency + 1;
+			currentEDP = currentDelay * currentEnergy;
+
+			/* Cache the Optimized Version*/
+
+			if(currentEDP < optEDP){
+				optSize = j;
+				optNumber = i;
+				optEDP = currentEDP;
+			 }
+		}
+	}
+
+	cout << "OptNumber: " << optNumber << " | OptSize: " << optSize << endl;
+
 }
 
 SubArray & SubArray::operator=(const SubArray &rhs) {
