@@ -603,12 +603,23 @@ void SubArray::CalculateLatency(double _rampInput) {
 				else capLoad = gateCapRep + sectioncap;
 				
 				resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, inputParameter->temperature, *tech);
+				tr = resPullDown * 2 * gateCapRep + gateCapRep * sectionres / 2;
+				gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, *tech);
+				beta = 1 / (resPullDown * gm);
+
+				rowDecoderRepeaterLatency += horowitz(tr, beta, rampInput, &rampOutput);
+				rampInput = rampOutput;
+
+				/* Two Inverters Per Repeater */
+
+				resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, inputParameter->temperature, *tech);
 				tr = resPullDown * capLoad + sectioncap * sectionres / 2;
 				gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, *tech);
 				beta = 1 / (resPullDown * gm);
 
 				rowDecoderRepeaterLatency += horowitz(tr, beta, rampInput, &rampOutput);
 				rampInput = rampOutput;
+
 			}
 
 			rampInput = _rampInput;
@@ -619,6 +630,16 @@ void SubArray::CalculateLatency(double _rampInput) {
 				if(i > 0) capLoad = sectioncapMux;
 				else capLoad = gateCapRep + sectioncapMux;
 				
+				resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, inputParameter->temperature, *tech);
+				tr = resPullDown * 2 * gateCapRep + gateCapRep * sectionres / 2;
+				gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, *tech);
+				beta = 1 / (resPullDown * gm);
+
+				rowDecoderRepeaterLatencyMux += horowitz(tr, beta, rampInput, &rampOutput);
+				rampInput = rampOutput;
+
+				/* Two Inverters Per Repeater */
+
 				resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, inputParameter->temperature, *tech);
 				tr = resPullDown * capLoad + sectioncap * sectionres / 2;
 				gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, *tech);
