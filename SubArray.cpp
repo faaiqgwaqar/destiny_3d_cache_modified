@@ -403,6 +403,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	/* Repeater Insertion Scheme */
+	double rowDecoderCap;
 
 	if (inputParameter->numRepeaters > 0) {
 
@@ -424,6 +425,8 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	gateCapRep = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN * tech->featureSize, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvP * tech->featureSize, *tech);
+	if(inputParameter->numRepeaters) rowDecoderCap = sectioncap + gateCapRep;
+	else rowDecoderCap = sectioncap;
 
 	/****************************/
 
@@ -432,7 +435,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	precharger.Initialize(tech->vdd, numColumn, capBitline, resBitline, lenBitline);
 	precharger.CalculateRC();
 
-	rowDecoder.Initialize(numRow, (sectioncap + gateCapRep), sectionres, multipleRowPerSet, areaOptimizationLevel, maxWordlineCurrent, true, lenWordline);
+	rowDecoder.Initialize(numRow, rowDecoderCap, sectionres, multipleRowPerSet, areaOptimizationLevel, maxWordlineCurrent, false, lenWordline);
 	if (rowDecoder.invalid) {
 		invalid = true;
 		return;
@@ -440,7 +443,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	rowDecoder.CalculateRC();
 
 	if (!invalid) {
-		bitlineMuxDecoder.Initialize(muxSenseAmp, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true, lenWordline);
+		bitlineMuxDecoder.Initialize(muxSenseAmp, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, false, lenWordline);
 		if (bitlineMuxDecoder.invalid)
 			invalid = true;
 		else
@@ -448,7 +451,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	if (!invalid) { 
-		senseAmpMuxLev1Decoder.Initialize(muxOutputLev1, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true, lenWordline);
+		senseAmpMuxLev1Decoder.Initialize(muxOutputLev1, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, false, lenWordline);
 		if (senseAmpMuxLev1Decoder.invalid)
 			invalid = true;
 		else
@@ -456,7 +459,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	if (!invalid) {
-		senseAmpMuxLev2Decoder.Initialize(muxOutputLev2, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, true, lenWordline);
+		senseAmpMuxLev2Decoder.Initialize(muxOutputLev2, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, false, lenWordline);
 		if (senseAmpMuxLev2Decoder.invalid)
 			invalid = true;
 		else
@@ -805,9 +808,11 @@ void SubArray::CalculatePower() {
 			leakage *= numRow * numColumn;
 
 			/* Add Energy Comsumption from Repeaters */
-			leakage += repeater_leakage;
-			readDynamicEnergy += repeater_readDynamicEnergy;
-			writeDynamicEnergy += repeater_writeDynamicEnergy;
+			if(inputParameter->numRepeaters){	
+				leakage += repeater_leakage;
+				readDynamicEnergy += repeater_readDynamicEnergy;
+				writeDynamicEnergy += repeater_writeDynamicEnergy;
+			}
 			/*****************************************/
 
 		} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
@@ -1073,6 +1078,18 @@ SubArray & SubArray::operator=(const SubArray &rhs) {
 	senseAmpMuxLev2 = rhs.senseAmpMuxLev2;
 	precharger = rhs.precharger;
 	senseAmp = rhs.senseAmp;
+	widthInvN = rhs.widthInvN;
+	widthInvP = rhs.widthInvP;
+	wInv = rhs.wInv;
+	hInv = rhs.hInv;
+	drivecapin = rhs.drivecapin;
+	drivecapout = rhs.drivecapout;
+	sectionres = rhs.sectionres;
+	sectioncap = rhs.sectioncap;
+	targetdriveres = rhs.targetdriveres;
+	activityRowRead = rhs.activityRowRead;
+	activityRowWrite = rhs.activityRowWrite;
+	gateCapRep = rhs.gateCapRep;
 
 	return *this;
 }
