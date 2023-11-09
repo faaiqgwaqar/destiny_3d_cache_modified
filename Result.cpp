@@ -659,8 +659,6 @@ void Result::print(int indent) {
     }
 	if (inputParameter->routingMode == h_tree){
 		cout << string(indent, ' ') << " |--- H-Tree Leakage Power     = " << TO_WATT(bank->routingLeakage) << endl;
-		cout << string(indent, ' ') << " |--- minDist Output Driver     = " << TO_WATT(bank->mat.subarray.rowDecoder.outputDriver.numRepeater) << endl;
-		cout << string(indent, ' ') << " |--- unitLengthLeakage Output Driver     = " << TO_WATT(bank->mat.subarray.rowDecoder.outputDriver.unitLengthLeakage) << endl;
 	} else
 		cout << string(indent, ' ') << " |--- Non-H-Tree Leakage Power = " << TO_WATT(bank->routingLeakage) << endl;
 	cout << string(indent, ' ') << " |--- Mat Leakage Power        = " << TO_WATT(bank->mat.leakage) << " per mat" << endl;

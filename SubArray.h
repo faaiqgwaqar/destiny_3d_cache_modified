@@ -71,6 +71,11 @@ public:
 	double bitlineDelayOn;  /* Bitline delay of LRS, Unit: s */
 	double bitlineDelayOff; /* Bitline delay of HRS, Unit: s */
 
+	// 1.4 update : parameters for buffer insertion
+	double widthInvN, widthInvP;
+	double wInv, hInv, drivecapin, drivecapout, sectionres, sectioncap, targetdriveres;
+	double gateCapRep;
+
 	RowDecoder	rowDecoder;
 	RowDecoder	bitlineMuxDecoder;
 	Mux			bitlineMux;

@@ -63,7 +63,9 @@ InputParameter::InputParameter() {
 	minIsGlobalWireLowSwing = false;
 	maxIsGlobalWireLowSwing = true;
 	relaxSRAMCell = true;
-	delaytolerance = 0;
+	delaytolerance = 0.1;
+	numRepeaters = 0;
+	bufferSizeRatio = 1.0;
 
 	associativity = 1;				/* Default value for non-cache design */
 	routingMode = h_tree;

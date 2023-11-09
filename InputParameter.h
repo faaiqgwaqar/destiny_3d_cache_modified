@@ -62,9 +62,11 @@ public:
 
 	double maxNmosSize;				/* Default value is MAX_NMOS_SIZE in constant.h, however, user might change it, Unit: F */
 	double delaytolerance;
+	double bufferSizeRatio;
 
 	string outputFilePrefix;
 
+	int numRepeaters;
 	int minNumRowMat;
 	int maxNumRowMat;
 	int minNumColumnMat;

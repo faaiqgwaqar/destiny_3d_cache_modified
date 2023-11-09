@@ -46,12 +46,12 @@ public:
 	double capOutput[MAX_INV_CHAIN_LEN];
 	double rampInput, rampOutput;
 	/* Repeater Insertion Parameters */
-	double widthMinInvN, widthMinInvP, wMinInv, hMinInv, capMinInvInput, capMinInvOutput, wRep, hRep, capRepInput, capRepOutput;
-	double widthInvN, widthInvP, wInv, hInv, capInvInput, capInvOutput;
-	double unitLengthWireResistance, unitLengthWireCap, minDist;
-	int numRepeater, repeaterSize;
+	//double widthMinInvN, widthMinInvP, wMinInv, hMinInv, capMinInvInput, capMinInvOutput, wRep, hRep, capRepInput, capRepOutput;
+	//double widthInvN, widthInvP, wInv, hInv, capInvInput, capInvOutput;
+	//double unitLengthWireResistance, unitLengthWireCap, minDist;
+	//int numRepeater, repeaterSize;
 	double unitLatencyRep, unitLatencyWire, wireLength;
-	double unitLengthLeakage, unitLengthEnergyRep, unitLengthEnergyWire;
+	//double unitLengthLeakage, unitLengthEnergyRep, unitLengthEnergyWire;
 	};
 
 #endif /* OUTPUTDRIVER_H_ */

@@ -106,25 +106,6 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 			}
 			maxBitlineCurrent = MAX(cell->resetCurrent, cell->setCurrent) + cell->leakageCurrentAccessDevice * (numRow - 1);
 		} else { //non-CMOS access
-		//	if (!cell->readFloating) { // conventional half select read scheme
-		//		if ((2 * cell->resistanceOnAtHalfReadVoltage / (numRow - 1)) < (cell->resistanceOffAtReadVoltage / BITLINE_LEAKAGE_TOLERANCE)){
-		//			/* bitline too long */
-		//			invalid = true;
-		//			initialized = true;
-		//			return;
-		//		}
-		//	} else { //Floating wordline and bitline to reduce bypass leakage */
-		//		double r, c; // number of rows and columns in a memristor array of which wordline voltage is to be calculated
-		//		r = numRow;
-		//		c = numColumn / muxSenseAmp / muxOutputLev1 / muxOutputLev2;
-		//		double equResistanceOn = cell->GetMemristance((c - 1) / (r + c - 1)); //Solved Wordline Voltage is (c-1)/(r+c-1) * Vread
-		//		if (((c - 1) / (r + c - 1) * equResistanceOn / (numRow - 1)) < (cell->resistanceOffAtReadVoltage / BITLINE_LEAKAGE_TOLERANCE)){
-		//			/* bitline too long */
-		//			invalid = true;
-		//			initialized = true;
-		//			return;
-		//		}
-		//	}
 			/* Write half select problem limit the array size */
 			double resetCurrent;
 			if (cell->resetCurrent == 0) {
@@ -419,12 +400,37 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		// TO-DO
 	}
 
+	/* Repeater Insertion Scheme */
+
+	if (inputParameter->numRepeaters > 0) {
+
+			sectionres = resWordline / (inputParameter->numRepeaters + 1);
+			sectioncap = capWordline / (inputParameter->numRepeaters + 1);
+			targetdriveres = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize * inputParameter->bufferSizeRatio, NMOS, inputParameter->temperature, *tech) ;
+			widthInvN  = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, NMOS, inputParameter->temperature, *tech) / targetdriveres * tech->featureSize;
+			widthInvP = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, PMOS, inputParameter->temperature, *tech) / targetdriveres * tech->featureSize ;
+			if (tech->featureSize <= 14*1e-9){
+				widthInvN = 2* ceil(widthInvN / tech->featureSize) * tech->featureSize;
+				widthInvP = 2* ceil(widthInvP / tech->featureSize) * tech->featureSize;
+			}
+
+	} else {
+		
+		sectionres = resWordline;
+		sectioncap = capWordline;
+
+	}
+
+	gateCapRep = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN * tech->featureSize, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvP * tech->featureSize, *tech);
+
+	/****************************/
+
 	/* Initialize sub-component */
 
 	precharger.Initialize(tech->vdd, numColumn, capBitline, resBitline, lenBitline);
 	precharger.CalculateRC();
 
-	rowDecoder.Initialize(numRow, capWordline, resWordline, multipleRowPerSet, areaOptimizationLevel, maxWordlineCurrent, true, lenWordline);
+	rowDecoder.Initialize(numRow, (sectioncap + gateCapRep), sectionres, multipleRowPerSet, areaOptimizationLevel, maxWordlineCurrent, true, lenWordline);
 	if (rowDecoder.invalid) {
 		invalid = true;
 		return;
@@ -493,7 +499,9 @@ void SubArray::CalculateArea() {
 	} else if (invalid) {
 		height = width = area = invalid_value;
 	} else {
+		
 		double addWidth = 0, addHeight = 0;
+		double bufferarea= hInv * wInv * inputParameter->numRepeaters * 2 * numRow;
 
 		width = lenWordline;
 		height = lenBitline;
@@ -535,6 +543,13 @@ void SubArray::CalculateArea() {
 		senseAmpMuxLev2.CalculateArea();
 		addHeight += senseAmpMuxLev2.height;
 
+		/* Add Repeater Cell Area */
+
+		//addHeight += bufferarea/lenWordline;
+		addWidth += bufferarea/lenBitline;
+
+		/**************************/
+
 		bitlineMuxDecoder.CalculateArea();
 		addWidth = MAX(addWidth, bitlineMuxDecoder.width);
 		senseAmpMuxLev1Decoder.CalculateArea();
@@ -554,6 +569,34 @@ void SubArray::CalculateLatency(double _rampInput) {
 	} else if (invalid) {
 		readLatency = writeLatency = invalid_value;
 	} else {
+
+		/* Row Decoder Repeater Calculation */
+		double resPullDown;
+		double capLoad;
+		double tr;	/* time constant */
+		double gm;	/* transconductance */
+		double beta;	/* for horowitz calculation */
+		double rampInput = _rampInput;
+		double rampOutput = _rampInput;
+		double rowDecoderRepeaterLatency = 0.0;
+		
+		if(inputParameter->numRepeaters){
+			for(int i = 0; i < inputParameter->numRepeaters; i++){
+				
+				if(i > 0) capLoad = sectioncap;
+				else capLoad = gateCapRep + sectioncap;
+				
+				resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, inputParameter->temperature, *tech);
+				tr = resPullDown * capLoad + sectioncap * sectionres / 2;
+				gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, *tech);
+				beta = 1 / (resPullDown * gm);
+
+				rowDecoderRepeaterLatency += horowitz(tr, beta, rampInput, &rampOutput);
+				rampInput = rampOutput;
+			}
+		}
+		/************************************/
+
 		precharger.CalculateLatency(_rampInput);
 		rowDecoder.CalculateLatency(_rampInput);
 		bitlineMuxDecoder.CalculateLatency(_rampInput);
