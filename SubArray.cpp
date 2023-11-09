@@ -404,11 +404,14 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 
 	/* Repeater Insertion Scheme */
 	double rowDecoderCap;
+	double muxDecoderCap;
 
 	if (inputParameter->numRepeaters > 0) {
 
 			sectionres = resWordline / (inputParameter->numRepeaters + 1);
 			sectioncap = capWordline / (inputParameter->numRepeaters + 1);
+			sectionresMux = resMuxLoad / (inputParameter->numRepeaters + 1);
+			sectioncapMux = capMuxLoad / (inputParameter->numRepeaters  + 1);
 			targetdriveres = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize * inputParameter->bufferSizeRatio, NMOS, inputParameter->temperature, *tech) ;
 			widthInvN  = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, NMOS, inputParameter->temperature, *tech) / targetdriveres * tech->featureSize;
 			widthInvP = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, PMOS, inputParameter->temperature, *tech) / targetdriveres * tech->featureSize ;
@@ -421,12 +424,19 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		
 		sectionres = resWordline;
 		sectioncap = capWordline;
+		sectionresMux = resMuxLoad;
+		sectioncapMux = capMuxLoad;
 
 	}
 
 	gateCapRep = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN * tech->featureSize, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvP * tech->featureSize, *tech);
-	if(inputParameter->numRepeaters) rowDecoderCap = sectioncap + gateCapRep;
-	else rowDecoderCap = sectioncap;
+	if(inputParameter->numRepeaters){
+		rowDecoderCap = sectioncap + gateCapRep;
+		muxDecoderCap = sectioncapMux + gateCapRep;
+	} else {
+		rowDecoderCap = sectioncap;
+		muxDecoderCap = sectioncapMux;
+	} 
 
 	/****************************/
 
@@ -443,7 +453,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	rowDecoder.CalculateRC();
 
 	if (!invalid) {
-		bitlineMuxDecoder.Initialize(muxSenseAmp, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, false, lenWordline);
+		bitlineMuxDecoder.Initialize(muxSenseAmp, muxDecoderCap, sectionresMux /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, false, lenWordline);
 		if (bitlineMuxDecoder.invalid)
 			invalid = true;
 		else
@@ -451,7 +461,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	if (!invalid) { 
-		senseAmpMuxLev1Decoder.Initialize(muxOutputLev1, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, false, lenWordline);
+		senseAmpMuxLev1Decoder.Initialize(muxOutputLev1, muxDecoderCap, sectionresMux /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, false, lenWordline);
 		if (senseAmpMuxLev1Decoder.invalid)
 			invalid = true;
 		else
@@ -459,7 +469,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	if (!invalid) {
-		senseAmpMuxLev2Decoder.Initialize(muxOutputLev2, capMuxLoad, resMuxLoad /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, false, lenWordline);
+		senseAmpMuxLev2Decoder.Initialize(muxOutputLev2, muxDecoderCap, sectionresMux /* TO-DO: need to fix */, false, areaOptimizationLevel, 0, false, lenWordline);
 		if (senseAmpMuxLev2Decoder.invalid)
 			invalid = true;
 		else
@@ -506,7 +516,7 @@ void SubArray::CalculateArea() {
 	} else {
 		
 		double addWidth = 0, addHeight = 0;
-		double bufferarea= hInv * wInv * inputParameter->numRepeaters * 2 * numRow;
+		double bufferwidth = wInv * inputParameter->numRepeaters * 2;
 
 		width = lenWordline;
 		height = lenBitline;
@@ -551,7 +561,7 @@ void SubArray::CalculateArea() {
 		/* Add Repeater Cell Area */
 
 		//addHeight += bufferarea/lenWordline;
-		addWidth += bufferarea/lenBitline;
+		width += bufferwidth;
 
 		/**************************/
 
@@ -584,6 +594,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 		double rampInput = _rampInput;
 		double rampOutput = _rampInput;
 		double rowDecoderRepeaterLatency = 0.0;
+		double rowDecoderRepeaterLatencyMux = 0.0;
 		
 		if(inputParameter->numRepeaters){
 			for(int i = 0; i < inputParameter->numRepeaters; i++){
@@ -599,6 +610,23 @@ void SubArray::CalculateLatency(double _rampInput) {
 				rowDecoderRepeaterLatency += horowitz(tr, beta, rampInput, &rampOutput);
 				rampInput = rampOutput;
 			}
+
+			rampInput = _rampInput;
+			rampOutput = _rampInput;
+
+			for(int i = 0; i < inputParameter->numRepeaters; i++){
+				
+				if(i > 0) capLoad = sectioncapMux;
+				else capLoad = gateCapRep + sectioncapMux;
+				
+				resPullDown = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, inputParameter->temperature, *tech);
+				tr = resPullDown * capLoad + sectioncap * sectionres / 2;
+				gm = CalculateTransconductance(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN, NMOS, *tech);
+				beta = 1 / (resPullDown * gm);
+
+				rowDecoderRepeaterLatencyMux += horowitz(tr, beta, rampInput, &rampOutput);
+				rampInput = rampOutput;
+			}
 		}
 		/************************************/
 
@@ -608,7 +636,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 		senseAmpMuxLev1Decoder.CalculateLatency(_rampInput);
 		senseAmpMuxLev2Decoder.CalculateLatency(_rampInput);
 		columnDecoderLatency = MAX(MAX(bitlineMuxDecoder.readLatency, senseAmpMuxLev1Decoder.readLatency), senseAmpMuxLev2Decoder.readLatency);
-		double decoderLatency = MAX(rowDecoder.readLatency + rowDecoderRepeaterLatency, columnDecoderLatency);
+		double decoderLatency = MAX(rowDecoder.readLatency + rowDecoderRepeaterLatency, columnDecoderLatency + rowDecoderRepeaterLatencyMux);
 		/*need a second thought on this equation*/
 		double capPassTransistor = bitlineMux.capNMOSPassTransistor +
 				senseAmpMuxLev1.capNMOSPassTransistor + senseAmpMuxLev2.capNMOSPassTransistor;
@@ -790,10 +818,13 @@ void SubArray::CalculatePower() {
 		senseAmpMuxLev1.CalculatePower();
 		senseAmpMuxLev2.CalculatePower();
 
-		double repeater_leakage = CalculateGateLeakage(INV, 1, widthInvN, widthInvP, inputParameter->temperature, *tech) * inputParameter->numRepeaters *2 * numRow;
-		double repeater_readDynamicEnergy = (drivecapin + drivecapout) * tech->vdd * tech->vdd * inputParameter->numRepeaters * 2 * numRow * activityRowRead;
-		double repeater_writeDynamicEnergy = (drivecapin + drivecapout) * tech->vdd * tech->vdd * inputParameter->numRepeaters * 2 * numRow * activityRowWrite;
+		double repeater_leakage = CalculateGateLeakage(INV, 1, widthInvN, widthInvP, inputParameter->temperature, *tech) * inputParameter->numRepeaters * 2 * (numRow + muxOutputLev1 + muxOutputLev2 + muxSenseAmp);
+		double repeater_readDynamicEnergy = sectioncap * tech->vdd * tech->vdd * inputParameter->numRepeaters * 2 * numRow * activityRowRead;
+		double repeater_writeDynamicEnergy = sectioncap * tech->vdd * tech->vdd * inputParameter->numRepeaters * 2 * numRow * activityRowWrite;
+		double repeater_readDynamicEnergyMux = sectioncapMux * tech->vdd * tech->vdd *inputParameter->numRepeaters * 2 * (muxOutputLev1 + muxOutputLev2 + muxSenseAmp) * (1/(muxOutputLev1 + muxOutputLev2) + 1/(muxSenseAmp));
+		double repeater_writeDynamicEnergyMux = sectioncapMux * tech->vdd * tech->vdd *inputParameter->numRepeaters * 2 * (muxOutputLev1 + muxOutputLev2 + muxSenseAmp) * (1/(muxOutputLev1 + muxOutputLev2) + 1/(muxSenseAmp));
 
+		
 		if (cell->memCellType == SRAM) {
 			/* Codes below calculate the SRAM bitline power */
 			readDynamicEnergy = (capCellAccess + capBitline + bitlineMux.capForPreviousPowerCalculation)
@@ -810,8 +841,8 @@ void SubArray::CalculatePower() {
 			/* Add Energy Comsumption from Repeaters */
 			if(inputParameter->numRepeaters){	
 				leakage += repeater_leakage;
-				readDynamicEnergy += repeater_readDynamicEnergy;
-				writeDynamicEnergy += repeater_writeDynamicEnergy;
+				readDynamicEnergy += repeater_readDynamicEnergy + repeater_readDynamicEnergyMux;
+				writeDynamicEnergy += repeater_writeDynamicEnergy + repeater_writeDynamicEnergyMux;
 			}
 			/*****************************************/
 
@@ -1086,6 +1117,8 @@ SubArray & SubArray::operator=(const SubArray &rhs) {
 	drivecapout = rhs.drivecapout;
 	sectionres = rhs.sectionres;
 	sectioncap = rhs.sectioncap;
+	sectionresMux = rhs.sectionresMux;
+	sectioncapMux = rhs.sectioncapMux;
 	targetdriveres = rhs.targetdriveres;
 	activityRowRead = rhs.activityRowRead;
 	activityRowWrite = rhs.activityRowWrite;

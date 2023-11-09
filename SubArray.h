@@ -73,7 +73,8 @@ public:
 
 	// 1.4 update : parameters for buffer insertion
 	double widthInvN, widthInvP;
-	double wInv, hInv, drivecapin, drivecapout, sectionres, sectioncap, targetdriveres;
+	double wInv, hInv, drivecapin, drivecapout, targetdriveres;
+	double sectionres, sectioncap, sectionresMux, sectioncapMux;
 	double activityRowRead, activityRowWrite;		// Activity for # of rows
 	double gateCapRep;
 
