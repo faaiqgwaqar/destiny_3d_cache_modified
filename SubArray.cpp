@@ -41,6 +41,8 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 
 	double maxWordlineCurrent = 0;
 	double maxBitlineCurrent = 0;
+	
+	activityRowRead = activityRowWrite = 1/numRow;
 
 	/* Check if the configuration is legal */
 	if (inputParameter->designTarget == cache && inputParameter->cacheAccessMode != sequential_access_mode) {
@@ -603,7 +605,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 		senseAmpMuxLev1Decoder.CalculateLatency(_rampInput);
 		senseAmpMuxLev2Decoder.CalculateLatency(_rampInput);
 		columnDecoderLatency = MAX(MAX(bitlineMuxDecoder.readLatency, senseAmpMuxLev1Decoder.readLatency), senseAmpMuxLev2Decoder.readLatency);
-		double decoderLatency = MAX(rowDecoder.readLatency, columnDecoderLatency);
+		double decoderLatency = MAX(rowDecoder.readLatency + rowDecoderRepeaterLatency, columnDecoderLatency);
 		/*need a second thought on this equation*/
 		double capPassTransistor = bitlineMux.capNMOSPassTransistor +
 				senseAmpMuxLev1.capNMOSPassTransistor + senseAmpMuxLev2.capNMOSPassTransistor;
@@ -785,6 +787,10 @@ void SubArray::CalculatePower() {
 		senseAmpMuxLev1.CalculatePower();
 		senseAmpMuxLev2.CalculatePower();
 
+		double repeater_leakage = CalculateGateLeakage(INV, 1, widthInvN, widthInvP, inputParameter->temperature, *tech) * inputParameter->numRepeaters *2 * numRow;
+		double repeater_readDynamicEnergy = (drivecapin + drivecapout) * tech->vdd * tech->vdd * inputParameter->numRepeaters * 2 * numRow * activityRowRead;
+		double repeater_writeDynamicEnergy = (drivecapin + drivecapout) * tech->vdd * tech->vdd * inputParameter->numRepeaters * 2 * numRow * activityRowWrite;
+
 		if (cell->memCellType == SRAM) {
 			/* Codes below calculate the SRAM bitline power */
 			readDynamicEnergy = (capCellAccess + capBitline + bitlineMux.capForPreviousPowerCalculation)
@@ -797,6 +803,13 @@ void SubArray::CalculatePower() {
 			leakage += CalculateGateLeakage(INV, 1, cell->widthAccessCMOS * tech->featureSize, 0,
 					inputParameter->temperature, *tech) * tech->vdd;	/* two accesses NMOS, but combined as one with vdd crossed */
 			leakage *= numRow * numColumn;
+
+			/* Add Energy Comsumption from Repeaters */
+			leakage += repeater_leakage;
+			readDynamicEnergy += repeater_readDynamicEnergy;
+			writeDynamicEnergy += repeater_writeDynamicEnergy;
+			/*****************************************/
+
 		} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
 			/* Codes below calculate the DRAM bitline power */
 			readDynamicEnergy = (capCellAccess + capBitline + bitlineMux.capForPreviousPowerCalculation) * senseVoltage * devtech->vdd * numColumn;
