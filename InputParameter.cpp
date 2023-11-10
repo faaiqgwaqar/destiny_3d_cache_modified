@@ -66,6 +66,7 @@ InputParameter::InputParameter() {
 	delaytolerance = 0.1;
 	numRepeaters = 0;
 	bufferSizeRatio = 1.0;
+	addRepeaters = true;
 
 	associativity = 1;				/* Default value for non-cache design */
 	routingMode = h_tree;

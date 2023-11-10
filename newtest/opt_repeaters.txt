@@ -1,0 +1,13 @@
+User-defined configuration file (2D_SRAM_Benchmarker/SRAM_cache_5nm.cfg) is loaded
+
+
+====================
+DESIGN SPECIFICATION
+====================
+Design Target: Cache
+Capacity   : 32MB
+Cache Line Size: 64Bytes
+Cache Associativity: 16 Ways
+
+Searching for the best solution that is optimized for write energy-delay-product ...
+Using cell file: 2D_SRAM_Benchmarker/SRAM_cell_5nm.cell

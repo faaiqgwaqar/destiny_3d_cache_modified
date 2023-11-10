@@ -120,6 +120,9 @@ public:
     bool doublePrune;
     bool printAllOptimals;
     bool allowDifferentTagTech;
+	bool addRepeaters;
+	int optNumRepeaters[25];
+	float optSizeRepeaters[25];
 
     int printLevel;
 };

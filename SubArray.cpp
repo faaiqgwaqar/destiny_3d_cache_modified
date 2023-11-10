@@ -405,18 +405,18 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	/* Repeater Insertion Scheme */
 	double rowDecoderCap;
 	double muxDecoderCap;
-	int temp1;
-	double temp2;
 
-	CalculateRepeater(numColumn, &temp1, &temp2);
+	CalculateRepeater(numColumn);
 
-	if (inputParameter->numRepeaters > 0) {
+	//cout << "OptNumber: " << numRepeaters << " | OptSize: " << bufferSizeRatio << endl;
 
-			sectionres = resWordline / (inputParameter->numRepeaters + 1);
-			sectioncap = capWordline / (inputParameter->numRepeaters + 1);
-			sectionresMux = resMuxLoad / (inputParameter->numRepeaters + 1);
-			sectioncapMux = capMuxLoad / (inputParameter->numRepeaters  + 1);
-			targetdriveres = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize * inputParameter->bufferSizeRatio, NMOS, inputParameter->temperature, *tech) ;
+	if (numRepeaters > 0) {
+
+			sectionres = resWordline / (numRepeaters + 1);
+			sectioncap = capWordline / (numRepeaters + 1);
+			sectionresMux = resMuxLoad / (numRepeaters + 1);
+			sectioncapMux = capMuxLoad / (numRepeaters  + 1);
+			targetdriveres = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize * bufferSizeRatio, NMOS, inputParameter->temperature, *tech) ;
 			widthInvN  = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, NMOS, inputParameter->temperature, *tech) / targetdriveres * tech->featureSize;
 			widthInvP = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * tech->featureSize, PMOS, inputParameter->temperature, *tech) / targetdriveres * tech->featureSize ;
 			if (tech->featureSize <= 14*1e-9){
@@ -434,7 +434,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	gateCapRep = CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvN * tech->featureSize, *tech) + CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * widthInvP * tech->featureSize, *tech);
-	if(inputParameter->numRepeaters){
+	if(numRepeaters){
 		rowDecoderCap = sectioncap + gateCapRep;
 		muxDecoderCap = sectioncapMux + gateCapRep;
 	} else {
@@ -520,7 +520,7 @@ void SubArray::CalculateArea() {
 	} else {
 		
 		double addWidth = 0, addHeight = 0;
-		double bufferwidth = wInv * inputParameter->numRepeaters * 2;
+		double bufferwidth = wInv * numRepeaters * 2;
 
 		width = lenWordline;
 		height = lenBitline;
@@ -600,8 +600,8 @@ void SubArray::CalculateLatency(double _rampInput) {
 		double rowDecoderRepeaterLatency = 0.0;
 		double rowDecoderRepeaterLatencyMux = 0.0;
 		
-		if(inputParameter->numRepeaters){
-			for(int i = 0; i < inputParameter->numRepeaters; i++){
+		if(numRepeaters){
+			for(int i = 0; i < numRepeaters; i++){
 				
 				if(i == 0) capLoad = sectioncap;
 				else capLoad = gateCapRep + sectioncap;
@@ -629,7 +629,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 			rampInput = _rampInput;
 			rampOutput = _rampInput;
 
-			for(int i = 0; i < inputParameter->numRepeaters; i++){
+			for(int i = 0; i < numRepeaters; i++){
 				
 				if(i == 0) capLoad = sectioncapMux;
 				else capLoad = gateCapRep + sectioncapMux;
@@ -843,11 +843,11 @@ void SubArray::CalculatePower() {
 		senseAmpMuxLev1.CalculatePower();
 		senseAmpMuxLev2.CalculatePower();
 
-		double repeater_leakage = CalculateGateLeakage(INV, 1, widthInvN, widthInvP, inputParameter->temperature, *tech) * inputParameter->numRepeaters * 2 * (numRow + muxOutputLev1 + muxOutputLev2 + muxSenseAmp);
-		double repeater_readDynamicEnergy = sectioncap * tech->vdd * tech->vdd * inputParameter->numRepeaters * 2 * numRow * activityRowRead;
-		double repeater_writeDynamicEnergy = sectioncap * tech->vdd * tech->vdd * inputParameter->numRepeaters * 2 * numRow * activityRowWrite;
-		double repeater_readDynamicEnergyMux = sectioncapMux * tech->vdd * tech->vdd *inputParameter->numRepeaters * 2 * (muxOutputLev1 + muxOutputLev2 + muxSenseAmp) * (1/(muxOutputLev1 + muxOutputLev2) + 1/(muxSenseAmp));
-		double repeater_writeDynamicEnergyMux = sectioncapMux * tech->vdd * tech->vdd *inputParameter->numRepeaters * 2 * (muxOutputLev1 + muxOutputLev2 + muxSenseAmp) * (1/(muxOutputLev1 + muxOutputLev2) + 1/(muxSenseAmp));
+		double repeater_leakage = CalculateGateLeakage(INV, 1, widthInvN, widthInvP, inputParameter->temperature, *tech) * numRepeaters * 2 * (numRow + muxOutputLev1 + muxOutputLev2 + muxSenseAmp);
+		double repeater_readDynamicEnergy = sectioncap * tech->vdd * tech->vdd * numRepeaters * 2 * numRow * activityRowRead;
+		double repeater_writeDynamicEnergy = sectioncap * tech->vdd * tech->vdd * numRepeaters * 2 * numRow * activityRowWrite;
+		double repeater_readDynamicEnergyMux = sectioncapMux * tech->vdd * tech->vdd *numRepeaters * 2 * (muxOutputLev1 + muxOutputLev2 + muxSenseAmp) * (1/(muxOutputLev1 + muxOutputLev2) + 1/(muxSenseAmp));
+		double repeater_writeDynamicEnergyMux = sectioncapMux * tech->vdd * tech->vdd *numRepeaters * 2 * (muxOutputLev1 + muxOutputLev2 + muxSenseAmp) * (1/(muxOutputLev1 + muxOutputLev2) + 1/(muxSenseAmp));
 
 		
 		if (cell->memCellType == SRAM) {
@@ -864,7 +864,7 @@ void SubArray::CalculatePower() {
 			leakage *= numRow * numColumn;
 
 			/* Add Energy Comsumption from Repeaters */
-			if(inputParameter->numRepeaters){	
+			if(numRepeaters){	
 				leakage += repeater_leakage;
 				readDynamicEnergy += repeater_readDynamicEnergy + repeater_readDynamicEnergyMux;
 				writeDynamicEnergy += repeater_writeDynamicEnergy + repeater_writeDynamicEnergyMux;
@@ -1073,7 +1073,7 @@ void SubArray::PrintProperty() {
 	cout << "columnDecoderLatency: " << columnDecoderLatency*1e12 << "ps" << endl;
 }
 
-void SubArray::CalculateRepeater(int numCol, int *numRepeaters, double *repeaterSize){
+void SubArray::CalculateRepeater(int numCol){
 
 	int optNumber, currentNumber;
 	double optSize;
@@ -1098,6 +1098,21 @@ void SubArray::CalculateRepeater(int numCol, int *numRepeaters, double *repeater
 	optNumber = 0;
 	optSize = 0;
 
+	if(!inputParameter->addRepeaters){
+		numRepeaters = 0;
+		bufferSizeRatio = 1.0;
+		return;
+	}
+
+	if(inputParameter->optNumRepeaters[int(log2(numCol))]){
+		numRepeaters = inputParameter->optNumRepeaters[int(log2(numCol))];
+		bufferSizeRatio = inputParameter->optSizeRepeaters[int(log2(numCol))];
+		//cout << "using already optimized vars" << endl;
+		return;
+	}
+
+	//cout << "Not Using Optimized Vars" << endl;
+
 	for(int i = 1; i < log2(numCol); i++){
 		for(int j = 1; j <= MAX_NMOS_SIZE; j++){
 
@@ -1116,8 +1131,8 @@ void SubArray::CalculateRepeater(int numCol, int *numRepeaters, double *repeater
 				widthInvPLoc = 2* ceil(widthInvPLoc / tech->featureSize) * tech->featureSize;
 			}
 			 
-			repeater_leakage = CalculateGateLeakage(INV, 1, widthInvNLoc, widthInvPLoc, inputParameter->temperature, *tech) * currentNumber * 2 * (numRow + muxOutputLev1 + muxOutputLev2 + muxSenseAmp);
-			repeater_readDynamicEnergy = sectioncap * tech->vdd * tech->vdd * currentNumber * 2 * numRow * activityRowRead;
+			repeater_leakage = CalculateGateLeakage(INV, 1, widthInvNLoc, widthInvPLoc, inputParameter->temperature, *tech) * currentNumber * 2;
+			repeater_readDynamicEnergy = sectioncap * tech->vdd * tech->vdd * currentNumber * 2 * activityRowRead;
 			
 			currentEnergy = repeater_leakage + repeater_readDynamicEnergy + 1;
 
@@ -1158,14 +1173,18 @@ void SubArray::CalculateRepeater(int numCol, int *numRepeaters, double *repeater
 
 			if(currentEDP < optEDP){
 				optSize = j;
-				optNumber = i;
+				optNumber = currentNumber;
 				optEDP = currentEDP;
 			 }
 		}
 	}
 
-	cout << "OptNumber: " << optNumber << " | OptSize: " << optSize << endl;
-
+	//cout << "OptNumber: " << optNumber << " | OptSize: " << optSize << endl;
+	numRepeaters = optNumber;
+	bufferSizeRatio = optSize;
+	inputParameter->optNumRepeaters[int(log2(numCol))] = optNumber;
+	inputParameter->optSizeRepeaters[int(log2(numCol))] = optSize;
+	
 }
 
 SubArray & SubArray::operator=(const SubArray &rhs) {
@@ -1243,6 +1262,8 @@ SubArray & SubArray::operator=(const SubArray &rhs) {
 	activityRowRead = rhs.activityRowRead;
 	activityRowWrite = rhs.activityRowWrite;
 	gateCapRep = rhs.gateCapRep;
+	numRepeaters = rhs.numRepeaters;
+	bufferSizeRatio = rhs.bufferSizeRatio;
 
 	return *this;
 }

@@ -30,7 +30,7 @@ public:
 	//void CalculateRC();
 	void CalculateLatency(double _rampInput);
 	void CalculatePower();
-	void CalculateRepeater(int numCol, int *numRepeaters, double *repeaterSize);
+	void CalculateRepeater(int numCol);
 	SubArray & operator=(const SubArray &);
 
 	/* Properties */
@@ -78,6 +78,8 @@ public:
 	double sectionres, sectioncap, sectionresMux, sectioncapMux;
 	double activityRowRead, activityRowWrite;		// Activity for # of rows
 	double gateCapRep;
+	int numRepeaters;
+	double bufferSizeRatio;
 
 	RowDecoder	rowDecoder;
 	RowDecoder	bitlineMuxDecoder;
