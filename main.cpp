@@ -664,6 +664,7 @@ int nvsim(ofstream& outputFile, string inputFileName, long long& numSolution, Re
 	}
 
     cout << "numSolutions = " << numSolution << " / numDesigns = " << numDesigns << endl;
+	//globalWire->PrintProperty();
 
 	if (localWire) delete localWire;
 	if (globalWire) delete globalWire;

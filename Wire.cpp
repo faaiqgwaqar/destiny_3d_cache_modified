@@ -254,7 +254,10 @@ void Wire::Initialize(int _featureSizeInNano, WireType _wireType, WireRepeaterTy
 			aspectRatio = 0;
 			ildThickness = 0e-6;
 		}
-		} else if (_featureSizeInNano <= 22) {
+
+		wirePitch *= featureSize;
+	
+	} else if (_featureSizeInNano <= 22) {
 		featureSize = 22e-9;
 		switch (wireType) {
 		case local_aggressive:
@@ -690,7 +693,7 @@ void Wire::Initialize(int _featureSizeInNano, WireType _wireType, WireRepeaterTy
 		}
 		/* calculate repeated wire pitch */
 		CalculateGateArea(INV, 1, repeaterSize * MIN_NMOS_SIZE * tech->featureSize,
-				repeaterSize * MIN_NMOS_SIZE * tech->featureSize * tech->pnSizeRatio, 1e41, *tech,
+				repeaterSize * MIN_NMOS_SIZE * tech->featureSize * tech->pnSizeRatio, tech->featureSize * MAX_TRANSISTOR_HEIGHT, *tech,
 				&repeaterHeight, &repeaterWidth);
 		if (repeaterWidth < repeaterHeight) {
 			double temp = repeaterWidth;
@@ -698,6 +701,9 @@ void Wire::Initialize(int _featureSizeInNano, WireType _wireType, WireRepeaterTy
 			repeaterHeight = temp;
 		}
 		repeatedWirePitch = wirePitch + repeaterWidth;
+		//cout << "repeatedWirePitch: " << repeatedWirePitch << endl;
+		//cout << "wirePitch: " << wirePitch << endl;
+		//cout << "repeaterSize: " << repeaterSize << endl;
 	}
 
 	initialized =true;
@@ -872,7 +878,7 @@ void Wire::findOptimalRepeater() {
 	double outputRes = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * nmosSize, NMOS, inputParameter->temperature, *tech)
 			+ CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * pmosSize, PMOS, inputParameter->temperature, *tech);
 
-	repeaterSize = sqrt(outputRes * capWirePerUnit / inputCap / resWirePerUnit);
+	repeaterSize = floor(sqrt(outputRes * capWirePerUnit / inputCap / resWirePerUnit));
 	repeaterSpacing = sqrt(2 * outputRes * (outputCap + inputCap) / (resWirePerUnit * capWirePerUnit));
 
 	//double tau = outputRes * (inputCap + outputCap) + outputRes * capWirePerUnit * repeaterSpacing
@@ -924,6 +930,8 @@ double Wire::getRepeatedWireUnitDelay() {
 
 	double tau = outputRes * (inputCap + outputCap) + outputRes * wireCap + wireRes * outputCap
 			+ 0.5 * wireRes * wireCap;
+
+	//cout << "repeaterSpacing: " << repeaterSpacing << endl; 
 
 	/* Return as a unit value */
 	return 0.693 * tau / repeaterSpacing;
