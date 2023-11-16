@@ -12,6 +12,12 @@ Cache Associativity: 16 Ways
 Searching for the best solution that is optimized for read latency ...
 Using cell file: 2D_SRAM_Benchmarker/SRAM_cell_14nm.cell
 numSolutions = 151 / numDesigns = 59049
+Wire type: active (with repeaters)
+Repeater Size: 32.000
+Repeater Spacing: 0.115mm
+Delay: 0.292ns/mm
+Dynamic Energy: 0.000nJ/mm
+Subtheshold Leakage Power: 0.000mW/mm
 
 =======================
 CACHE DESIGN -- SUMMARY
@@ -62,7 +68,7 @@ CACHE DATA ARRAY DETAILS
      - One set is partitioned into 1 rows
     Local Wire:
      - Wire Type :     Local Aggressive
-     - Repeater Type:     No Repeaters
+     - Repeater Type:     Fully-Optimized Repeaters
      - Low Swing :     No
     Global Wire:
      - Wire Type :     Global Aggressive
