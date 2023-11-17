@@ -861,6 +861,8 @@ void SubArray::CalculatePower() {
 					* tech->vdd * 2;	/* two inverters per SRAM cell */
 			leakage += CalculateGateLeakage(INV, 1, cell->widthAccessCMOS * tech->featureSize, 0,
 					inputParameter->temperature, *tech) * tech->vdd;	/* two accesses NMOS, but combined as one with vdd crossed */
+
+			//cout << "single cell leakage: " << leakage * 1e12 << endl;
 			leakage *= numRow * numColumn;
 
 			/* Add Energy Comsumption from Repeaters */

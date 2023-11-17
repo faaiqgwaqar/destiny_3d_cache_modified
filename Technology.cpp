@@ -2403,7 +2403,11 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
         vpp = vdd;
     }
 
-	capOverlap = capIdealGate * 0.2;
+	if (_featureSizeInNano >= 22) {
+		capOverlap = capIdealGate * 0.2;
+	} else {
+		capOverlap = 0;	// capOverlap and capFringe are included in capIdealGate in FinFET technology, so we let these two parameters 0
+	}
 	//capSidewall = 2.5e-10;	/* Unit: F/m, this value is from CACTI, PTM model shows the value is 5e-10 */
 	double cjd = 1e-3;             /* Bottom junction capacitance, Unit: F/m^2*/
 	double cjswd = 2.5e-10;           /* Isolation-edge sidewall junction capacitance, Unit: F/m */
@@ -2412,7 +2416,16 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
 	double mjswd = 0.33;           /* Isolation-edge sidewall junction capacitance grading coefficient */
 	double mjswgd = 0.33;          /* Gate-edge sidewall junction capacitance grading coefficient */
 	buildInPotential = 0.9;			/* This value is from BSIM4 */
-	capJunction = cjd / pow(1 + vdd / buildInPotential, mjd);
+
+	if ( _featureSizeInNano == 14 ) capJunction = 0.0120;
+	else if ( _featureSizeInNano == 10 ) capJunction = 0.0134;
+	else if ( _featureSizeInNano== 7 ) capJunction = 0.0137;
+	else if ( _featureSizeInNano == 5 ) capJunction = 0.0119;
+	else if ( _featureSizeInNano == 3 ) capJunction = 0.0128;
+	else if ( _featureSizeInNano == 2 ) capJunction = 0.0091;
+	else if ( _featureSizeInNano == 1 ) capJunction = 0.0102;
+	else capJunction = cjd / pow(1 + vdd / buildInPotential, mjd);
+
 	capSidewall = cjswd / pow(1 + vdd / buildInPotential, mjswd);
 	capDrainToChannel = cjswgd / pow(1 + vdd / buildInPotential, mjswgd);
 
