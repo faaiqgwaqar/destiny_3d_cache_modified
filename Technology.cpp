@@ -1575,7 +1575,7 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
 
 				// 1.4 update
 				max_fin_num =4;
-				effective_width=widthFin+heightFin*2;
+				effective_width=widthFin+heightFin*2; // 9.2e-8
 
 				phyGateLength = 2.6e-8; // 1.4 update : changed to 2.6e-8 following IRDS 2016
 				capIdealGate = caplist[0] * 1E-18 / (effective_width);
@@ -1663,7 +1663,7 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
 
 				// 1.4 update 
 				max_fin_num =3;
-				effective_width=widthFin+heightFin*2;
+				effective_width=widthFin+heightFin*2; // 9.8e-8
 
 				phyGateLength = 2.2e-8;	
 				capIdealGate = caplist[1] * 1E-18 / (effective_width);
@@ -2380,18 +2380,41 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
         tsv_depletion_width[1][1] = 0.6;  // um, Calculated from cylindrical Possion equation
         tsv_liner_dielectric_constant[1][1] = 2.104;
     } /*TODO: ADD NEW PROJECTIONS, EVERYTHING SEEN IS TEMPORARY*/ else if (_featureSizeInNano >= 1) {
-        //TSV aggressive, projected from ITRS
-        tsv_pitch[0][0] = tsv_pitch[1][0] = tsv_pitch[0][1] = tsv_pitch[1][1] = 0.4; // in um
-        tsv_diameter[0][0] = tsv_diameter[1][0] = tsv_diameter[0][1] = tsv_diameter[1][1] = 0.6;
-        tsv_length[0][0] = tsv_length[1][0] = tsv_length[0][1] = tsv_length[1][1] = 4.0;
-        tsv_dielec_thickness[0][0] = tsv_dielec_thickness[1][0] = 
-			tsv_dielec_thickness[0][1] = tsv_dielec_thickness[1][1] = 0.1;
-        tsv_contact_resistance[0][0] = tsv_contact_resistance[1][0] = 
-			tsv_contact_resistance[0][1] = tsv_contact_resistance[1][1] = 0.1; // Ohm
-        tsv_depletion_width[0][0] = tsv_depletion_width[1][0] = 
-			tsv_depletion_width[0][1] = tsv_depletion_width[1][1] = 0.6;  // um, Calculated from cylindrical Possion equation
-        tsv_liner_dielectric_constant[0][0] = tsv_liner_dielectric_constant[1][0] = 
-			tsv_liner_dielectric_constant[0][1] = tsv_liner_dielectric_constant[1][1] = 1.414;
+        //TSV aggressive, projected from IRDS
+        tsv_pitch[0][0] = 4; // in um
+        tsv_diameter[0][0] = 1;
+        tsv_length[0][0] = 10.0;
+        tsv_dielec_thickness[0][0] = 0.1;
+        tsv_contact_resistance[0][0] = 0.7;
+        tsv_depletion_width[0][0] = 0.6;
+        tsv_liner_dielectric_constant[0][0] = 2.4;
+
+        //TSV conservative, projected from IRDS
+        tsv_pitch[1][0] = 10; // in um
+        tsv_diameter[1][0] = 4.5;
+        tsv_length[1][0] = 50.0;
+        tsv_dielec_thickness[1][0] = 0.2;
+        tsv_contact_resistance[1][0] = 0.9; // Ohm
+        tsv_depletion_width[1][0] = 0.6;  // um, Calculated from cylindrical Possion equation
+        tsv_liner_dielectric_constant[1][0] = 2.55;
+
+        //TSV aggressive, industry reported
+        tsv_pitch[0][1] = 4; // in um
+        tsv_diameter[0][1] = 1;
+        tsv_length[0][1] = 10.0;
+        tsv_dielec_thickness[0][1] = 0.1;
+        tsv_contact_resistance[0][1] = 0.7;
+        tsv_depletion_width[0][1] = 0.6;
+        tsv_liner_dielectric_constant[0][1] = 2.4;
+
+        //TSV conservative, industry reported -- Swapped from CACTI3DD
+        tsv_pitch[1][1] = 10; // in um
+        tsv_diameter[1][1] = 4.5;
+        tsv_length[1][1] = 50.0;
+        tsv_dielec_thickness[1][1] = 0.2;
+        tsv_contact_resistance[1][1] = 0.9; // Ohm
+        tsv_depletion_width[1][1] = 0.6;  // um, Calculated from cylindrical Possion equation
+        tsv_liner_dielectric_constant[1][1] = 2.55;
     }
     // Note: CACTI3DD also has 16nm
     
