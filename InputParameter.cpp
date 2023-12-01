@@ -148,7 +148,7 @@ void InputParameter::ReadInputParameterFromFile(const std::string & inputFile) {
 			if (!strcmp(tmp, "ReadLatency"))
 				optimizationTarget = read_latency_optimized;
 			else if (!strcmp(tmp, "WriteLatency"))
-				optimizationTarget = write_latency_optimized;
+			optimizationTarget = write_latency_optimized;
 			else if (!strcmp(tmp, "ReadDynamicEnergy"))
 				optimizationTarget = read_energy_optimized;
 			else if (!strcmp(tmp, "WriteDynamicEnergy"))
