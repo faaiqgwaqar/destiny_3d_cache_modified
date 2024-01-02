@@ -337,6 +337,9 @@ void Result::print(int indent) {
 			<< cell->area * tech->featureSize * tech->featureSize * bank->capacity / bank->numRowMat
 			/ bank->numColumnMat / bank->numRowSubarray / bank->numColumnSubarray
 			/ bank->mat.subarray.area * 100 << "%)" <<endl;
+	if (cell->memCellType == gcDRAM){
+		cout << string(indent, ' ') << " |--- Subarray Memory Tiers = " << bank->mat.subarray.stackedMemTiers << endl;
+	}
     if (bank->stackedDieCount > 1 && bank->partitionGranularity == 0) {
         cout << string(indent, ' ') << " |--- TSV Area      = " << TO_SQM(bank->tsvArray.area) << endl;
     } else if (bank->stackedDieCount > 1 && bank->partitionGranularity == 1) {
@@ -461,7 +464,7 @@ void Result::print(int indent) {
 		cout << string(indent, ' ') << "       |--- Row Decoder Latency = " << TO_SECOND(bank->mat.subarray.rowDecoder.writeLatency) << endl;
 		cout << string(indent, ' ') << "       |--- Charge Latency      = " << TO_SECOND(bank->mat.subarray.chargeLatency) << endl;
 	}
-    if (cell->memCellType == eDRAM) {
+    if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
         cout << string(indent, ' ') << " - Refresh Latency = " << TO_SECOND(bank->refreshLatency) << endl;
         if (bank->stackedDieCount > 1 && bank->partitionGranularity == 0) {
             cout << string(indent, ' ') << " |--- TSV Latency    = " << TO_SECOND(bank->tsvArray.writeLatency * (bank->stackedDieCount-1)) << endl;
@@ -629,7 +632,7 @@ void Result::print(int indent) {
 			cout << string(indent, ' ') << "       |--- Bitline & Cell Write Energy= " << TO_JOULE(bank->mat.subarray.cellResetEnergy) << endl;
 		}
 	}
-    if (cell->memCellType == eDRAM) {
+    if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
         cout << string(indent, ' ') << " - Refresh Dynamic Energy = " << TO_JOULE(bank->refreshDynamicEnergy) << endl;
         if (bank->stackedDieCount > 1 && bank->partitionGranularity == 0) {
             cout << string(indent, ' ') << " |--- TSV Dynamic Energy    = " << TO_JOULE(bank->tsvArray.writeDynamicEnergy * (bank->stackedDieCount-1) * bank->tsvArray.numReadBits) << endl;
@@ -662,7 +665,7 @@ void Result::print(int indent) {
 	} else
 		cout << string(indent, ' ') << " |--- Non-H-Tree Leakage Power = " << TO_WATT(bank->routingLeakage) << endl;
 	cout << string(indent, ' ') << " |--- Mat Leakage Power        = " << TO_WATT(bank->mat.leakage) << " per mat" << endl;
-    if (cell->memCellType == eDRAM) {
+    if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
         cout << string(indent, ' ') << " - Refresh Power = " << TO_WATT(bank->refreshDynamicEnergy / (cell->retentionTime)) << endl;
     }
 }
@@ -735,7 +738,7 @@ void Result::printAsCache(Result &tagResult, CacheAccessMode cacheAccessMode) {
 		cout << " - Cache Hit Latency   = " << cacheHitLatency * 1e9 << "ns" << endl;
 		cout << " - Cache Miss Latency  = " << cacheMissLatency * 1e9 << "ns" << endl;
 		cout << " - Cache Write Latency = " << cacheWriteLatency * 1e9 << "ns" << endl;
-        if (cell->memCellType == eDRAM) {
+        if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
             cout << " - Cache Refresh Latency = " << MAX(tagResult.bank->refreshLatency, bank->refreshLatency) * 1e6 << "us per bank" << endl;
             cout << " - Cache Availability = " << ((cell->retentionTime - MAX(tagResult.bank->refreshLatency, bank->refreshLatency)) / cell->retentionTime) * 100.0 << "%" << endl;
         }
@@ -743,13 +746,13 @@ void Result::printAsCache(Result &tagResult, CacheAccessMode cacheAccessMode) {
 		cout << " - Cache Hit Dynamic Energy   = " << cacheHitDynamicEnergy * 1e9 << "nJ per access" << endl;
 		cout << " - Cache Miss Dynamic Energy  = " << cacheMissDynamicEnergy * 1e9 << "nJ per access" << endl;
 		cout << " - Cache Write Dynamic Energy = " << cacheWriteDynamicEnergy * 1e9 << "nJ per access" << endl;
-        if (cell->memCellType == eDRAM) {
+        if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
             cout << " - Cache Refresh Dynamic Energy = " << (tagResult.bank->refreshDynamicEnergy + bank->refreshDynamicEnergy) * 1e9 << "nJ per bank" << endl;
         }
 		cout << " - Cache Total Leakage Power  = " << cacheLeakage * 1e3 << "mW" << endl;
 		cout << " |--- Cache Data Array Leakage Power = " << bank->leakage * 1e3 << "mW" << endl;
 		cout << " |--- Cache Tag Array Leakage Power  = " << tagResult.bank->leakage * 1e3 << "mW" << endl;
-        if (cell->memCellType == eDRAM) {
+        if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
             cout << " - Cache Refresh Power = " << TO_WATT(bank->refreshDynamicEnergy / (cell->retentionTime)) << " per bank" << endl;
         }
         if (inputParameter->printLevel > 0) {
@@ -929,19 +932,19 @@ void Result::printToCsvFile(ofstream &outputFile) {
 	outputFile << bank->mat.subarray.height * 1e6 << "," << bank->mat.subarray.width * 1e6 << "," << bank->mat.subarray.area * 1e6 << ",";
 	outputFile << cell->area * tech->featureSize * tech->featureSize * bank->capacity / bank->area * 100 << ",";
 	outputFile << bank->readLatency * 1e9 << "," << bank->writeLatency * 1e9 << ",";
-    if (cell->memCellType == eDRAM) {
+    if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
         outputFile << bank->refreshLatency * 1e9 << ",";
     } else {
         outputFile << "0,";
     }
 	outputFile << bank->readDynamicEnergy * 1e12 << "," << bank->writeDynamicEnergy * 1e12 << ",";
-    if (cell->memCellType == eDRAM) {
+    if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
         outputFile << bank->refreshDynamicEnergy * 1e12 << ",";
     } else {
         outputFile << "0,";
     }
 	outputFile << bank->leakage * 1e3 << ",";
-    if (cell->memCellType == eDRAM) {
+    if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
         outputFile << TO_WATT(bank->refreshDynamicEnergy / (cell->retentionTime)) << ",";
     } else {
         outputFile << "0,";
@@ -1009,7 +1012,7 @@ void Result::printAsCacheToCsvFile(Result &tagResult, CacheAccessMode cacheAcces
 		outputFile << cacheHitLatency * 1e9 << ",";
 		outputFile << cacheMissLatency * 1e9 << ",";
 		outputFile << cacheWriteLatency * 1e9 << ",";
-        if (cell->memCellType == eDRAM) {
+        if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
             outputFile << MAX(tagResult.bank->refreshLatency, bank->refreshLatency) * 1e9 << ",";
         } else {
             outputFile << "0,";
@@ -1017,13 +1020,13 @@ void Result::printAsCacheToCsvFile(Result &tagResult, CacheAccessMode cacheAcces
 		outputFile << cacheHitDynamicEnergy * 1e9 << ",";
 		outputFile << cacheMissDynamicEnergy * 1e9 << ",";
 		outputFile << cacheWriteDynamicEnergy * 1e9 << ",";
-        if (cell->memCellType == eDRAM) {
+        if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
             outputFile << (tagResult.bank->refreshDynamicEnergy + bank->refreshDynamicEnergy) * 1e9 << ",";
         } else {
             outputFile << "0,";
         }
 		outputFile << cacheLeakage * 1e3 << ",";
-        if (cell->memCellType == eDRAM) {
+        if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
             outputFile << TO_WATT(bank->refreshDynamicEnergy / (cell->retentionTime)) << ",";
         } else {
             outputFile << "0,";

@@ -54,7 +54,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		}
 	}
 
-	if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
+	if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
 		if (muxSenseAmp > 1) {
 			/* DRAM does not allow muxed bitline because of its destructive readout */
 			invalid = true;
@@ -152,7 +152,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 	}
 
 	if (internalSenseAmp) {
-		if (cell->memCellType == SRAM || cell->memCellType == DRAM || cell->memCellType == eDRAM) {
+		if (cell->memCellType == SRAM || cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
 			/* SRAM, DRAM, and eDRAM all use voltage sensing */
 			voltageSense = true;
 		} else if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor || cell->memCellType == FBRAM) {
@@ -160,7 +160,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		} else {/* NAND flash */
 			voltageSense = true;
 		}
-	} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
+	} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
 		cout << "[Subarray] Error: DRAM does not support external sense amplifiers!" << endl;
 		exit(-1);
 	}
@@ -261,7 +261,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		//cout << "capMuxLoad: " << capMuxLoad * 1e9 << endl;
 		//cout << "resMuxLoad: " << resMuxLoad * 1e9 << endl;
 
-	if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
+	if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
 		senseVoltage = devtech->vdd / 2 * cell->capDRAMCell / (cell->capDRAMCell + capBitline);
 		if (senseVoltage < cell->minSenseVoltage) {		/* Bitline is too long */
 			invalid = true;
@@ -286,7 +286,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		if(tech->featureSize <= 14 * 1e-9){ capBitline += tech->cap_draintotal * cell->widthAccessCMOS * tech->effective_width * numRow / 2;}
 		else {capBitline  += capCellAccess * numRow / 2;	/* Due to shared contact */}
 		voltagePrecharge = tech->vdd / 2;	/* SRAM read voltage is always half of vdd */
-	} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
+	} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
 		/* DRAM and eDRAM only has one access transistors */
 		resCellAccess = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, NMOS, inputParameter->temperature, *devtech);
 		capCellAccess = CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, NMOS, cell->widthInFeatureSize * devtech->featureSize, *devtech);
@@ -505,6 +505,14 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		}
 	}
 
+	if (cell->memCellType == gcDRAM) {
+		if (!invalid) {
+			levelshifter.Initialize(numRow, 1/numRow);
+			tsvType = Monolithic;
+			tsvArray.Initialize(tsvType);	
+		}
+	}
+
 	if (!invalid) {
 		bitlineMux.CalculateRC();
 	}
@@ -579,6 +587,52 @@ void SubArray::CalculateArea() {
 		width += addWidth;
 		height += addHeight;
 		area = width * height;
+		stackedMemTiers = 1;
+
+		/* In BEOL Structure, Rethink the orientation of peripherals*/
+		if (cell->memCellType == gcDRAM) {
+			bool dimReduction;
+			levelshifter.CalculateArea(rowDecoder.height, 0.0, NONE);
+			tsvArray.CalculateArea();
+			double redundancyFactor = inputParameter->tsvRedundancy;
+			tsvArray.numTotalBits = (int)((double)((2*numRow + 2*numColumn) * redundancyFactor) + 0.1);
+			tsvArray.numAccessBits = tsvArray.numTotalBits;
+			double areaTSV = tsvArray.area * tsvArray.numTotalBits;
+			/* Assume Magic Folding within Logic Tier */
+			/* TODO: add MIV Area Consumption */
+			logicArea = levelshifter.area + rowDecoder.area + precharger.area + bitlineMux.area
+				+ senseAmp.area + senseAmpMuxLev1.area + senseAmpMuxLev2.area
+				+ bitlineMuxDecoder.area + senseAmpMuxLev1Decoder.area + senseAmpMuxLev2Decoder.area; 
+
+			/* Default assumption, but should be moved around for subarray ratio */
+			logicWidth = logicHeight = sqrt(logicArea);
+
+			/* Check the memory stacking needs */
+			memoryHeight = lenBitline;
+			memoryWidth = lenWordline;
+			memoryArea = memoryHeight * memoryWidth;
+			dimReduction = memoryHeight > memoryWidth;
+			stackedMemTiers = 1;
+			while (memoryArea > logicArea) {
+				if(dimReduction){
+					memoryHeight /= 2;
+				} else {
+					memoryWidth /= 2;
+				}
+				dimReduction = !dimReduction;
+				memoryArea = memoryHeight * memoryWidth;
+				stackedMemTiers++;
+			}
+
+			/* Try to Magic Layout the Logic to Memory sizing*/
+			memoryArea = memoryHeight * memoryWidth;
+			areaRatio = memoryHeight / (memoryArea);
+			logicArea += areaTSV;
+
+			area = logicArea;
+			height = areaRatio * logicArea;
+			width = logicArea / height;
+		}
 	}
 }
 
@@ -699,7 +753,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency;
 			/* assume symmetric read/write for SRAM bitline delay */
 			writeLatency = readLatency;
-		} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
+		} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
 			double cap = (capCellAccess + cell->capDRAMCell) * (capBitline + bitlineMux.capForPreviousDelayCalculation)
 					/ (capCellAccess + cell->capDRAMCell + capBitline + bitlineMux.capForPreviousDelayCalculation);
 			double res = resBitline + resCellAccess;
@@ -874,6 +928,13 @@ void SubArray::CalculatePower() {
 			/*****************************************/
 
 		} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
+			/* Codes below calculate the DRAM bitline power */
+			readDynamicEnergy = (capCellAccess + capBitline + bitlineMux.capForPreviousPowerCalculation) * senseVoltage * devtech->vdd * numColumn;
+            refreshDynamicEnergy = readDynamicEnergy;
+			double writeVoltage = cell->resetVoltage;	/* should also equal to setVoltage, for DRAM, it is Vdd */
+			writeDynamicEnergy = (capBitline + bitlineMux.capForPreviousPowerCalculation) * writeVoltage * writeVoltage * numColumn;
+			leakage = readDynamicEnergy / DRAM_REFRESH_PERIOD * numRow;
+		} else if (cell->memCellType == gcDRAM) {
 			/* Codes below calculate the DRAM bitline power */
 			readDynamicEnergy = (capCellAccess + capBitline + bitlineMux.capForPreviousPowerCalculation) * senseVoltage * devtech->vdd * numColumn;
             refreshDynamicEnergy = readDynamicEnergy;
@@ -1266,6 +1327,17 @@ SubArray & SubArray::operator=(const SubArray &rhs) {
 	gateCapRep = rhs.gateCapRep;
 	numRepeaters = rhs.numRepeaters;
 	bufferSizeRatio = rhs.bufferSizeRatio;
+
+	levelshifter = rhs.levelshifter;
+	tsvArray = rhs.tsvArray;
+	logicArea = rhs.logicArea;
+	logicWidth = rhs.logicWidth;
+	logicHeight = rhs.logicHeight;
+	memoryArea = rhs.memoryArea;
+	memoryWidth = rhs.memoryWidth;
+	memoryHeight = rhs.memoryHeight;
+	areaRatio = rhs.areaRatio;
+	stackedMemTiers = rhs.stackedMemTiers;
 
 	return *this;
 }

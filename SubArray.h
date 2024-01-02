@@ -14,6 +14,8 @@
 #include "Precharger.h"
 #include "SenseAmp.h"
 #include "Mux.h"
+#include "LevelShifter.h"
+#include "TSV.h"
 #include "typedef.h"
 
 class SubArray: public FunctionUnit {
@@ -45,6 +47,7 @@ public:
 	int muxOutputLev1;	/* How many sense amplifiers connect to one output bit, level-1 */
 	int muxOutputLev2;	/* How many sense amplifiers connect to one output bit, level-2 */
 	BufferDesignTarget areaOptimizationLevel;
+	TSV_type tsvType;
     int num3DLevels; /* Number of monolithic 3D levels in the subarray. */
 
 	bool voltageSense;	/* Whether the sense amplifier is voltage-sensing */
@@ -71,6 +74,14 @@ public:
 	double columnDecoderLatency;	/* The worst-case mux latency, Unit: s */
 	double bitlineDelayOn;  /* Bitline delay of LRS, Unit: s */
 	double bitlineDelayOff; /* Bitline delay of HRS, Unit: s */
+	double logicArea;		/* Seperation of FEOL logic from BEOL Subarray */
+	double logicWidth;		/* Seperation of FEOL logic from BEOL Subarray */
+	double logicHeight;		/* Seperation of FEOL logic from BEOL Subarray */
+	double memoryArea;		/* Seperation of FEOL logic from BEOL Subarray */
+	double memoryWidth;		/* Seperation of FEOL logic from BEOL Subarray */
+	double memoryHeight;
+	double areaRatio;		/* Seperation of FEOL logic from BEOL Subarray */
+	int stackedMemTiers;
 
 	// 1.4 update : parameters for buffer insertion
 	double widthInvN, widthInvP;
@@ -90,6 +101,10 @@ public:
 	Mux			senseAmpMuxLev2;
 	Precharger	precharger;
 	SenseAmp	senseAmp;
+
+	// Gain Cell Update : Add Level Shifters for Hold/Boost Voltages
+	LevelShifter levelshifter;
+	TSV tsvArray;
 };
 
 #endif /* SUBARRAY_H_ */

@@ -88,6 +88,8 @@ void MemCell::ReadCellFromFile(const string & inputFile)
 				memCellType = DRAM;
 			else if (!strcmp(tmp, "eDRAM"))
 				memCellType = eDRAM;
+			else if (!strcmp(tmp, "gcDRAM"))
+				memCellType = gcDRAM;
 			else if (!strcmp(tmp, "MRAM"))
 				memCellType = MRAM;
 			else if (!strcmp(tmp, "PCRAM"))
@@ -318,7 +320,7 @@ void MemCell::ReadCellFromFile(const string & inputFile)
 		}
 
 		if (!strncmp("-DRAMCellCapacitance", line, strlen("-DRAMCellCapacitance"))) {
-			if (memCellType != DRAM && memCellType != eDRAM)
+			if (memCellType != DRAM && memCellType != eDRAM && memCellType != gcDRAM)
 				cout << "Warning: The input of DRAM cell capacitance is ignored because the memory cell is not DRAM." << endl;
 			else
 				sscanf(line, "-DRAMCellCapacitance (F): %lf", &capDRAMCell);
@@ -405,7 +407,7 @@ void MemCell::ReadCellFromFile(const string & inputFile)
 		}
 
 		if (!strncmp("-RetentionTime", line, strlen("-RetentionTime"))) {
-			if (memCellType != eDRAM)
+			if (memCellType != eDRAM || memCellType != gcDRAM)
 				cout << "Warning: The input of retention time is ignored because the cell is not eDRAM." << endl;
 			else {
 				sscanf(line, "-RetentionTime (us): %lf", &retentionTime);
@@ -415,7 +417,7 @@ void MemCell::ReadCellFromFile(const string & inputFile)
 		}
 
 		if (!strncmp("-Temperature", line, strlen("-Temperature"))) {
-			if (memCellType != eDRAM)
+			if (memCellType != eDRAM || memCellType != gcDRAM)
 				cout << "Warning: The input of temperature is ignored because the cell is not eDRAM." << endl;
 			else
 				sscanf(line, "-Temperature (K): %lf", &temperature);
@@ -433,7 +435,7 @@ void MemCell::ApplyPVT() {
         return;
     }
 
-    if (memCellType == eDRAM) {
+    if (memCellType == eDRAM || memCellType == gcDRAM) {
         cout << "[Info] Retention time given at " << temperature << "K is " << retentionTime * 1e6 << "us" << endl;
         double exponent = -0.0268 * (inputParameter->temperature - temperature);
         retentionTime = retentionTime * exp(exponent);
@@ -613,6 +615,9 @@ void MemCell::PrintCell(int indent)
 		break;
 	case eDRAM:
 		cout << string(indent, ' ') << "Memory Cell: Embedded DRAM" << endl;
+		break;
+	case gcDRAM:
+		cout << string(indent, ' ') << "Memory Cell: Gain Cell DRAM" << endl;
 		break;
 	case MRAM:
 		cout << string(indent, ' ') << "Memory Cell: MRAM (Magnetoresistive)" << endl;

@@ -162,7 +162,7 @@ void RowDecoder::CalculatePower() {
 			/* Dynamic energy */
 			double capLoad = capNandOutput + outputDriver.capInput[0];
             /* For DRAM types account for overdriven wordline. */
-            if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
+            if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
                 readDynamicEnergy = capLoad * tech->vpp * tech->vpp;
             } else {
                 readDynamicEnergy = capLoad * tech->vdd * tech->vdd;

@@ -214,6 +214,40 @@ void TSV::_CalculateLatencyAndPower(double _rampInput, double &_dynamicEnergy, d
     }
 }
 
+void TSV::CalculateDepletionWidth(double interface_potential, double r_t) {
+    /* Define Constants */
+    double epsilon_0 = 8.854e-12;
+    double epsilon_si = 11.7 * epsilon_0;
+    double k_boltzman = 1.381e-23;
+    double Na_dopant = 0.137e22;
+    double carrier_temp = 9.15e19 * (pow((inputParameter->temperature/300),2)) * exp((-6880/inputParameter->temperature));
+    double elementary_q = 1.602e-19;
+
+    /* Time Constant Calculation */
+    double tau_a = -1 * elementary_q * Na_dopant / epsilon_si;
+    double tau_b = exp((-1 * elementary_q * interface_potential / (k_boltzman * inputParameter->temperature)));
+    double tau_c = pow((carrier_temp/Na_dopant),2);
+
+    double tau_s = tau_a * (tau_b - 1 + tau_c);
+
+    /* Nu Calculation */
+    double nu_a = k_boltzman * inputParameter->temperature * Na_dopant / epsilon_si;
+    double nu_b = elementary_q * interface_potential / (k_boltzman * inputParameter->temperature);
+
+    double nu_s = nu_a * ((tau_b + nu_b - 1) - (tau_c * nu_b));
+
+    /* Gamma Calculation */
+    double gamma_a = interface_potential + (pow(r_t,2) * tau_s);
+    double gamma_b = sqrt(pow(interface_potential,2) + (2 * pow(r_t,2) * nu_s));
+
+    double gamma_s = 1 + (gamma_a / gamma_b);
+
+    /* Wdep Calculation */
+
+    w_dep = r_t * exp((1/gamma_s)) - 1;
+
+}
+
 TSV& TSV::operator=(const TSV& rhs) {
 	height = rhs.height;
 	width = rhs.width;

@@ -19,9 +19,9 @@ FunctionUnit::FunctionUnit() {
 	leakage = 0;
 
 	resetLatency = setLatency = 0;
-    refreshLatency = 0;
+  refreshLatency = 0;
 	resetDynamicEnergy = setDynamicEnergy = 0;
-    refreshDynamicEnergy = 0;
+  refreshDynamicEnergy = 0;
 	cellReadEnergy = 0;
 	cellSetEnergy = cellResetEnergy = 0;
 }
@@ -91,4 +91,24 @@ int FunctionUnit::logical_effort(
   return num_gates;
 }
 
+void FunctionUnit::MagicLayout() {
+	if (newHeight) {
+		width = area / newHeight;
+		height = newHeight;
+	} else if (newWidth) {
+		height = area / newWidth;
+		width = newWidth;
+	}
+}
+
+void FunctionUnit::OverrideLayout() {
+	if (newHeight && newWidth) {
+		height = newHeight;
+		width = newWidth;
+	} else {
+		puts("Need to provide both newHeight and newWidth for OverrideLayout()");
+		exit(-1);
+	}
+	area = height * width;
+}
 

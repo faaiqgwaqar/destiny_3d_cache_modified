@@ -25,6 +25,8 @@ public:
 	/* Properties */
 	double height;		/* Unit: m */
 	double width;		/* Unit: m */
+	double newHeight;
+	double newWidth;
 	double area;		/* Unit: m^2 */
 	double readLatency, writeLatency;		/* Unit: s */
 	double readDynamicEnergy, writeDynamicEnergy;	/* Unit: J */
@@ -37,6 +39,9 @@ public:
 	double cellReadEnergy, cellSetEnergy, cellResetEnergy;			/* Unit: J */
     double refreshDynamicEnergy;                    /* Unit: J */
 
+
+	virtual void MagicLayout();
+	virtual void OverrideLayout();
     int logical_effort(int num_gates_min, double g, double F, double *w_n, double *w_p,
                        double C_load, double p_to_n_sz_ratio, double max_w_nmos,
                        Technology tech);

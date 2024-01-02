@@ -9,6 +9,7 @@
 #define CONSTANT_H_
 
 #define WARNING	0
+#define ALPHA 1.44
 
 #define INV		0
 #define NOR		1

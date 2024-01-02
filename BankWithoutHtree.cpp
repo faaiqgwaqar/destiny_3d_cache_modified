@@ -36,7 +36,7 @@ void BankWithoutHtree::Initialize(int _numRowMat, int _numColumnMat, long long _
 	}
 
 	if (!_internalSenseAmp) {
-		if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
+		if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
 			invalid = true;
 			cout << "[BankWithoutHtree] Error: DRAM does not support external sense amplification!" << endl;
 			return;
@@ -120,7 +120,7 @@ void BankWithoutHtree::Initialize(int _numRowMat, int _numColumnMat, long long _
 		int numWayPerRow = numWay / numRowPerSet;	/* At least 1, otherwise it is invalid, and returned already */
 		if (numWayPerRow > 1) {		/* multiple ways per row, needs extra mux level */
 			/* Do mux level recalculation to contain the multiple ways */
-			if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
+			if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
 				/* for DRAM, mux before sense amp has to be 1, only mux output1 and mux output2 can be used */
 				int numWayPerRowInLog = (int)(log2((double)numWayPerRow) + 0.1);
 				int extraMuxOutputLev2 = (int)pow(2, numWayPerRowInLog / 2);
@@ -538,7 +538,7 @@ void BankWithoutHtree::CalculateLatencyAndPower() {
         leakage += tsvArray.numTotalBits * (stackedDieCount-1) * tsvArray.leakage;
     }
 
-    if (cell->memCellType == eDRAM) {
+    if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
         if (refreshLatency > cell->retentionTime) {
             invalid = true;
         }

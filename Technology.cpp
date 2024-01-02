@@ -2415,6 +2415,24 @@ void Technology::Initialize(int _featureSizeInNano, DeviceRoadmap _deviceRoadmap
         tsv_contact_resistance[1][1] = 0.9; // Ohm
         tsv_depletion_width[1][1] = 0.6;  // um, Calculated from cylindrical Possion equation
         tsv_liner_dielectric_constant[1][1] = 2.55;
+
+		//MIV - From Prof. SK Lim's Group - Use same projection
+        tsv_pitch[0][2] = 0.1; // in um
+        tsv_diameter[0][2] = 0.05;
+        tsv_length[0][2] = 0.1;
+        tsv_dielec_thickness[0][2] = 0.01;
+        tsv_contact_resistance[0][2] = 1; // Ohm
+        tsv_depletion_width[0][2] = 0.6;  // um, Calculated from cylindrical Possion equation
+        tsv_liner_dielectric_constant[0][2] = 2.55;
+
+		//MIV - From Prof. SK Lim's Group - Use same projection
+        tsv_pitch[1][2] = 0.1; // in um
+        tsv_diameter[1][2] = 0.05;
+        tsv_length[1][2] = 0.1;
+        tsv_dielec_thickness[1][2] = 0.01;
+        tsv_contact_resistance[1][2] = 1; // Ohm
+        tsv_depletion_width[1][2] = 0.6;  // um, Calculated from cylindrical Possion equation
+        tsv_liner_dielectric_constant[1][2] = 2.55;
     }
     // Note: CACTI3DD also has 16nm
     
@@ -2647,6 +2665,18 @@ void Technology::SetLayerCount(InputParameter *inputParameter, int layers)
     tsv_parasitic_cap[1][1] = tsv_capacitance(length_value, tsv_diameter[1][1], tsv_pitch[1][1], tsv_dielec_thickness[1][1], tsv_liner_dielectric_constant[1][1], tsv_depletion_width[1][1]);
     tsv_occupation_area[1][1] = tsv_area(tsv_pitch[1][1]);
 
+	//MIV aggressive/conservative
+	length_value = tsv_length[0][2] * layers;
+    tsv_parasitic_res[0][2] = 10;
+    tsv_parasitic_cap[0][2] = 0.2e-15;
+    tsv_occupation_area[0][2] = tsv_area(tsv_pitch[0][2]);
+
+	//MIV aggressive/conservative
+	length_value = tsv_length[1][2] * layers;
+    tsv_parasitic_res[1][2] = 10;
+    tsv_parasitic_cap[1][2] = 0.2e-15;
+    tsv_occupation_area[1][2] = tsv_area(tsv_pitch[1][2]);
+
     //Finalize TSV parameters in tech pointer
     int local_ic_proj_type = WireTypeToTSVType(inputParameter->maxLocalWireType);
     int global_ic_proj_type = WireTypeToTSVType(inputParameter->maxGlobalWireType);
@@ -2668,6 +2698,10 @@ void Technology::SetLayerCount(InputParameter *inputParameter, int layers)
     resTSV[Coarse] = tsv_parasitic_res[global_ic_proj_type][tsv_os_bank_type];
     capTSV[Coarse] = tsv_parasitic_cap[global_ic_proj_type][tsv_os_bank_type];
     areaTSV[Coarse] = tsv_occupation_area[global_ic_proj_type][tsv_os_bank_type];
+
+	resTSV[Monolithic] = tsv_parasitic_res[0][2];
+    capTSV[Monolithic] = tsv_parasitic_cap[0][2];
+    areaTSV[Monolithic] = tsv_occupation_area[0][2];
 
     layerCount = layers;
 }

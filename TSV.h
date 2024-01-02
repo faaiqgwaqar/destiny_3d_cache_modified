@@ -24,11 +24,13 @@ public:
     void Initialize(TSV_type tsv_type, bool buffered = false);
     void CalculateArea();
     void CalculateLatencyAndPower(double _rampInputRead, double _rampInputWrite);
+    void CalculateDepletionWidth(double interface_potential, double r_t);
 
     double res; //TSV resistance
     double cap; //TSV capacitance
     double C_load_TSV; //The intrinsic load plus the load TSV is driving
     double min_area;
+    double w_dep;
     double F;
 
     int num_gates;

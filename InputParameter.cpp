@@ -105,6 +105,7 @@ InputParameter::InputParameter() {
     doublePrune = false;  // TODO
     printAllOptimals = false;
     allowDifferentTagTech = false;
+	validated = true;
 
     printLevel = 1;
 }

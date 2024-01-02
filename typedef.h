@@ -17,7 +17,8 @@ enum MemCellType
 	memristor,
 	FBRAM,
 	SLCNAND,
-	MLCNAND
+	MLCNAND,
+	gcDRAM
 };
 enum CellAccessType
 {
@@ -32,7 +33,15 @@ enum DeviceRoadmap
 	HP,		/* High performance */
 	LSTP,	/* Low standby power */
 	LOP,	/* Low operating power */
-    EDRAM   /* Embedded DRAM */
+    EDRAM,  /* Embedded DRAM */
+	IWO     /* Indium Tungston Oxide DRAM */ 
+};
+
+enum AreaModify
+{
+	NONE,		/* No action, just use the original area calculation */
+	MAGIC,		/* Use magic folding based on the original area */
+	OVERRIDE	/* directly modify the height and width and calculate new area */
 };
 
 enum WireType
@@ -121,7 +130,8 @@ enum TSV_type
 {
     Fine = 0,        // ITRS high density
     Coarse = 1,      // Industry reported in 2010
-    NUM_TSV_TYPES = 2
+	Monolithic = 2,  // MIV specification from Dr. S.K. Lim's Group
+    NUM_TSV_TYPES = 3
 };
 
 
