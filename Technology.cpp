@@ -2673,8 +2673,8 @@ void Technology::SetLayerCount(InputParameter *inputParameter, int layers)
 
 	//MIV aggressive/conservative
 	length_value = tsv_length[1][2] * layers;
-    tsv_parasitic_res[1][2] = 10;
-    tsv_parasitic_cap[1][2] = 0.2e-15;
+    tsv_parasitic_res[1][2] = 32;
+    tsv_parasitic_cap[1][2] = 0.64e-15;
     tsv_occupation_area[1][2] = tsv_area(tsv_pitch[1][2]);
 
     //Finalize TSV parameters in tech pointer

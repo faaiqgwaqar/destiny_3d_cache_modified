@@ -466,11 +466,13 @@ void Result::print(int indent) {
 	}
     if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
         cout << string(indent, ' ') << " - Refresh Latency = " << TO_SECOND(bank->refreshLatency) << endl;
-        if (bank->stackedDieCount > 1 && bank->partitionGranularity == 0) {
+        if ((bank->stackedDieCount > 1 && bank->partitionGranularity == 0)) {
             cout << string(indent, ' ') << " |--- TSV Latency    = " << TO_SECOND(bank->tsvArray.writeLatency * (bank->stackedDieCount-1)) << endl;
         } else if (bank->stackedDieCount > 1 && bank->partitionGranularity == 1) {
             cout << string(indent, ' ') << " |--- TSV Latency    = " << TO_SECOND(bank->tsvArray.writeLatency * (bank->stackedDieCount-1)) << endl;
-        }
+        } if (bank->mat.subarray.stackedMemTiers) {
+			cout << string(indent, ' ') << " |--- MIV Latency    = " << TO_SECOND(bank->mat.subarray.tsvArray.writeLatency * (bank->mat.subarray.stackedMemTiers)) << endl;
+		}
 		if (inputParameter->routingMode == h_tree)
 			cout << string(indent, ' ') << " |--- H-Tree Latency = " << TO_SECOND(bank->routingRefreshLatency) << endl;
 		else

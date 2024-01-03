@@ -600,9 +600,9 @@ void SubArray::CalculateArea() {
 			double areaTSV = tsvArray.area * tsvArray.numTotalBits;
 			/* Assume Magic Folding within Logic Tier */
 			/* TODO: add MIV Area Consumption */
-			logicArea = levelshifter.area + rowDecoder.area + precharger.area + bitlineMux.area
+			logicArea = levelshifter.area + 2*rowDecoder.area + precharger.area + bitlineMux.area
 				+ senseAmp.area + senseAmpMuxLev1.area + senseAmpMuxLev2.area
-				+ bitlineMuxDecoder.area + senseAmpMuxLev1Decoder.area + senseAmpMuxLev2Decoder.area; 
+				+ 2*bitlineMuxDecoder.area + senseAmpMuxLev1Decoder.area + senseAmpMuxLev2Decoder.area; 
 
 			/* Default assumption, but should be moved around for subarray ratio */
 			logicWidth = logicHeight = sqrt(logicArea);
@@ -753,7 +753,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency;
 			/* assume symmetric read/write for SRAM bitline delay */
 			writeLatency = readLatency;
-		} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
+		} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
 			double cap = (capCellAccess + cell->capDRAMCell) * (capBitline + bitlineMux.capForPreviousDelayCalculation)
 					/ (capCellAccess + cell->capDRAMCell + capBitline + bitlineMux.capForPreviousDelayCalculation);
 			double res = resBitline + resCellAccess;
@@ -763,6 +763,41 @@ void SubArray::CalculateLatency(double _rampInput) {
 			senseAmp.CalculateLatency(bitlineRamp);
 			senseAmpMuxLev1.CalculateLatency(1e20);
 			senseAmpMuxLev2.CalculateLatency(senseAmpMuxLev1.rampOutput);
+
+            /* Refresh operation does not pass sense amplifier. */
+            refreshLatency = decoderLatency + bitlineDelay + senseAmp.readLatency;
+            refreshLatency *= numRow; // TOTAL refresh latency for subarray
+			readLatency = decoderLatency + bitlineDelay + senseAmp.readLatency
+					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency;
+			/* assume symmetric read/write for DRAM/eDRAM bitline delay */
+			writeLatency = readLatency;
+		} else if (cell->memCellType == gcDRAM) {
+			levelshifter.CalculateLatency(rowDecoder.rampOutput, capWordline, resWordline);
+			decoderLatency = MAX(rowDecoder.readLatency + rowDecoderRepeaterLatency + levelshifter.readLatency, columnDecoderLatency + rowDecoderRepeaterLatencyMux);
+			double cap = (capBitline + bitlineMux.capForPreviousDelayCalculation);
+			double res = resBitline;
+			double tau = 2.3 * res * cap;
+			double bitlineRamp = 0;
+			bitlineDelay = horowitz(tau, 0, rowDecoder.rampOutput, &bitlineRamp) + 3e-9;
+			senseAmp.CalculateLatency(bitlineRamp);
+			senseAmpMuxLev1.CalculateLatency(1e20);
+			senseAmpMuxLev2.CalculateLatency(senseAmpMuxLev1.rampOutput);
+
+			double tsvReadRampInput;
+            double tsvWriteRampInput;
+
+            // Normally senseAmpMuxLev2 is the last driver from Mat
+            //tsvReadRampInput = mat.subarray.senseAmpMuxLev2.rampOutput;
+            tsvReadRampInput = 1e20;
+
+            // Write TSVs should be driven by predecoders -- Use the min for worst case
+            tsvWriteRampInput = infinite_ramp; 
+
+            // Add TSV energy ~ Assume outside of bank area
+            // Use comparator for tag read ramp input with internal sensing
+            tsvArray.CalculateLatencyAndPower(tsvReadRampInput, tsvWriteRampInput); 
+
+			decoderLatency += (2* tsvArray.writeLatency * stackedMemTiers);
 
             /* Refresh operation does not pass sense amplifier. */
             refreshLatency = decoderLatency + bitlineDelay + senseAmp.readLatency;
@@ -897,12 +932,13 @@ void SubArray::CalculatePower() {
 		senseAmpMuxLev1.CalculatePower();
 		senseAmpMuxLev2.CalculatePower();
 
+		/* Personal Implementation of Repeater */
 		double repeater_leakage = CalculateGateLeakage(INV, 1, widthInvN, widthInvP, inputParameter->temperature, *tech) * numRepeaters * 2 * (numRow + muxOutputLev1 + muxOutputLev2 + muxSenseAmp);
 		double repeater_readDynamicEnergy = sectioncap * tech->vdd * tech->vdd * numRepeaters * 2 * numRow * activityRowRead;
 		double repeater_writeDynamicEnergy = sectioncap * tech->vdd * tech->vdd * numRepeaters * 2 * numRow * activityRowWrite;
 		double repeater_readDynamicEnergyMux = sectioncapMux * tech->vdd * tech->vdd *numRepeaters * 2 * (muxOutputLev1 + muxOutputLev2 + muxSenseAmp) * (1/(muxOutputLev1 + muxOutputLev2) + 1/(muxSenseAmp));
 		double repeater_writeDynamicEnergyMux = sectioncapMux * tech->vdd * tech->vdd *numRepeaters * 2 * (muxOutputLev1 + muxOutputLev2 + muxSenseAmp) * (1/(muxOutputLev1 + muxOutputLev2) + 1/(muxSenseAmp));
-
+		/**************************************/
 		
 		if (cell->memCellType == SRAM) {
 			/* Codes below calculate the SRAM bitline power */

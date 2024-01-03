@@ -9,7 +9,7 @@
 -AccessType: CMOS
 -AccessCMOSWidth (F): 1
 
--DRAMCellCapacitance (F): 13e-15
+-DRAMCellCapacitance (F): 1e-15
 -ResetVoltage (V): vdd
 -SetVoltage (V): vdd
 
