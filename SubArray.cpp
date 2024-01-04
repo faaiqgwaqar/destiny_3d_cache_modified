@@ -632,6 +632,11 @@ void SubArray::CalculateArea() {
 			area = logicArea;
 			height = areaRatio * logicArea;
 			width = logicArea / height;
+
+			capBitline += tsvArray.width * stackedMemTiers * localWire->capWirePerUnit;
+			capWordline += tsvArray.width * stackedMemTiers * localWire->capWirePerUnit;
+			resBitline += tsvArray.width * stackedMemTiers * localWire->resWirePerUnit_M0;
+			resWordline += tsvArray.width * stackedMemTiers * localWire->resWirePerUnit_M1;
 		}
 	}
 }
