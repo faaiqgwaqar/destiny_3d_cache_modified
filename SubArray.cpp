@@ -621,7 +621,7 @@ void SubArray::CalculateArea() {
 				}
 				dimReduction = !dimReduction;
 				memoryArea = memoryHeight * memoryWidth;
-				stackedMemTiers++;
+				stackedMemTiers*=2;
 			}
 
 			/* Try to Magic Layout the Logic to Memory sizing*/

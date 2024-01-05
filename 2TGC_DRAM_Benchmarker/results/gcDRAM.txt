@@ -83,7 +83,7 @@ CACHE DATA ARRAY DETAILS
      - Total Area = 2.556mm x 1.262mm = 3.225mm^2
      |--- Mat Area      = 39.866um x 157.419um = 6275.631um^2   (384.301%)
      |--- Subarray Area = 19.933um x 77.649um = 1547.760um^2   (389.552%)
-     |--- Subarray Memory Tiers = 3
+     |--- Subarray Memory Tiers = 4
      - Area Efficiency = 382.885%
     Timing:
      -  Read Latency = 7.199ns
@@ -104,7 +104,7 @@ CACHE DATA ARRAY DETAILS
            |--- Row Decoder Latency = 908.508ps
            |--- Charge Latency      = 41.497ps
      - Refresh Latency = 16.613us
-     |--- MIV Latency    = 0.002ps
+     |--- MIV Latency    = 0.003ps
      |--- H-Tree Latency = 14.536us
      |--- Mat Latency    = 2.076us
         |--- Predecoder Latency = 83.783ps
@@ -183,7 +183,7 @@ CACHE TAG ARRAY DETAILS
      - Total Area = 698.228um x 280.877um = 196115.973um^2
      |--- Mat Area      = 43.617um x 139.718um = 6094.060um^2   (346.282%)
      |--- Subarray Area = 21.745um x 67.943um = 1477.416um^2   (357.087%)
-     |--- Subarray Memory Tiers = 3
+     |--- Subarray Memory Tiers = 4
      - Area Efficiency = 344.329%
     Timing:
      -  Read Latency = 4.699ns
@@ -205,7 +205,7 @@ CACHE TAG ARRAY DETAILS
            |--- Row Decoder Latency = 775.144ps
            |--- Charge Latency      = 31.287ps
      - Refresh Latency = 4.014us
-     |--- MIV Latency    = 0.002ps
+     |--- MIV Latency    = 0.003ps
      |--- H-Tree Latency = 2.007us
      |--- Mat Latency    = 2.007us
         |--- Predecoder Latency = 139.901ps
