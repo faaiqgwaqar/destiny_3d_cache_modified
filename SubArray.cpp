@@ -286,13 +286,28 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		if(tech->featureSize <= 14 * 1e-9){ capBitline += tech->cap_draintotal * cell->widthAccessCMOS * tech->effective_width * numRow / 2;}
 		else {capBitline  += capCellAccess * numRow / 2;	/* Due to shared contact */}
 		voltagePrecharge = tech->vdd / 2;	/* SRAM read voltage is always half of vdd */
-	} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
+	} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
 		/* DRAM and eDRAM only has one access transistors */
 		resCellAccess = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, NMOS, inputParameter->temperature, *devtech);
 		capCellAccess = CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, NMOS, cell->widthInFeatureSize * devtech->featureSize, *devtech);
 		capWordline += CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, *devtech) * numColumn;
 		capBitline  += capCellAccess * numRow / 2;	/* Due to shared contact */
 		voltagePrecharge = devtech->vdd / 2;	/* DRAM read voltage is always half of vdd */
+	} else if(cell->memCellType == gcDRAM) {
+		/* DRAM and eDRAM only has one access transistors */
+		//resCellAccess = CalculateOnResistance(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, NMOS, inputParameter->temperature, *devtech);
+		//capCellAccess = CalculateDrainCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, NMOS, cell->widthInFeatureSize * devtech->featureSize, *devtech);
+		//capWordline += CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, *devtech) * numColumn;
+		resCellAccess = 1.2e5;
+		capCellAccess = 25e-18;
+		capWordlineRead = capWordline;
+		capWordline += /*20e-18*/ /*485e-18*/ 1e-15 * numColumn;
+		capWordlineRead += capCellAccess * numColumn;
+		capBitline  += capCellAccess * numRow / 2;	/* Due to shared contact */
+		voltagePrecharge = devtech->vdd / 2;	/* DRAM read voltage is always half of vdd */
+		//cout << "resCellAccess: " << resCellAccess << endl;
+		//cout << "capCellAccess: " << 1e18 * capCellAccess << endl;
+		//cout << "drainCapAccess: " << 1e18 * CalculateGateCap(((tech->featureSize <= 14*1e-9)? 2:1) * cell->widthAccessCMOS * devtech->featureSize, *devtech) << endl;
 	} else if (cell->memCellType == FBRAM){ /* Floating Body RAM */
 		resCellAccess = 0;
 		capCellAccess = CalculateFBRAMDrainCap(cell->widthSOIDevice * tech->featureSize, *tech);
@@ -507,10 +522,17 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 
 	if (cell->memCellType == gcDRAM) {
 		if (!invalid) {
-			levelshifter.Initialize(numRow, 1/numRow);
+			levelshifter.Initialize(numRow, 1/numRow, 2.0, -0.5); /* Todo: Make these technology parameters */
 			tsvType = Monolithic;
 			tsvArray.Initialize(tsvType);	
 		}
+
+		gcRowDecoder.Initialize(numRow, capWordlineRead, resWordline, multipleRowPerSet, areaOptimizationLevel, maxWordlineCurrent, false, lenWordline);
+		if (rowDecoder.invalid) {
+			invalid = true;
+			return;
+		}
+		gcRowDecoder.CalculateRC();
 	}
 
 	if (!invalid) {
@@ -594,15 +616,16 @@ void SubArray::CalculateArea() {
 			bool dimReduction;
 			levelshifter.CalculateArea(rowDecoder.height, 0.0, NONE);
 			tsvArray.CalculateArea();
+			gcRowDecoder.CalculateArea();
 			double redundancyFactor = inputParameter->tsvRedundancy;
 			tsvArray.numTotalBits = (int)((double)((2*numRow + 2*numColumn) * redundancyFactor) + 0.1);
 			tsvArray.numAccessBits = tsvArray.numTotalBits;
 			double areaTSV = tsvArray.area * tsvArray.numTotalBits;
 			/* Assume Magic Folding within Logic Tier */
 			/* TODO: add MIV Area Consumption */
-			logicArea = levelshifter.area + 2*rowDecoder.area + precharger.area + bitlineMux.area
+			logicArea = levelshifter.area + gcRowDecoder.area + rowDecoder.area + precharger.area + bitlineMux.area
 				+ senseAmp.area + senseAmpMuxLev1.area + senseAmpMuxLev2.area
-				+ 2*bitlineMuxDecoder.area + senseAmpMuxLev1Decoder.area + senseAmpMuxLev2Decoder.area; 
+				+ (2*bitlineMuxDecoder.area) + senseAmpMuxLev1Decoder.area + senseAmpMuxLev2Decoder.area; 
 
 			/* Default assumption, but should be moved around for subarray ratio */
 			logicWidth = logicHeight = sqrt(logicArea);
@@ -721,6 +744,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 		senseAmpMuxLev2Decoder.CalculateLatency(_rampInput);
 		columnDecoderLatency = MAX(MAX(bitlineMuxDecoder.readLatency, senseAmpMuxLev1Decoder.readLatency), senseAmpMuxLev2Decoder.readLatency);
 		double decoderLatency = MAX(rowDecoder.readLatency + rowDecoderRepeaterLatency, columnDecoderLatency + rowDecoderRepeaterLatencyMux);
+		double gcDecoderLatency;
 		/*need a second thought on this equation*/
 		double capPassTransistor = bitlineMux.capNMOSPassTransistor +
 				senseAmpMuxLev1.capNMOSPassTransistor + senseAmpMuxLev2.capNMOSPassTransistor;
@@ -779,6 +803,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 		} else if (cell->memCellType == gcDRAM) {
 			levelshifter.CalculateLatency(rowDecoder.rampOutput, capWordline, resWordline);
 			decoderLatency = MAX(rowDecoder.readLatency + rowDecoderRepeaterLatency + levelshifter.readLatency, columnDecoderLatency + rowDecoderRepeaterLatencyMux);
+			gcDecoderLatency = MAX(gcRowDecoder.readLatency + rowDecoderRepeaterLatency, columnDecoderLatency + rowDecoderRepeaterLatencyMux);
 			double cap = (capBitline + bitlineMux.capForPreviousDelayCalculation);
 			double res = resBitline;
 			double tau = 2.3 * res * cap;
@@ -807,10 +832,11 @@ void SubArray::CalculateLatency(double _rampInput) {
             /* Refresh operation does not pass sense amplifier. */
             refreshLatency = decoderLatency + bitlineDelay + senseAmp.readLatency;
             refreshLatency *= numRow; // TOTAL refresh latency for subarray
-			readLatency = decoderLatency + bitlineDelay + senseAmp.readLatency
-					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency;
+			writeLatency = decoderLatency + bitlineDelay /*+ senseAmp.readLatency
+					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency*/;
 			/* assume symmetric read/write for DRAM/eDRAM bitline delay */
-			writeLatency = readLatency;
+			readLatency = gcDecoderLatency + bitlineDelay + senseAmp.readLatency
+					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency;
 		} else if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor || cell->memCellType == FBRAM) {
 			double bitlineRamp = 0;
 			if (cell->readMode == false) {	/* current-sensing */
@@ -977,10 +1003,10 @@ void SubArray::CalculatePower() {
 			leakage = readDynamicEnergy / DRAM_REFRESH_PERIOD * numRow;
 		} else if (cell->memCellType == gcDRAM) {
 			/* Codes below calculate the DRAM bitline power */
-			readDynamicEnergy = (capCellAccess + capBitline + bitlineMux.capForPreviousPowerCalculation) * senseVoltage * devtech->vdd * numColumn;
+			readDynamicEnergy = (capBitline + bitlineMux.capForPreviousPowerCalculation) * senseVoltage * devtech->vdd * numColumn;
             refreshDynamicEnergy = readDynamicEnergy;
 			double writeVoltage = cell->resetVoltage;	/* should also equal to setVoltage, for DRAM, it is Vdd */
-			writeDynamicEnergy = (capBitline + bitlineMux.capForPreviousPowerCalculation) * writeVoltage * writeVoltage * numColumn;
+			writeDynamicEnergy = (capCellAccess + bitlineMux.capForPreviousPowerCalculation) * writeVoltage * writeVoltage * numColumn;
 			leakage = readDynamicEnergy / DRAM_REFRESH_PERIOD * numRow;
 		} else if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor || cell->memCellType == FBRAM) {
 			if (cell->readMode == false) {	/* current-sensing */
@@ -1343,6 +1369,7 @@ SubArray & SubArray::operator=(const SubArray &rhs) {
 	resMemCellOff = rhs.resMemCellOff;
 	resMemCellOn = rhs.resMemCellOn;
 
+	gcRowDecoder = rhs.gcRowDecoder;
 	rowDecoder = rhs.rowDecoder;
 	bitlineMuxDecoder = rhs.bitlineMuxDecoder;
 	bitlineMux = rhs.bitlineMux;

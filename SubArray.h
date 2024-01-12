@@ -57,6 +57,7 @@ public:
 	double lenWordline;	/* Length of wordlines, Unit: m */
 	double lenBitline;	/* Length of bitlines, Unit: m */
 	double capWordline;	/* Wordline capacitance, Unit: F */
+	double capWordlineRead;	/* Wordline capacitance, Gain Cell, Unit: F */
 	double capBitline;	/* Bitline capacitance, Unit: F */
 	double resWordline;	/* Wordline resistance, Unit: ohm */
 	double resBitline;	/* Bitline resistance, Unit: ohm */
@@ -93,6 +94,7 @@ public:
 	double bufferSizeRatio;
 
 	RowDecoder	rowDecoder;
+	RowDecoder	gcRowDecoder;
 	RowDecoder	bitlineMuxDecoder;
 	Mux			bitlineMux;
 	RowDecoder	senseAmpMuxLev1Decoder;

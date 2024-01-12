@@ -59,12 +59,14 @@ LevelShifter::~LevelShifter() {
 	// TODO Auto-generated destructor stub
 }
 
-void LevelShifter::Initialize(int _numOutput, double _activityRowRead){
+void LevelShifter::Initialize(int _numOutput, double _activityRowRead, double _writeVoltage, double _holdVoltage){
 	if (initialized)
 		cout << "[LevelShifter] Warning: Already initialized!" << endl;
 	
 	numOutput = _numOutput;
 	activityRowRead = _activityRowRead;
+	writeVoltage = _writeVoltage;
+	holdVoltage = _holdVoltage;
     
 	widthN = MIN_NMOS_SIZE * tech->featureSize;
 	widthP = tech->pnSizeRatio * MIN_NMOS_SIZE * tech->featureSize;

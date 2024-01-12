@@ -2569,6 +2569,40 @@ void Technology::InterpolateWith(Technology rhs, double _alpha) {
 	}
 }
 
+double Technology::CalculateDepletionWidth(double interface_potential, double r_t) {
+    /* Define Constants */
+    double epsilon_0 = 8.854e-12;
+    double epsilon_si = 11.7 * epsilon_0;
+    double k_boltzman = 1.381e-23;
+    double Na_dopant = 0.137e22;
+    double carrier_temp = 9.15e19 * (pow((350/300),2)) * exp((-6880/350));
+    double elementary_q = 1.602e-19;
+
+    /* Time Constant Calculation */
+    double tau_a = -1 * elementary_q * Na_dopant / epsilon_si;
+    double tau_b = exp((-1 * elementary_q * interface_potential / (k_boltzman * 350)));
+    double tau_c = pow((carrier_temp/Na_dopant),2);
+
+    double tau_s = tau_a * (tau_b - 1 + tau_c);
+
+    /* Nu Calculation */
+    double nu_a = k_boltzman * 350 * Na_dopant / epsilon_si;
+    double nu_b = elementary_q * interface_potential / (k_boltzman * 350);
+
+    double nu_s = nu_a * ((tau_b + nu_b - 1) - (tau_c * nu_b));
+
+    /* Gamma Calculation */
+    double gamma_a = interface_potential + (pow(r_t,2) * tau_s);
+    double gamma_b = sqrt(pow(interface_potential,2) + (2 * pow(r_t,2) * nu_s));
+
+    double gamma_s = 1 + (gamma_a / gamma_b);
+
+    /* Wdep Calculation */
+    w_dep = r_t * exp((1/gamma_s)) - 1;
+    return w_dep;
+
+}
+
 double Technology::tsv_resistance(double resistivity, double tsv_len, double tsv_diam, double tsv_contact_resistance)
 {
 	double resistance;
@@ -2581,6 +2615,8 @@ double Technology::tsv_capacitance(double tsv_len, double tsv_diam, double tsv_p
 	double self_cap, liner_cap, depletion_cap, lateral_coupling_cap, diagonal_coupling_cap, total_cap;
 	double diagonal_coupling_constant, lateral_coupling_constant;
 	const double e_si = PERMITTIVITY_FREE_SPACE * 11.9, PI = 3.1416;
+	//double dep_test = CalculateDepletionWidth(vdd, (tsv_diam/2 + dielec_thickness));
+	//cout << "Depletion Calculation: " << dep_test << endl;
 	lateral_coupling_constant = 4.1;
 	diagonal_coupling_constant = 5.3;
 	//depletion_width = 0.6; // um

@@ -472,6 +472,8 @@ void Result::print(int indent) {
             cout << string(indent, ' ') << " |--- TSV Latency    = " << TO_SECOND(bank->tsvArray.writeLatency * (bank->stackedDieCount-1)) << endl;
         } if (bank->mat.subarray.stackedMemTiers) {
 			cout << string(indent, ' ') << " |--- MIV Latency    = " << TO_SECOND(bank->mat.subarray.tsvArray.writeLatency * (bank->mat.subarray.stackedMemTiers)) << endl;
+			//cout << string(indent, ' ') << " |--- BL Res    = " << TO_SECOND(bank->mat.subarray.resBitline) << endl;
+			//cout << string(indent, ' ') << " |--- BL Cap    = " << TO_SECOND(bank->mat.subarray.capBitline) << endl;
 		}
 		if (inputParameter->routingMode == h_tree)
 			cout << string(indent, ' ') << " |--- H-Tree Latency = " << TO_SECOND(bank->routingRefreshLatency) << endl;

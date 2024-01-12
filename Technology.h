@@ -71,6 +71,7 @@ public:
 	double heightFin;	/* Fin height, Unit: m */
 	double widthFin;	/* Fin width, Unit: m */
 	double PitchFin;	/* Fin pitch, Unit: m */
+	double w_dep;
 	bool neurosim_wiring;
 
 	double capPolywire;	/* Poly wire capacitance, Unit: F/m */
@@ -81,6 +82,7 @@ public:
 
     double tsv_resistance(double resistivity, double tsv_len, double tsv_diam, double tsv_contact_resistance);
     double tsv_capacitance(double tsv_len, double tsv_diam, double tsv_pitch, double dielec_thickness, double liner_dielectric_constant, double depletion_width);
+	double CalculateDepletionWidth(double interface_potential, double r_t);
     double tsv_area(double tsv_pitch);
     TSV_type WireTypeToTSVType(int wiretype);
     void SetLayerCount(InputParameter *inputParameter, int layers); /* Recalculate TSV parameters based on layer count */

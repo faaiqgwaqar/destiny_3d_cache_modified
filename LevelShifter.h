@@ -53,7 +53,7 @@ public:
 
 	/* Functions */
 	void PrintProperty(const char* str);
-	void Initialize(int _numOutput, double _activityRowRead);
+	void Initialize(int _numOutput, double _activityRowRead, double _writeVoltage, double _holdVoltage);
 	void CalculateArea(double _newHeight, double _newWidth, AreaModify _option);
 	void CalculateLatency(double _rampInput, double _capLoad, double _resLoad);
 	void CalculatePower(double activeRowRead);
@@ -69,7 +69,7 @@ public:
 	double TgHeight, TgWidth;
 	double capMidGateN, capLowDrain, capHighDrain;
 	double resTg;
-	double writeVoltage; /*TODO: Add Proper Definition*/
+	double writeVoltage, holdVoltage; /*TODO: Add Proper Definition*/
 	double rampInput, rampOutput;
 	int mode;
 	int numRowTg, numColTg;
