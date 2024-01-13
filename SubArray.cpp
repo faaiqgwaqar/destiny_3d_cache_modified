@@ -54,7 +54,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		}
 	}
 
-	if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
+	if (cell->memCellType == DRAM || cell->memCellType == eDRAM /*|| cell->memCellType == gcDRAM*/) { /* TODO: Better Parameterized for GC? */
 		if (muxSenseAmp > 1) {
 			/* DRAM does not allow muxed bitline because of its destructive readout */
 			invalid = true;
@@ -153,7 +153,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 
 	if (internalSenseAmp) {
 		if (cell->memCellType == SRAM || cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
-			/* SRAM, DRAM, and eDRAM all use voltage sensing */
+			/* SRAM, DRAM, and eDRAM (and now gcDRAM) all use voltage sensing */
 			voltageSense = true;
 		} else if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor || cell->memCellType == FBRAM) {
 			voltageSense = cell->readMode;
@@ -802,6 +802,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 			writeLatency = readLatency;
 		} else if (cell->memCellType == gcDRAM) {
 			levelshifter.CalculateLatency(rowDecoder.rampOutput, capWordline, resWordline);
+			gcRowDecoder.CalculateLatency(_rampInput);
 			decoderLatency = MAX(rowDecoder.readLatency + rowDecoderRepeaterLatency + levelshifter.readLatency, columnDecoderLatency + rowDecoderRepeaterLatencyMux);
 			gcDecoderLatency = MAX(gcRowDecoder.readLatency + rowDecoderRepeaterLatency, columnDecoderLatency + rowDecoderRepeaterLatencyMux);
 			double cap = (capBitline + bitlineMux.capForPreviousDelayCalculation);
@@ -831,7 +832,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 
             /* Refresh operation does not pass sense amplifier. */
             refreshLatency = decoderLatency + bitlineDelay + senseAmp.readLatency;
-            refreshLatency *= numRow; // TOTAL refresh latency for subarray
+            refreshLatency *= (numRow/numSenseAmp); // TOTAL refresh latency for subarray /* TODO: Can this be done simultaneously? */
 			writeLatency = decoderLatency + bitlineDelay /*+ senseAmp.readLatency
 					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency*/;
 			/* assume symmetric read/write for DRAM/eDRAM bitline delay */
@@ -1002,12 +1003,14 @@ void SubArray::CalculatePower() {
 			writeDynamicEnergy = (capBitline + bitlineMux.capForPreviousPowerCalculation) * writeVoltage * writeVoltage * numColumn;
 			leakage = readDynamicEnergy / DRAM_REFRESH_PERIOD * numRow;
 		} else if (cell->memCellType == gcDRAM) {
+			gcRowDecoder.CalculatePower();
+			levelshifter.CalculatePower(1);
 			/* Codes below calculate the DRAM bitline power */
-			readDynamicEnergy = (capBitline + bitlineMux.capForPreviousPowerCalculation) * senseVoltage * devtech->vdd * numColumn;
+			readDynamicEnergy = (capCellAccess + bitlineMux.capForPreviousPowerCalculation) * senseVoltage * devtech->vdd * numColumn;
             refreshDynamicEnergy = readDynamicEnergy;
 			double writeVoltage = cell->resetVoltage;	/* should also equal to setVoltage, for DRAM, it is Vdd */
-			writeDynamicEnergy = (capCellAccess + bitlineMux.capForPreviousPowerCalculation) * writeVoltage * writeVoltage * numColumn;
-			leakage = readDynamicEnergy / DRAM_REFRESH_PERIOD * numRow;
+			writeDynamicEnergy = (capBitline + bitlineMux.capForPreviousPowerCalculation) * writeVoltage * writeVoltage * numColumn;
+			leakage = readDynamicEnergy / (DRAM_REFRESH_PERIOD * 2) * numRow;
 		} else if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor || cell->memCellType == FBRAM) {
 			if (cell->readMode == false) {	/* current-sensing */
 				/* Use ICCAD 2009 model */
@@ -1167,7 +1170,15 @@ void SubArray::CalculatePower() {
 				+ senseAmpMuxLev2Decoder.writeDynamicEnergy + bitlineMux.writeDynamicEnergy
 				+ senseAmp.writeDynamicEnergy + senseAmpMuxLev1.writeDynamicEnergy + senseAmpMuxLev2.writeDynamicEnergy;
 
-        /* Read all column energy + row decoder + sense amp + precharger is enough for one subarray row REF. */
+		if (cell->memCellType == gcDRAM) {
+			writeDynamicEnergy += levelshifter.readDynamicEnergy;
+			readDynamicEnergy = readDynamicEnergy - rowDecoder.readDynamicEnergy + gcRowDecoder.readDynamicEnergy
+			- (senseAmpMuxLev1Decoder.writeDynamicEnergy + senseAmpMuxLev2Decoder.writeDynamicEnergy 
+			+ senseAmp.writeDynamicEnergy + senseAmpMuxLev1.writeDynamicEnergy + senseAmpMuxLev2.writeDynamicEnergy);
+			leakage += levelshifter.leakage + gcRowDecoder.leakage + bitlineMuxDecoder.leakage;
+		}
+        
+		/* Read all column energy + row decoder + sense amp + precharger is enough for one subarray row REF. */
         refreshDynamicEnergy += rowDecoder.readDynamicEnergy + precharger.readDynamicEnergy
                              + senseAmp.readDynamicEnergy;
         refreshDynamicEnergy *= numRow; // Energy for this entire subarray 

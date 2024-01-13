@@ -166,7 +166,7 @@ void LevelShifter::CalculateLatency(double _rampInput, double _capLoad, double _
 	}
 }
 
-void LevelShifter::CalculatePower(double activeRowRead) {      
+void LevelShifter::CalculatePower(double activityRowRead) {      
 	if (!initialized) {
 		cout << "[LevelShifter] Error: Require initialization first!" << endl;
 	} else {
@@ -181,7 +181,7 @@ void LevelShifter::CalculatePower(double activeRowRead) {
 		// Write dynamic energy (2-step write and average case half SET and half RESET)
 		// 1T1R
 		writeDynamicEnergy += (capLowDrain + capMidGateN * 2) * tech->vdd * tech->vdd;    
-		writeDynamicEnergy += (capLoad + capHighDrain) * 2 * writeVoltage * writeVoltage;   	
+		writeDynamicEnergy += (capLoad + capHighDrain) * 2 * (writeVoltage - holdVoltage) * (writeVoltage - holdVoltage);   	
 	}
 }
 
