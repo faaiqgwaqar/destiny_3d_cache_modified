@@ -1010,7 +1010,7 @@ void SubArray::CalculatePower() {
             refreshDynamicEnergy = readDynamicEnergy;
 			double writeVoltage = cell->resetVoltage;	/* should also equal to setVoltage, for DRAM, it is Vdd */
 			writeDynamicEnergy = (capBitline + bitlineMux.capForPreviousPowerCalculation) * writeVoltage * writeVoltage * numColumn;
-			leakage = readDynamicEnergy / (DRAM_REFRESH_PERIOD * 2) * numRow;
+			leakage = writeDynamicEnergy / (DRAM_REFRESH_PERIOD * 2) * numRow;
 		} else if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor || cell->memCellType == FBRAM) {
 			if (cell->readMode == false) {	/* current-sensing */
 				/* Use ICCAD 2009 model */
