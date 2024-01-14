@@ -639,8 +639,10 @@ void SubArray::CalculateArea() {
 			while (memoryArea > logicArea) {
 				if(dimReduction){
 					memoryHeight /= 2;
+					resBitline /= 4;
 				} else {
 					memoryWidth /= 2;
+					resWordline /= 4;
 				}
 				dimReduction = !dimReduction;
 				memoryArea = memoryHeight * memoryWidth;
@@ -658,8 +660,8 @@ void SubArray::CalculateArea() {
 
 			capBitline += tsvArray.width * stackedMemTiers * localWire->capWirePerUnit;
 			capWordline += tsvArray.width * stackedMemTiers * localWire->capWirePerUnit;
-			resBitline += tsvArray.width * stackedMemTiers * localWire->resWirePerUnit_M0;
-			resWordline += tsvArray.width * stackedMemTiers * localWire->resWirePerUnit_M1;
+			resBitline += tsvArray.width * stackedMemTiers * localWire->resWirePerUnit_M0 + (tsvArray.res * stackedMemTiers);
+			resWordline += tsvArray.width * stackedMemTiers * localWire->resWirePerUnit_M1 + (tsvArray.res * stackedMemTiers);
 		}
 	}
 }
@@ -1172,9 +1174,7 @@ void SubArray::CalculatePower() {
 
 		if (cell->memCellType == gcDRAM) {
 			writeDynamicEnergy += levelshifter.readDynamicEnergy;
-			readDynamicEnergy = readDynamicEnergy - rowDecoder.readDynamicEnergy + gcRowDecoder.readDynamicEnergy
-			- (senseAmpMuxLev1Decoder.writeDynamicEnergy + senseAmpMuxLev2Decoder.writeDynamicEnergy 
-			+ senseAmp.writeDynamicEnergy + senseAmpMuxLev1.writeDynamicEnergy + senseAmpMuxLev2.writeDynamicEnergy);
+			readDynamicEnergy = readDynamicEnergy - rowDecoder.readDynamicEnergy + gcRowDecoder.readDynamicEnergy;
 			leakage += levelshifter.leakage + gcRowDecoder.leakage + bitlineMuxDecoder.leakage;
 		}
         

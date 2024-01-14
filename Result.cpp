@@ -373,7 +373,8 @@ void Result::print(int indent) {
 	cout << string(indent, ' ') << " |--- Mat Latency    = " << TO_SECOND(bank->mat.readLatency) << endl;
 	cout << string(indent, ' ') << "    |--- Predecoder Latency = " << TO_SECOND(bank->mat.predecoderLatency) << endl;
 	cout << string(indent, ' ') << "    |--- Subarray Latency   = " << TO_SECOND(bank->mat.subarray.readLatency) << endl;
-	cout << string(indent, ' ') << "       |--- Row Decoder Latency = " << TO_SECOND(bank->mat.subarray.rowDecoder.readLatency) << endl;
+	if(cell->memCellType != gcDRAM) cout << string(indent, ' ') << "       |--- Row Decoder Latency = " << TO_SECOND(bank->mat.subarray.rowDecoder.readLatency) << endl;
+	else cout << string(indent, ' ') << "       |--- Row Decoder Latency = " << TO_SECOND(bank->mat.subarray.gcRowDecoder.readLatency) << endl;
 	//cout << string(indent, ' ') << "       		|--- Row Decoder Driver Latency = " << TO_SECOND(bank->mat.subarray.rowDecoder.outputDriver.readLatency) << endl;
 	//cout << string(indent, ' ') << "       			|--- resPullDown = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_resPullDown) << endl;
 	//cout << string(indent, ' ') << "       			|--- capLoad = " << TO_GENERAL(bank->mat.subarray.rowDecoder.outputDriver.temp_capLoad) << endl;
@@ -462,6 +463,7 @@ void Result::print(int indent) {
 		if (cell->memCellType == MRAM)
 			cout << string(indent, ' ') << "       |--- Write Pulse Duration = " << TO_SECOND(cell->resetPulse) << endl;	// MRAM reset/set is equal
 		cout << string(indent, ' ') << "       |--- Row Decoder Latency = " << TO_SECOND(bank->mat.subarray.rowDecoder.writeLatency) << endl;
+		if(cell->memCellType == gcDRAM) cout << string(indent, ' ') << "       |--- Level Shifter Latency = " << TO_SECOND(bank->mat.subarray.levelshifter.readLatency) << endl;
 		cout << string(indent, ' ') << "       |--- Charge Latency      = " << TO_SECOND(bank->mat.subarray.chargeLatency) << endl;
 	}
     if (cell->memCellType == eDRAM || cell->memCellType == gcDRAM) {
@@ -511,8 +513,11 @@ void Result::print(int indent) {
 	cout << string(indent, ' ') << "    |--- Predecoder Dynamic Energy = " << TO_JOULE(bank->mat.readDynamicEnergy - bank->mat.subarray.readDynamicEnergy
 														* bank->numActiveSubarrayPerRow * bank->numActiveSubarrayPerColumn)
 														<< endl;
-	cout << string(indent, ' ') << "    |--- Subarray Dynamic Energy   = " << TO_JOULE(bank->mat.subarray.readDynamicEnergy) << " per active subarray" << endl;
-	cout << string(indent, ' ') << "       |--- Row Decoder Dynamic Energy = " << TO_JOULE(bank->mat.subarray.rowDecoder.readDynamicEnergy) << endl;
+	cout << string(indent, ' ') << "    |--- Subarray Dynamic Energy   = " << TO_JOULE(bank->mat.subarray.readDynamicEnergy) << " per active subarray" << endl;\
+	if (cell->memCellType != gcDRAM)
+		cout << string(indent, ' ') << "       |--- Row Decoder Dynamic Energy = " << TO_JOULE(bank->mat.subarray.rowDecoder.readDynamicEnergy) << endl;
+	else
+		cout << string(indent, ' ') << "       |--- Row Decoder Dynamic Energy = " << TO_JOULE(bank->mat.subarray.gcRowDecoder.readDynamicEnergy) << endl;
 	cout << string(indent, ' ') << "       |--- Mux Decoder Dynamic Energy = " << TO_JOULE(bank->mat.subarray.bitlineMuxDecoder.readDynamicEnergy
 													+ bank->mat.subarray.senseAmpMuxLev1Decoder.readDynamicEnergy
 													+ bank->mat.subarray.senseAmpMuxLev2Decoder.readDynamicEnergy) << endl;
@@ -525,6 +530,9 @@ void Result::print(int indent) {
 													+ bank->mat.subarray.senseAmpMuxLev1.readDynamicEnergy
 													+ bank->mat.subarray.senseAmpMuxLev2.readDynamicEnergy) << endl;
 	cout << string(indent, ' ') << "       |--- Precharge Dynamic Energy   = " << TO_JOULE(bank->mat.subarray.precharger.readDynamicEnergy) << endl;
+	//if(cell->memCellType == gcDRAM){
+	//	cout << string(indent, ' ') << "       |--- LevelShifter Dynamic Energy   = " << TO_JOULE(bank->mat.subarray.levelshifter.readDynamicEnergy) << endl;
+	//}
 
 	if (cell->memCellType == PCRAM || cell->memCellType == FBRAM ||
 			(cell->memCellType == memristor && (cell->accessType == CMOS_access || cell->accessType == BJT_access))) {
@@ -626,6 +634,9 @@ void Result::print(int indent) {
 															<< endl;
 		cout << string(indent, ' ') << "    |--- Subarray Dynamic Energy   = " << TO_JOULE(bank->mat.subarray.writeDynamicEnergy) << " per active subarray" << endl;
 		cout << string(indent, ' ') << "       |--- Row Decoder Dynamic Energy = " << TO_JOULE(bank->mat.subarray.rowDecoder.writeDynamicEnergy) << endl;
+		if(cell->memCellType == gcDRAM){
+			cout << string(indent, ' ') << "       |--- LevelShifter Dynamic Energy   = " << TO_JOULE(bank->mat.subarray.levelshifter.readDynamicEnergy) << endl;
+		}
 		cout << string(indent, ' ') << "       |--- Mux Decoder Dynamic Energy = " << TO_JOULE(bank->mat.subarray.bitlineMuxDecoder.writeDynamicEnergy
 														+ bank->mat.subarray.senseAmpMuxLev1Decoder.writeDynamicEnergy
 														+ bank->mat.subarray.senseAmpMuxLev2Decoder.writeDynamicEnergy) << endl;
@@ -652,7 +663,7 @@ void Result::print(int indent) {
                 TO_JOULE(bank->mat.refreshDynamicEnergy - bank->mat.subarray.refreshDynamicEnergy
                          * bank->numActiveSubarrayPerRow * bank->numActiveSubarrayPerColumn) << endl;
         cout << string(indent, ' ') << "    |--- Subarray Dynamic Energy   = " << TO_JOULE(bank->mat.subarray.refreshDynamicEnergy) << " per active subarray" << endl;
-        cout << string(indent, ' ') << "       |--- Row Decoder Dynamic Energy = " << TO_JOULE(bank->mat.subarray.rowDecoder.refreshDynamicEnergy) << endl;
+        cout << string(indent, ' ') << "       |--- Row Decoder Dynamic Energy = " << TO_JOULE(bank->mat.subarray.rowDecoder.readDynamicEnergy) << endl;
         if (inputParameter->internalSensing)
             cout << string(indent, ' ') << "       |--- Senseamp Dynamic Energy    = " << TO_JOULE(bank->mat.subarray.senseAmp.refreshDynamicEnergy) << endl;
         cout << string(indent, ' ') << "       |--- Precharge Dynamic Energy   = " << TO_JOULE(bank->mat.subarray.precharger.refreshDynamicEnergy) << endl;
