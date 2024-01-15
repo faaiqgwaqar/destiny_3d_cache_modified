@@ -781,7 +781,7 @@ void SubArray::CalculateLatency(double _rampInput) {
 				senseAmpMuxLev2.CalculateLatency(senseAmpMuxLev1.rampOutput);
 			}
 			readLatency = decoderLatency + bitlineDelay + bitlineMux.readLatency + senseAmp.readLatency
-					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency;
+					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency + precharger.readLatency;
 			/* assume symmetric read/write for SRAM bitline delay */
 			writeLatency = readLatency;
 		} else if (cell->memCellType == DRAM || cell->memCellType == eDRAM) {
@@ -799,7 +799,7 @@ void SubArray::CalculateLatency(double _rampInput) {
             refreshLatency = decoderLatency + bitlineDelay + senseAmp.readLatency;
             refreshLatency *= numRow; // TOTAL refresh latency for subarray
 			readLatency = decoderLatency + bitlineDelay + senseAmp.readLatency
-					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency;
+					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency + precharger.readLatency;
 			/* assume symmetric read/write for DRAM/eDRAM bitline delay */
 			writeLatency = readLatency;
 		} else if (cell->memCellType == gcDRAM) {
@@ -835,11 +835,11 @@ void SubArray::CalculateLatency(double _rampInput) {
             /* Refresh operation does not pass sense amplifier. */
             refreshLatency = decoderLatency + bitlineDelay + senseAmp.readLatency;
             refreshLatency *= (numRow/numSenseAmp); // TOTAL refresh latency for subarray /* TODO: Can this be done simultaneously? */
-			writeLatency = decoderLatency + bitlineDelay /*+ senseAmp.readLatency
+			writeLatency = decoderLatency + bitlineDelay + precharger.readLatency /*+ senseAmp.readLatency
 					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency*/;
 			/* assume symmetric read/write for DRAM/eDRAM bitline delay */
 			readLatency = gcDecoderLatency + bitlineDelay + senseAmp.readLatency
-					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency;
+					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency + precharger.readLatency;
 		} else if (cell->memCellType == MRAM || cell->memCellType == PCRAM || cell->memCellType == memristor || cell->memCellType == FBRAM) {
 			double bitlineRamp = 0;
 			if (cell->readMode == false) {	/* current-sensing */
