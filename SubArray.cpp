@@ -54,7 +54,7 @@ void SubArray::Initialize(long long _numRow, long long _numColumn, bool _multipl
 		}
 	}
 
-	if (cell->memCellType == DRAM || cell->memCellType == eDRAM /*|| cell->memCellType == gcDRAM*/) { /* TODO: Better Parameterized for GC? */
+	if (cell->memCellType == DRAM || cell->memCellType == eDRAM || cell->memCellType == gcDRAM) { /* TODO: Better Parameterized for GC? */
 		if (muxSenseAmp > 1) {
 			/* DRAM does not allow muxed bitline because of its destructive readout */
 			invalid = true;
@@ -833,8 +833,9 @@ void SubArray::CalculateLatency(double _rampInput) {
 			decoderLatency += (2* tsvArray.writeLatency * stackedMemTiers);
 
             /* Refresh operation does not pass sense amplifier. */
-            refreshLatency = decoderLatency + bitlineDelay + senseAmp.readLatency;
-            refreshLatency *= (numRow/numSenseAmp); // TOTAL refresh latency for subarray /* TODO: Can this be done simultaneously? */
+            refreshLatency = decoderLatency + bitlineDelay + senseAmp.readLatency + precharger.readLatency;
+            refreshLatency *= (numRow/*/numSenseAmp*/); // TOTAL refresh latency for subarray /* TODO: Can this be done simultaneously? */
+			refreshLatency /= numSenseAmp;
 			writeLatency = decoderLatency + bitlineDelay + precharger.readLatency /*+ senseAmp.readLatency
 					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency*/;
 			/* assume symmetric read/write for DRAM/eDRAM bitline delay */

@@ -11,7 +11,7 @@ Cache Associativity: 16 Ways
 
 Searching for the best solution that is optimized for write latency ...
 Using cell file: 2TGC_DRAM_Benchmarker/gcDRAM.cell
-numSolutions = 226159 / numDesigns = 15604974
+numSolutions = 73071 / numDesigns = 15604974
 Wire type: active (with repeaters)
 Repeater Size: 13.000
 Repeater Spacing: 0.027mm
