@@ -38,8 +38,8 @@ Power:
  - Cache Miss Dynamic Energy  = 0.505nJ per access
  - Cache Write Dynamic Energy = 0.513nJ per access
  - Cache Refresh Dynamic Energy = 818.168nJ per bank
- - Cache Total Leakage Power  = 53.977mW
- |--- Cache Data Array Leakage Power = 52.215mW
+ - Cache Total Leakage Power  = 53.978mW
+ |--- Cache Data Array Leakage Power = 52.216mW
  |--- Cache Tag Array Leakage Power  = 1.762mW
  - Cache Refresh Power = 0.000pW per bank
 
@@ -140,7 +140,7 @@ CACHE DATA ARRAY DETAILS
            |--- Row Decoder Dynamic Energy = 0.137pJ
            |--- Senseamp Dynamic Energy    = 0.110pJ
            |--- Precharge Dynamic Energy   = 0.118pJ
-     - Leakage Power = 52.215mW
+     - Leakage Power = 52.216mW
      |--- H-Tree Leakage Power     = 1.297mW
      |--- Mat Leakage Power        = 6.216uW per mat
      - Refresh Power = 0.000pW
@@ -245,7 +245,7 @@ CACHE TAG ARRAY DETAILS
            |--- Precharge Dynamic Energy   = 0.203pJ
      - Leakage Power = 1.762mW
      |--- H-Tree Leakage Power     = 16.396uW
-     |--- Mat Leakage Power        = 27.279uW per mat
+     |--- Mat Leakage Power        = 27.280uW per mat
      - Refresh Power = 0.000pW
 
 Finished!
