@@ -835,7 +835,7 @@ void SubArray::CalculateLatency(double _rampInput) {
             /* Refresh operation does not pass sense amplifier. */
             refreshLatency = decoderLatency + bitlineDelay + senseAmp.readLatency + precharger.readLatency;
             refreshLatency *= (numRow/*/numSenseAmp*/); // TOTAL refresh latency for subarray /* TODO: Can this be done simultaneously? */
-			refreshLatency /= numSenseAmp;
+			//refreshLatency /= numSenseAmp;
 			writeLatency = decoderLatency + bitlineDelay + precharger.readLatency /*+ senseAmp.readLatency
 					+ senseAmpMuxLev1.readLatency + senseAmpMuxLev2.readLatency*/;
 			/* assume symmetric read/write for DRAM/eDRAM bitline delay */
