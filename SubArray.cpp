@@ -1330,6 +1330,7 @@ void SubArray::CalculateRepeater(int numCol){
 }
 
 SubArray & SubArray::operator=(const SubArray &rhs) {
+	//cout << "[PROGRESS] Line 1333 :: SubArray.cc" << endl;
 	height = rhs.height;
 	width = rhs.width;
 	area = rhs.area;
@@ -1380,10 +1381,11 @@ SubArray & SubArray::operator=(const SubArray &rhs) {
 	resEquivalentOff = rhs.resEquivalentOff;
 	resMemCellOff = rhs.resMemCellOff;
 	resMemCellOn = rhs.resMemCellOn;
-
+	
 	gcRowDecoder = rhs.gcRowDecoder;
 	levelshifter = rhs.levelshifter;
 	rowDecoder = rhs.rowDecoder;
+
 	bitlineMuxDecoder = rhs.bitlineMuxDecoder;
 	bitlineMux = rhs.bitlineMux;
 	senseAmpMuxLev1Decoder = rhs.senseAmpMuxLev1Decoder;
@@ -1419,6 +1421,6 @@ SubArray & SubArray::operator=(const SubArray &rhs) {
 	memoryHeight = rhs.memoryHeight;
 	areaRatio = rhs.areaRatio;
 	stackedMemTiers = rhs.stackedMemTiers;
-
+	//cout << "[PROGRESS] Line 1423 :: SubArray.cc" << endl;
 	return *this;
 }

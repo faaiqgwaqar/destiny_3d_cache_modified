@@ -181,6 +181,7 @@ void RowDecoder::PrintProperty() {
 }
 
 RowDecoder & RowDecoder::operator=(const RowDecoder &rhs) {
+	//cout << "[PROGRESS] Line 184 :: RowDecoder.cc" << endl;
 	height = rhs.height;
 	width = rhs.width;
 	area = rhs.area;
@@ -199,6 +200,7 @@ RowDecoder & RowDecoder::operator=(const RowDecoder &rhs) {
 	initialized = rhs.initialized;
 	invalid = rhs.invalid;
 	outputDriver = rhs.outputDriver;
+
 	numRow = rhs.numRow;
 	multipleRowPerSet = rhs.multipleRowPerSet;
 	numNandInput = rhs.numNandInput;

@@ -128,6 +128,7 @@ void Mux::PrintProperty() {
 }
 
 Mux & Mux::operator=(const Mux &rhs) {
+	//cout << "[PROGRESS] Line 131 :: Mux.cc" << endl;
 	height = rhs.height;
 	width = rhs.width;
 	area = rhs.area;

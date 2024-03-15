@@ -197,6 +197,7 @@ void LevelShifter::UnInitialize(){
 }
 
 LevelShifter & LevelShifter::operator=(const LevelShifter &rhs) {
+	//cout << "[PROGRESS] Line 200 :: LevelShifter.cc" << endl;
 	initialized = rhs.initialized;
 	numOutput = rhs.numOutput;
 	capLoad = rhs.capLoad;
@@ -222,4 +223,6 @@ LevelShifter & LevelShifter::operator=(const LevelShifter &rhs) {
 	numWriteCellPerOperationNeuro = rhs.numWriteCellPerOperationNeuro;
 	numWritePulse = rhs.numWritePulse;
 	clkFreq = rhs.clkFreq;
+
+	return *this;
 }

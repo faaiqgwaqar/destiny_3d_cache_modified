@@ -138,6 +138,7 @@ void Precharger::PrintProperty() {
 }
 
 Precharger & Precharger::operator=(const Precharger &rhs) {
+	//cout << "[PROGRESS] Line 141 :: Precharger.cc" << endl;
 	height = rhs.height;
 	width = rhs.width;
 	area = rhs.area;

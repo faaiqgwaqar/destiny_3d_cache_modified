@@ -426,6 +426,7 @@ void PredecodeBlock::PrintProperty() {
 }
 
 PredecodeBlock & PredecodeBlock::operator=(const PredecodeBlock &rhs) {
+	//cout << "[PROGRESS] Line 429 :: PredecodeBlock.cc" << endl;
 	height = rhs.height;
 	width = rhs.width;
 	area = rhs.area;

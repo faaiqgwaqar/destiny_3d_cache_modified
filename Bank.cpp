@@ -24,6 +24,7 @@ void Bank::PrintProperty() {
 }
 
 Bank & Bank::operator=(const Bank &rhs) {
+	//cout << "[PROGRESS] Line 27 :: Bank.cc" << endl;
 	height = rhs.height;
 	width = rhs.width;
 	area = rhs.area;

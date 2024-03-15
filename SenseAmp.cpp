@@ -181,6 +181,7 @@ void SenseAmp::PrintProperty() {
 }
 
 SenseAmp & SenseAmp::operator=(const SenseAmp &rhs) {
+	//cout << "[PROGRESS] Line 184 :: SenseAmp.cc" << endl;
 	height = rhs.height;
 	width = rhs.width;
 	area = rhs.area;

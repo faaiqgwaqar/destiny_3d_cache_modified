@@ -141,6 +141,7 @@ void Comparator::PrintProperty() {
 }
 
 Comparator & Comparator::operator=(const Comparator &rhs) {
+	//cout << "[PROGRESS] Line 144 :: Comparator.cc" << endl;
 	height = rhs.height;
 	width = rhs.width;
 	area = rhs.area;

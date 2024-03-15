@@ -744,6 +744,7 @@ void BankWithHtree::CalculateLatencyAndPower() {
 }
 
 BankWithHtree & BankWithHtree::operator=(const BankWithHtree &rhs) {
+	//cout << "[PROGRESS] Line 747 :: BankWithHtree.cc" << endl;
 	Bank::operator=(rhs);
 	levelHorizontal = rhs.levelHorizontal;
 	levelVertical = rhs.levelVertical;

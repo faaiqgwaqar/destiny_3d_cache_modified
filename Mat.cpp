@@ -394,6 +394,7 @@ void Mat::PrintProperty() {
 
 
 Mat & Mat::operator=(const Mat &rhs) {
+	//cout << "[PROGRESS] Line 397 :: Mat.cc" << endl;
 	height = rhs.height;
 	width = rhs.width;
 	area = rhs.area;

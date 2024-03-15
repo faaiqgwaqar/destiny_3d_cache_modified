@@ -319,6 +319,7 @@ void OutputDriver::PrintProperty() {
 }
 
 OutputDriver & OutputDriver::operator=(const OutputDriver &rhs) {
+	//cout << "[PROGRESS] Line 322 :: OutputDriver.cc" << endl;
 	height = rhs.height;
 	width = rhs.width;
 	area = rhs.area;
